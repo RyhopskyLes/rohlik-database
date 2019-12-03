@@ -45,6 +45,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import com.rohlik.data.commons.dao.CategoryKosikDao;
 import com.rohlik.data.commons.services.CategoryKosikService;
+import com.rohlik.data.commons.services.CategoryKosikUpdateService;
 import com.rohlik.data.commons.services.CategoryService;
 import com.rohlik.data.config.AppConfigTest;
 import com.rohlik.data.config.DataTestConfig;
@@ -60,6 +61,8 @@ import com.rohlik.data.kosik.objects.NavigationSubItem;
 public class CategoryKosikServiceTest {
 	@Autowired
 	CategoryKosikService catKosikService;
+	@Autowired
+	CategoryKosikUpdateService catKosikUpdateService;
 	@Autowired
 	CategoryKosikDao catKosikDao;
 	@Autowired
@@ -102,7 +105,7 @@ public class CategoryKosikServiceTest {
 		List<CategoryKosik> result = catKosikDao.findAllWithChildren();
 		CategoryKosik category = result.get(0);
 		Set<ChildKosik> children = category.getChildren();
-		catKosikService.updateParentUriByMainCategory(categoryURI);		
+		catKosikUpdateService.updateParentUriByMainCategory(categoryURI);		
 		result = catKosikDao.findAllWithChildren();
 		category = result.get(0);
 		children = category.getChildren();
@@ -177,7 +180,7 @@ public class CategoryKosikServiceTest {
 		result = catKosikDao.findByParentNameWithChildren("Nápoje");
 		result.forEach(category->assertEquals(null, category.getParentUri()));
 		result.forEach(category->category.getChildren().forEach(child->assertEquals(null, child.getParentUri())));		
-		catKosikService.updateParentUriBySecondLevelCategories(categoryURI);
+		catKosikUpdateService.updateParentUriBySecondLevelCategories(categoryURI);
 		result = catKosikDao.findByParentNameWithChildren("Nápoje");
 		result.forEach(category->assertEquals("/napoje", category.getParentUri()));		
 	}
@@ -191,11 +194,11 @@ public class CategoryKosikServiceTest {
 			category.getChildren().forEach(child->assertEquals(null, child.getParentUri())); 
 		});
 	//	result.forEach(category->catKosikService.updateUriByChildrenOfCategory(category.getUri()));
-		result.forEach(category->catKosikService.updateParentUriByChildrenOfCategory(category.getUri()));
+		result.forEach(category->catKosikUpdateService.updateParentUriByChildrenOfCategory(category.getUri()));
 		//catKosikService.updateUriByChildrenOfCategory(categoryURI);
 		result = catKosikDao.findByParentNameWithChildren("Nápoje");
 		//result.forEach(category->category.getChildren().forEach(child->logger.info("Child: "+child)));
-		result.forEach(category->catKosikService.updateUriByChildrenOfCategory(category.getUri()));
+		result.forEach(category->catKosikUpdateService.updateUriByChildrenOfCategory(category.getUri()));
 		result.forEach(category->category.getChildren().forEach(child->assertEquals(category.getUri(), child.getParentUri())));
 	}
 	@Test
@@ -239,7 +242,7 @@ public class CategoryKosikServiceTest {
 		categories = catKosikDao.findByParentName(parentName);
 		assertFalse(categories.isEmpty());
 		assertThat(categories, (Every.everyItem(HasPropertyWithValue.hasProperty("uri", Is.is("")))));	
-		catKosikService.updateUriBySecondLevelCategories(categoryURI);
+		catKosikUpdateService.updateUriBySecondLevelCategories(categoryURI);
 		categories = catKosikDao.findByParentName(parentName);
 		assertFalse(categories.isEmpty());
 		assertThat(categories, hasItem(Matchers.<CategoryKosik>hasProperty("uri", equalTo("/napoje/vina"))));
