@@ -37,11 +37,11 @@ public class CategoryBuilder {
 //	@Autowired
 	private CategoryDao catDao;
 //	@Autowired
-	CategoryService catService;
+	private CategoryService catService;
 //	@Autowired
-	CategoryKosikOverview review;
+	private CategoryKosikOverview review;
 //	@Autowired
-	NavigationBuilder navigationBuilder;
+	private NavigationBuilder navigationBuilder;
 //	@Autowired
 	CategoryMatcher matcher;
 	private List<Category> all;
@@ -217,11 +217,11 @@ public class CategoryBuilder {
 	}
 	
 	private void addEquivalentsBasedOnProductMatch(CategoryKosik category) {
-		List<Result<Category>> byProducts = matcher.findMatchBasedOnProducts(category, preFilterCategoriesForMatching(category));
-		Result<Category> min = byProducts.isEmpty() ? new Result<>() : byProducts.get(0);
-		Integer equiId = min.getEntity().orElse(new Category()).getCategoryId();
-		String equiCategoryName = min.getEntity().orElse(new Category()).getCategoryName();
-		byProducts.stream().map(Result::getEntity).filter(Optional::isPresent).map(Optional::get)
+		List<Result<Category>> matchesBasedOnProducts = matcher.findMatchBasedOnProducts(category, preFilterCategoriesForMatching(category));
+		Result<Category> min = matchesBasedOnProducts.isEmpty() ? new Result<>() : matchesBasedOnProducts.get(0);
+		Integer equiId = min.getEntity().orElseGet(Category::new).getCategoryId();
+		String equiCategoryName = min.getEntity().orElseGet(Category::new).getCategoryName();
+		matchesBasedOnProducts.stream().map(Result::getEntity).filter(Optional::isPresent).map(Optional::get)
 				.forEach(category::addCategory);
 		if (category.getEquiId() == null) {
 			category.setEquiId(equiId);
