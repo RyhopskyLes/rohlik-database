@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.rohlik.data.kosik.entities.CategoryKosik;
+import com.rohlik.data.kosik.entities.ChildKosik;
 import com.rohlik.data.kosik.objects.Cancelled;
 
 public interface CategoryKosikUpdateService {
@@ -20,5 +21,6 @@ public interface CategoryKosikUpdateService {
 	public void updateParentUriBySecondLevelCategories(String firstLevelCategoryURI);
 	public void updateUriByChildrenOfCategory(String categoryUri);
 	public void updateParentUriByChildrenOfCategory(String categoryUri);
+	public List<ChildKosik> addMissingChildrenOfSubCategoriesToParentsInCategory(String categoryURI);
 
 }
