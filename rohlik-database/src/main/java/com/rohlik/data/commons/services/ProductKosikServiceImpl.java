@@ -51,9 +51,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 	private ProductKosikDao productKosikDao;
 	@Autowired
 	private ProductDao productDao;
-	/*
-	 * @Autowired DataKosikImpl dataKosikImpl;
-	 */
+	
 	@Autowired
 	private ProductKosikOverview productKosikOverview;
 	@Autowired
