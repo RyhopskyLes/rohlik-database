@@ -40,17 +40,10 @@ import com.rohlik.data.entities.Category;
 @Transactional
 @SuppressWarnings("unchecked")
 public class CategoryKosikServiceImpl implements CategoryKosikService {
-	//@Autowired
 	private CategoryDao catDao;
-	//@Autowired
 	private CategoryService catService;
-	//@Autowired
 	private CategoryKosikDao catKosikDao;
-//	@Autowired
 	private NavigationBuilder navigationBuilder;
-	//@Autowired
-	private CategoryKosikOverview overView;
-	//@Autowired
 	private CategoryBuilder categoryBuilder;
 	
 	@Autowired
@@ -60,7 +53,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		this.catService = catService;
 		this.catKosikDao = catKosikDao;
 		this.navigationBuilder = navigationBuilder;
-		this.overView = overView;
+	//	this.overView = overView;
 		this.categoryBuilder = categoryBuilder;
 	}
 
@@ -71,15 +64,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		return categoryBuilder.buildMainCategory(categoryURI);
 	}
 
-	public Optional<CategoryKosik> updateParentUriByMainCategory(String categoryURI) {
-		Optional<CategoryKosik> mainCategory = catKosikDao.findByUriWithChildren(categoryURI);
-		mainCategory.ifPresent(category -> {
-			category.setParentUri("");
-			category.getChildren().forEach(child -> child.setParentUri(categoryURI));
-		});
-		return mainCategory;
-	}
-
+	
 	public CategoryKosik buildMainCategoryWithChildrenFromURI(String categoryURI) {
 		return categoryBuilder.buildMainCategoryWithChildren(categoryURI);
 	}
@@ -108,28 +93,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 				.collect(Collectors.toList());
 	}
 
-	public Cancelled findCancelledCategories() {
-		BiConsumer<Set<String>, Entry<String, Set<String>>> flattenToSet = (set, entry) -> {
-			set.add(entry.getKey());
-			set.addAll(entry.getValue());
-		};
-
-		List<CategoryKosik> categories = catKosikDao.findAllWithChildren();
-		Set<ChildKosik> children = categories.stream().map(CategoryKosik::getChildren).flatMap(Set::stream)
-				.collect(Collectors.toSet());
-
-		Set<String> links = overView.mainCategoriesLinks().stream()
-				.map(link -> overView.allLinksOfCategory(BASIC_URL + link)).flatMap(map -> map.entrySet().stream())
-				.collect(HashSet::new, flattenToSet::accept, HashSet::addAll);
-
-		List<ChildKosik> cancelledChildren = children.stream().filter(child -> !links.contains(child.getUri()))
-				.collect(Collectors.toList());
-		List<CategoryKosik> cancelledCategories = categories.stream()
-				.filter(category -> !links.contains(category.getUri())).collect(Collectors.toList());
-
-		return new Cancelled(cancelledCategories, cancelledChildren);
-	}
-
+	
 	private Predicate<NavigationSubItem> hasNoEquivalent(Set<ChildKosik> children) {
 		return subitem -> children.stream().noneMatch(equalsWith(subitem));
 	}
@@ -140,87 +104,12 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 				&& Objects.equals(child.getUri(), subitem.getUri());
 	}
 
-	@Override
-	public Set<CategoryKosik> findCategoriesWithUnactiveEquivalent() {
-		List<CategoryKosik> all = catKosikDao.findAllWithChildrenAndCategories();
-		// to do
-		return null;
-	}
-
 	public void saveSecondLevelCategoriesWithChildrenBuiltFromURI(String firstLevelCategoryURI) {
 		List<CategoryKosik> builtCategories = buildSecondLevelCategoriesWithChildrenFromURI(firstLevelCategoryURI);
 		builtCategories.forEach(catKosikDao::save);
 	}
 
-	public void updateUriBySecondLevelCategories(String firstLevelCategoryURI) {
-		List<NavigationItem> navigationItems = navigationBuilder.buildLevel(firstLevelCategoryURI);
-		getCategoryFromUri.andThen(category -> category.orElseGet(CategoryKosik::new).getCategoryName())
-				.andThen(catKosikDao::findByParentName).andThen(updateUri(navigationItems))
-				.apply(firstLevelCategoryURI);
-	}
-
-	public void updateParentUriBySecondLevelCategories(String firstLevelCategoryURI) {
-		getCategoryFromUri.andThen(category -> category.orElseGet(CategoryKosik::new).getCategoryName())
-				.andThen(catKosikDao::findByParentName).andThen(updateParentUri(firstLevelCategoryURI))
-				.apply(firstLevelCategoryURI);
-	}
-
-	public void updateUriByChildrenOfCategory(String categoryUri) {
-		Optional<CategoryKosik> category = catKosikDao.findByUriWithChildren(categoryUri);
-		category.ifPresent(theCategory -> {
-			NavigationItem item = navigationBuilder.buildItem(categoryUri);
-			List<NavigationSubItem> subitems = item.getSubcategories();
-			theCategory.getChildren().forEach(child -> {
-				Optional<String> uri = getUri(child).apply(subitems);
-				uri.ifPresent(theUri -> child.set(child::setUri, theUri));
-			});
-		});
-	}
-
-	private Function<List<NavigationSubItem>, Optional<String>> getUri(ChildKosik child) {
-		return subitems -> subitems.stream().filter(areEquivalent(child)).map(NavigationSubItem::getUri).findFirst();
-	}
-
-	private Predicate<NavigationSubItem> areEquivalent(ChildKosik child) {
-		return subitem -> Objects.equals(child.getCategoryName(), subitem.getCategoryName())
-				&& Objects.equals(child.getParentUri(), subitem.getParentUri());
-	}
-
-	@Override
-	public void updateParentUriByChildrenOfCategory(String categoryUri) {
-		Optional<CategoryKosik> category = catKosikDao.findByUriWithChildren(categoryUri);
-		category.ifPresent(theCategory -> {
-			theCategory.getChildren().forEach(child -> child.setParentUri(theCategory.getUri()));
-			catKosikDao.save(theCategory);
-		});
-	}
-
-	private Function<String, Optional<CategoryKosik>> getCategoryFromUri = uri -> uri.equals("undefined")
-			? Optional.empty()
-			: catKosikDao.findByUriWithChildren(uri);
-
-	private UnaryOperator<List<CategoryKosik>> updateUri(List<NavigationItem> navigationItems) {
-		return categories -> {
-			categories
-					.forEach(category -> uriForCategory().apply(category, navigationItems).ifPresent(category::setUri));
-			return categories;
-		};
-	}
-
-	private UnaryOperator<List<CategoryKosik>> updateParentUri(String parentUri) {
-		return categories -> {
-			categories.forEach(category ->	category.setParentUri(parentUri));
-			return categories;
-		};
-	}
-
-	private BiFunction<CategoryKosik, List<NavigationItem>, Optional<String>> uriForCategory() {
-		BiPredicate<CategoryKosik, NavigationItem> hasSameName = (category, item) -> Objects
-				.equals(item.getCategoryName(), category.getCategoryName());
-		return (category, items) -> items.stream().filter(item -> hasSameName.test(category, item)).findFirst()
-				.map(NavigationItem::getUri);
-	}
-
+	
 	public List<CategoryKosik> buildSecondLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI) {
 		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		return navigationBuilder.buildNavigationLevel().andThen(buildCategories(mainParent))
@@ -255,13 +144,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	@Override
-	public List<ChildKosik> addMissingChildrenOfSubCategoriesToParentsInCategory(String categoryURI) {
-		Map<LinkAndName, Set<LinkAndName>> allLinks = overView.allLinksAndNamesOnFirstLevel(BASIC_URL + categoryURI);
-		// to do
-		return null;
-	}
-
+	
 	private Function<List<NavigationItem>, List<CategoryKosik>> buildCategories(CategoryKosik parent) {
 		return navigationItems -> navigationItems.stream()
 				.map(item -> categoryBuilder.buildCategoryWithChildrenFromChild(parent, item))
@@ -316,91 +199,19 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		};
 	}
 
-	@Override
-	public List<CategoryKosik> findCategoriesWithWrongEquiNames() {
-		List<CategoryKosik> all = catKosikDao.findAll();
-		return all.stream().filter(isEquiIdNotNull).filter(areNamesNotEqual)
-				.collect(Collectors.toList());		
-	}
-
-	@Override
-	public void addMissingEquiCategoryNamesToAllCategories() {
-		List<CategoryKosik> all = catKosikDao.findAll();
-		all.stream().filter(isEquiIdNotNull).filter(isEquiCategoryNameNull).map(CategoryKosik::getId)
-				.map(id -> catKosikDao.findByIdWithChildren(id)).forEach(category -> category
-						.ifPresent(setEquiCategoryNameForCategory.andThen(catKosikDao::save)::apply));
-	}
-
-	@Override
-	public void fixWrongEquiNames() {
-		List<CategoryKosik> all = catKosikDao.findAll();
-		all.stream().filter(isEquiIdNotNull).filter(areNamesNotEqual).map(CategoryKosik::getId)
-				.map(id -> catKosikDao.findByIdWithChildren(id)).forEach(category -> category
-						.ifPresent(setEquiCategoryNameForCategory.andThen(catKosikDao::save)::apply));
-	}
-
-	@Override
-	public void fixWrongEquiNamesByChildren() {
-		List<CategoryKosik> all = catKosikDao.findAllWithChildren();
-		all.stream().map(category -> category.getChildren().stream()).map(children -> children.filter(equiIdNotNull))
-				.map(children -> children.filter(namesNotEqual)).flatMap(Function.identity())
-				.forEach(setEquiCategoryNameForChild::apply);
-	}
-
-	@Override
-	public void addMissingEquiNamesAndIdsToChildren() {
-		Function<ChildKosik, List<Category>> categoriesForComparison = child -> {
-			CategoryKosik parent = catKosikDao.findByUri(child.getParentUri()).orElseGet(CategoryKosik::new);
-			return new ArrayList<>(catService.findFirstLevelChildren(parent.getEquiId()));
-		};
-		UnaryOperator<ChildKosik> setEquiIdAndEquiName = child -> {
-			List<Category> toCompare = categoriesForComparison.apply(child);
-			return !toCompare.isEmpty() ? categoryBuilder.setChildPropertiesFromMatch(toCompare, 0.45).apply(child)
-					: child;
-		};
-
-		List<CategoryKosik> all = catKosikDao.findAllWithChildren();
-		List<ChildKosik> withEquiIdSet = all.stream().map(category -> category.getChildren().stream())
-				.map(children -> children.filter(equiIdNull)).flatMap(Function.identity())
-				.map(setEquiIdAndEquiName::apply).filter(equiIdNotNull).collect(Collectors.toList());
-		withEquiIdSet.forEach(child->log.info("EquiId was set by: {}", child));
-		log.info("Size: {}", withEquiIdSet.size());
-	}
-
+	
 	private BiPredicate<Optional<CategoryKosik>, Optional<CategoryKosik>> parentNamesEquals = (category,
 			mainCategory) -> Objects.equals(category.map(CategoryKosik::getParentName),
-					mainCategory.map(CategoryKosik::getParentName));
-
-	private Predicate<CategoryKosik> isEquiCategoryNameNull = category -> category.getEquiId() != null;
-
-	private Predicate<CategoryKosik> isEquiIdNotNull = category -> category.getEquiId() != null;
-	private Predicate<ChildKosik> equiIdNotNull = child -> child.getEquiId() != null;
-	private Predicate<ChildKosik> equiIdNull = child -> child.getEquiId() == null;
-	private Function<CategoryKosik, Optional<String>> getEquivalentName = category -> {
-		Optional<Category> rohlik = catDao.findByCategoryId(category.getEquiId());
-		return rohlik.map(Category::getCategoryName);
-	};
+					mainCategory.map(CategoryKosik::getParentName));	
+	
+	
 	private Function<ChildKosik, Optional<String>> equivalentName = child -> {
 		Optional<Category> rohlik =catDao.findByCategoryId(child.getEquiId());
 		return rohlik.map(Category::getCategoryName);
 	};
 
-	private Predicate<CategoryKosik> areNamesNotEqual = category -> !Objects.equals(category.getEquiCategoryName(),
-			getEquivalentName.apply(category).orElse(null));
-	private Predicate<ChildKosik> namesNotEqual = child -> !Objects.equals(child.getEquiCategoryName(),
-			equivalentName.apply(child).orElse(null));
-
-	private UnaryOperator<CategoryKosik> setEquiCategoryNameForCategory = category -> {
-		Optional<String> name = getEquivalentName.apply(category);
-		name.ifPresent(category::setEquiCategoryName);
-		return category;
-	};
-
-	private UnaryOperator<ChildKosik> setEquiCategoryNameForChild = child -> {
-		Optional<String> name = equivalentName.apply(child);
-		name.ifPresent(child::setEquiCategoryName);
-		return child;
-	};
+	
+		
 
 	@Override
 	public void saveThirdLevelCategoriesWithChildrenBuiltFromURI(String categoryURI) {
