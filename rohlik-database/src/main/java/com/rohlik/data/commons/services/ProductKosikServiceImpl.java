@@ -8,23 +8,16 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.minBy;
-import static java.util.Comparator.comparingDouble;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -36,12 +29,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.rohlik.data.commons.dao.ProductDao;
 import com.rohlik.data.commons.dao.ProductKosikDao;
 import com.rohlik.data.commons.objects.ProductMatcher;
 import com.rohlik.data.commons.objects.Result;
-import com.rohlik.data.commons.utilities.DataRohlik;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.kosik.components.ProductKosikOverview;
 import com.rohlik.data.kosik.entities.CategoryKosik;
