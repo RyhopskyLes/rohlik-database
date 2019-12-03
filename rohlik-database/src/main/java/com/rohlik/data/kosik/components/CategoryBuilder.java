@@ -208,7 +208,7 @@ public class CategoryBuilder {
 					Integer childId = directChild.getCategoryId();
 					Category child = all.stream().filter(cat->cat.getCategoryId().equals(childId)).findFirst().orElse(new Category());					
 					if(child!=null) {tempChildren.addAll(child.getChildren());
-					children.add(child);};
+					children.add(child);}
 				}
 				directChildren = tempChildren;
 			}

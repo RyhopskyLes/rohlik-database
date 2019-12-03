@@ -115,7 +115,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		};
 
 		List<CategoryKosik> categories = catKosikDao.findAllWithChildren();
-		Set<ChildKosik> children = categories.stream().map(CategoryKosik::getChildren).flatMap(set -> set.stream())
+		Set<ChildKosik> children = categories.stream().map(CategoryKosik::getChildren).flatMap(Set::stream)
 				.collect(Collectors.toSet());
 
 		Set<String> links = overView.mainCategoriesLinks().stream()
