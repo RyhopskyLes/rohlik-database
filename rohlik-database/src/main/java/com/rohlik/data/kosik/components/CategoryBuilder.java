@@ -106,19 +106,7 @@ public class CategoryBuilder {
 		return category -> {
 			Category rohlik = all.stream().filter(cat -> cat.getCategoryId().equals(child.get().getEquiId()))
 					.findFirst().orElse(null);
-			addEquivalentsBasedOnProductMatch(category);
-		/*	List<Result<Category>> byProducts = matcher.findMatchBasedOnProducts(category, preFilterCategoriesForMatching(category));
-			Result<Category> min = byProducts.isEmpty() ? new Result<Category>() : byProducts.get(0);
-			System.out.println(min);
-			Integer equiId = min.getEntity().orElse(new Category()).getCategoryId();
-			String equiCategoryName = min.getEntity().orElse(new Category()).getCategoryName();
-			byProducts.stream().map(Result::getEntity).filter(Optional::isPresent).map(Optional::get)
-					.forEach(roh -> category.addCategory(roh));			
-			if (category.getEquiId() == null) {
-				category.setEquiId(equiId);
-				category.setEquiCategoryName(equiCategoryName);
-			}*/
-			
+			addEquivalentsBasedOnProductMatch(category);				
 			category.addCategory(rohlik);
 			return category;
 		};
