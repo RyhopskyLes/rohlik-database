@@ -21,7 +21,6 @@ public List<CategoryKosik> buildSecondLevelCategoriesWithChildrenFromURI(String 
 public List<NavigationSubItem> findMissingChildrenOfCategory(String categoryURI);
 public List<ChildKosik> buildMissingChildrenOfCategory(String categoryURI);
 public List<ChildKosik> addMissingChildrenOfCategoryToParent(String categoryURI);
-public List<ChildKosik> addMissingChildrenOfSubCategoriesToParentsInCategory(String categoryURI);
 public List<CategoryKosik> buildThirdLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI);
 public List<CategoryKosik> buildFourthLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI);
 public List<CategoryKosik> buildFifthLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI);
