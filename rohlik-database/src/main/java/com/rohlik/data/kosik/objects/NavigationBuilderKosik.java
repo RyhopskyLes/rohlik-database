@@ -21,7 +21,7 @@ import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 public class NavigationBuilderKosik implements NavigationBuilder {
 	@Autowired
 	private CategoryKosikOverview categoryKosikOverview;
-	String uri;
+	private String uri;
 	static final String BASIC_URL = "https://www.kosik.cz";
 	private static Logger log = LoggerFactory.getLogger(NavigationBuilderKosik.class);
 
@@ -33,21 +33,20 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 	public NavigationItem buildItem(String uri) {
 		NavigationItem navigationItem = new NavigationItem();
 		Consumer<LinkAndName> setFields = holder -> {
-			holder.getLink().ifPresent(link -> navigationItem.setUri(link));
-			holder.getName().ifPresent(name -> navigationItem.setCategoryName(name));
+			holder.getLink().ifPresent(navigationItem::setUri);
+			holder.getName().ifPresent(navigationItem::setCategoryName);
 		};
 		BiFunction<LinkAndName, Optional<String>, NavigationSubItem> buildNavigationSubItem = (linkAndName,
 				parentUri) -> {
 			NavigationSubItem navigationSubItem = new NavigationSubItem();
-			linkAndName.getLink().ifPresent(link -> navigationSubItem.setUri(link));
-			linkAndName.getName().ifPresent(name -> navigationSubItem.setCategoryName(name));
-			parentUri.ifPresent(link -> navigationSubItem.setParentUri(link));
+			linkAndName.getLink().ifPresent(navigationSubItem::setUri);
+			linkAndName.getName().ifPresent(navigationSubItem::setCategoryName);
+			parentUri.ifPresent(navigationSubItem::setParentUri);
 			return navigationSubItem;
 		};
 		BiFunction<Set<LinkAndName>, Optional<String>, List<NavigationSubItem>> buildNavigationSubItems = (set,
-				parentUri) -> set.stream().collect(ArrayList::new, (list, item) -> {
-					list.add(buildNavigationSubItem.apply(item, parentUri));
-				}, List::addAll);
+				parentUri) -> set.stream().collect(ArrayList::new, (list, item) -> 
+					list.add(buildNavigationSubItem.apply(item, parentUri)), List::addAll);
 
 		Map<LinkAndName, Set<LinkAndName>> firstLevel = categoryKosikOverview.allLinksAndNamesOnFirstLevel(BASIC_URL + uri);
 		firstLevel.forEach((key, value) -> {
@@ -68,9 +67,9 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 	}	
 
 	private Function<Map<LinkAndName, Set<LinkAndName>>, List<NavigationItem>> buildNavigationItemsCollection() {
-		return nestedLinksAndNames -> {
-			return nestedLinksAndNames.entrySet().stream()
-				.map(entry -> buildNavigationItem().apply(entry)).collect(Collectors.toList());};
+		return nestedLinksAndNames -> 
+			 nestedLinksAndNames.entrySet().stream()
+				.map(entry -> buildNavigationItem().apply(entry)).collect(Collectors.toList());
 	}	
 
 	private Function<Set<LinkAndName>, List<NavigationSubItem>> buildNavigationSubItemsCollection(
@@ -82,8 +81,8 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 	private Function<LinkAndName, NavigationSubItem> buildSubItem(String parentUri) {
 		NavigationSubItem navigationSubItem = new NavigationSubItem();
 		return entry -> {
-			entry.getLink().ifPresent(link -> navigationSubItem.setUri(link));
-			entry.getName().ifPresent(name -> navigationSubItem.setCategoryName(name));			
+			entry.getLink().ifPresent(navigationSubItem::setUri);
+			entry.getName().ifPresent(navigationSubItem::setCategoryName);			
 			navigationSubItem.set(navigationSubItem::setParentUri, parentUri);
 			return navigationSubItem;};
 	}
@@ -91,8 +90,8 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 	private Function<Map.Entry<LinkAndName, Set<LinkAndName>>, NavigationItem> buildNavigationItem() {
 		NavigationItem navigationItem = new NavigationItem();
 		return entry -> {
-			entry.getKey().getLink().ifPresent(link -> navigationItem.setUri(link));
-			entry.getKey().getName().ifPresent(name -> navigationItem.setCategoryName(name));
+			entry.getKey().getLink().ifPresent(navigationItem::setUri);
+			entry.getKey().getName().ifPresent(navigationItem::setCategoryName);
 			entry.getKey().getLink().ifPresent(link->
 			navigationItem.set(navigationItem::setSubcategories,
 					buildNavigationSubItemsCollection(link).apply(entry.getValue())));
@@ -100,5 +99,5 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 		};
 	}	 
 
-	private Function<String, Map<LinkAndName, Set<LinkAndName>>> newnestedLinksAndNames = uri -> categoryKosikOverview.allLinksAndNamesOnSecondLevel(BASIC_URL + uri);
+	private Function<String, Map<LinkAndName, Set<LinkAndName>>> newnestedLinksAndNames = link -> categoryKosikOverview.allLinksAndNamesOnSecondLevel(BASIC_URL + link);
 }
