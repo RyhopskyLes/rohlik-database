@@ -30,15 +30,15 @@ import org.jsoup.nodes.Document;
 @Component("categoryOverView")
 
 public class CategoryKosikOverview {
-	@Autowired
 	private Source source;
 	private static Logger log = LoggerFactory.getLogger(CategoryKosikOverview.class);
 	private Optional<Document> document = Optional.empty();
 	private String url;
 	private JsonParser jp = new JsonParser();
 	private static final String BASIC_URL = "https://www.kosik.cz";
-
-	public CategoryKosikOverview() {
+	@Autowired
+	public CategoryKosikOverview(Source source) {
+		this.source=source;
 	}
 
 	private Optional<Elements> getSubcategoriesAnchors(String url) {
