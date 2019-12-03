@@ -34,25 +34,32 @@ import com.rohlik.data.kosik.objects.NavigationItem;
 
 @Component("categoryBuilder")
 public class CategoryBuilder {
-	@Autowired
+//	@Autowired
 	private CategoryDao catDao;
-	@Autowired
+//	@Autowired
 	CategoryService catService;
-	@Autowired
+//	@Autowired
 	CategoryKosikOverview review;
-	@Autowired
+//	@Autowired
 	NavigationBuilder navigationBuilder;
-	@Autowired
+//	@Autowired
 	CategoryMatcher matcher;
 	private List<Category> all;
 	private List<Category> main;
 	private static Logger log = LoggerFactory.getLogger(CategoryBuilder.class);
 	private static final String BASIC_URL = "https://www.kosik.cz";
 
-	public CategoryBuilder() {
-		// No-args constructor required by *Spring*
+	@Autowired
+	public CategoryBuilder(CategoryDao catDao, CategoryService catService, CategoryKosikOverview review,
+			NavigationBuilder navigationBuilder, CategoryMatcher matcher) {
+		this.catDao = catDao;
+		this.catService = catService;
+		this.review = review;
+		this.navigationBuilder = navigationBuilder;
+		this.matcher = matcher;
 	}
 
+	
 	@PostConstruct
 	public void init() {
 		all = catDao.findAllWithChildrenAndCategoriesKosikAndProducts().stream()
