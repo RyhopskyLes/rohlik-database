@@ -40,18 +40,30 @@ import com.rohlik.data.entities.Category;
 @Transactional
 @SuppressWarnings("unchecked")
 public class CategoryKosikServiceImpl implements CategoryKosikService {
+	//@Autowired
+	private CategoryDao catDao;
+	//@Autowired
+	private CategoryService catService;
+	//@Autowired
+	private CategoryKosikDao catKosikDao;
+//	@Autowired
+	private NavigationBuilder navigationBuilder;
+	//@Autowired
+	private CategoryKosikOverview overView;
+	//@Autowired
+	private CategoryBuilder categoryBuilder;
+	
 	@Autowired
-	CategoryDao catDao;
-	@Autowired
-	CategoryService catService;
-	@Autowired
-	CategoryKosikDao catKosikDao;
-	@Autowired
-	NavigationBuilder navigationBuilder;
-	@Autowired
-	CategoryKosikOverview review;
-	@Autowired
-	CategoryBuilder categoryBuilder;
+	public CategoryKosikServiceImpl(CategoryDao catDao, CategoryService catService, CategoryKosikDao catKosikDao,
+			NavigationBuilder navigationBuilder, CategoryKosikOverview overView, CategoryBuilder categoryBuilder) {
+		this.catDao = catDao;
+		this.catService = catService;
+		this.catKosikDao = catKosikDao;
+		this.navigationBuilder = navigationBuilder;
+		this.overView = overView;
+		this.categoryBuilder = categoryBuilder;
+	}
+
 	private static Logger log = LoggerFactory.getLogger(CategoryKosikServiceImpl.class);
 	private static final String BASIC_URL = "https://www.kosik.cz";
 
@@ -81,14 +93,14 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		Optional<CategoryKosik> category = catKosikDao.findByUriWithChildren(categoryURI);
 		Set<ChildKosik> children = category.isPresent() ? category.get().getChildren() : new HashSet<>();
 		NavigationItem navigationItem = navigationBuilder.buildItem(categoryURI);
-		return navigationItem.getSubcategories().stream().filter(hasNoEquivalent(children))
+		return navigationItem.getSubcategories().stream().filter(hasNoEquivalent(children)::test)
 				.collect(Collectors.toList());
 	}
 
 	public List<ChildKosik> buildMissingChildrenOfCategory(String categoryURI) {
 		List<NavigationSubItem> items = findMissingChildrenOfCategory(categoryURI);
 		Function<NavigationSubItem, List<Category>> categoriesForComparison = item -> {
-			CategoryKosik parent = catKosikDao.findByUri(item.getParentUri()).orElse(new CategoryKosik());
+			CategoryKosik parent = catKosikDao.findByUri(item.getParentUri()).orElseGet(CategoryKosik::new);
 			return new ArrayList<>(catService.findFirstLevelChildren(parent.getEquiId()));
 		};
 		return items.stream()
@@ -106,8 +118,8 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		Set<ChildKosik> children = categories.stream().map(CategoryKosik::getChildren).flatMap(set -> set.stream())
 				.collect(Collectors.toSet());
 
-		Set<String> links = review.mainCategoriesLinks().stream()
-				.map(link -> review.allLinksOfCategory(BASIC_URL + link)).flatMap(map -> map.entrySet().stream())
+		Set<String> links = overView.mainCategoriesLinks().stream()
+				.map(link -> overView.allLinksOfCategory(BASIC_URL + link)).flatMap(map -> map.entrySet().stream())
 				.collect(HashSet::new, flattenToSet::accept, HashSet::addAll);
 
 		List<ChildKosik> cancelledChildren = children.stream().filter(child -> !links.contains(child.getUri()))
@@ -142,13 +154,13 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 
 	public void updateUriBySecondLevelCategories(String firstLevelCategoryURI) {
 		List<NavigationItem> navigationItems = navigationBuilder.buildLevel(firstLevelCategoryURI);
-		getCategoryFromUri.andThen(category -> category.orElse(new CategoryKosik()).getCategoryName())
+		getCategoryFromUri.andThen(category -> category.orElseGet(CategoryKosik::new).getCategoryName())
 				.andThen(catKosikDao::findByParentName).andThen(updateUri(navigationItems))
 				.apply(firstLevelCategoryURI);
 	}
 
 	public void updateParentUriBySecondLevelCategories(String firstLevelCategoryURI) {
-		getCategoryFromUri.andThen(category -> category.orElse(new CategoryKosik()).getCategoryName())
+		getCategoryFromUri.andThen(category -> category.orElseGet(CategoryKosik::new).getCategoryName())
 				.andThen(catKosikDao::findByParentName).andThen(updateParentUri(firstLevelCategoryURI))
 				.apply(firstLevelCategoryURI);
 	}
@@ -206,17 +218,17 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		BiPredicate<CategoryKosik, NavigationItem> hasSameName = (category, item) -> Objects
 				.equals(item.getCategoryName(), category.getCategoryName());
 		return (category, items) -> items.stream().filter(item -> hasSameName.test(category, item)).findFirst()
-				.map(item -> item.getUri());
+				.map(NavigationItem::getUri);
 	}
 
 	public List<CategoryKosik> buildSecondLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI) {
-		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElse(new CategoryKosik());
+		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		return navigationBuilder.buildNavigationLevel().andThen(buildCategories(mainParent))
 				.apply(firstLevelCategoryURI);
 	}
 
 	public List<CategoryKosik> buildThirdLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI) {
-		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElse(new CategoryKosik());
+		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		Set<CategoryKosik> secondLevel = mainParent.getChildren().stream().map(ChildKosik::getUri)
 				.map(catKosikDao::findByUri).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(HashSet::new));
@@ -239,13 +251,13 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 				.collect(Collectors.toCollection(ArrayList::new));
 		Optional<CategoryKosik> parent = catKosikDao.findByUriWithChildren(categoryURI);
 		parent.ifPresent(theParent -> missing.forEach(theParent::addChildKosik));
-		return parent.orElse(new CategoryKosik()).getChildren().stream().filter(child -> uris.contains(child.getUri()))
+		return parent.orElseGet(CategoryKosik::new).getChildren().stream().filter(child -> uris.contains(child.getUri()))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override
 	public List<ChildKosik> addMissingChildrenOfSubCategoriesToParentsInCategory(String categoryURI) {
-		Map<LinkAndName, Set<LinkAndName>> allLinks = review.allLinksAndNamesOnFirstLevel(BASIC_URL + categoryURI);
+		Map<LinkAndName, Set<LinkAndName>> allLinks = overView.allLinksAndNamesOnFirstLevel(BASIC_URL + categoryURI);
 		// to do
 		return null;
 	}
@@ -257,22 +269,25 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 	}
 
 	public void saveUnsavedSecondLevelCategoriesWithChildrenBuiltFromURI(String topLevelCategoryURI) {
-		List<Optional<CategoryKosik>> builtCategories = buildUnsavedSecondLevelCategoriesWithChildrenFromURI(
+		List<CategoryKosik> builtCategories = buildUnsavedSecondLevelCategoriesWithChildrenFromURI(
 				topLevelCategoryURI);
-		builtCategories.stream().forEach(category -> category.ifPresent(catKosikDao::save));
+		builtCategories.stream().forEach(catKosikDao::save);
 	}
 
-	private List<Optional<CategoryKosik>> buildUnsavedSecondLevelCategoriesWithChildrenFromURI(
+	private List<CategoryKosik> buildUnsavedSecondLevelCategoriesWithChildrenFromURI(
 			String firstLevelCategoryURI) {
-		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElse(new CategoryKosik());
+		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		return navigationBuilder.buildNavigationLevel().andThen(buildUnSavedCategories(mainParent))
 				.apply(firstLevelCategoryURI);
 	}
 
-	private Function<List<NavigationItem>, List<Optional<CategoryKosik>>> buildUnSavedCategories(CategoryKosik parent) {
+	private Function<List<NavigationItem>, List<CategoryKosik>> buildUnSavedCategories(CategoryKosik parent) {
 		return navigationItems -> navigationItems.stream()
 				.map(item -> categoryBuilder.buildCategoryWithChildrenFromChild(parent, item))
-				.filter(Optional::isPresent).filter(isNotSavedWithSameName()::apply).collect(Collectors.toList());
+				.filter(Optional::isPresent).filter(isNotSavedWithSameName()::apply)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
 	}
 
 	Function<Optional<CategoryKosik>, Boolean> isNotSavedWithSameName() {
@@ -335,7 +350,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 	@Override
 	public void addMissingEquiNamesAndIdsToChildren() {
 		Function<ChildKosik, List<Category>> categoriesForComparison = child -> {
-			CategoryKosik parent = catKosikDao.findByUri(child.getParentUri()).orElse(new CategoryKosik());
+			CategoryKosik parent = catKosikDao.findByUri(child.getParentUri()).orElseGet(CategoryKosik::new);
 			return new ArrayList<>(catService.findFirstLevelChildren(parent.getEquiId()));
 		};
 		UnaryOperator<ChildKosik> setEquiIdAndEquiName = child -> {
@@ -395,7 +410,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 
 	@Override
 	public List<CategoryKosik> buildFourthLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI) {
-		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElse(new CategoryKosik());
+		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		Set<CategoryKosik> secondLevel = mainParent.getChildren().stream().map(ChildKosik::getUri)
 				.map(catKosikDao::findByUri).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(HashSet::new));
@@ -422,7 +437,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 
 	@Override
 	public List<CategoryKosik> buildFifthLevelCategoriesWithChildrenFromURI(String firstLevelCategoryURI) {
-		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElse(new CategoryKosik());
+		CategoryKosik mainParent = catKosikDao.findByUriWithChildren(firstLevelCategoryURI).orElseGet(CategoryKosik::new);
 		Set<CategoryKosik> secondLevel = mainParent.getChildren().stream().map(ChildKosik::getUri)
 				.map(catKosikDao::findByUri).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(HashSet::new));
@@ -454,7 +469,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 
 	@Override
 	public Set<CategoryKosik> getLowestLevelCategoriesInTreeOf(String categoryURI) {
-		CategoryKosik category = catKosikDao.findByUriWithChildren(categoryURI).orElse(new CategoryKosik());
+		CategoryKosik category = catKosikDao.findByUriWithChildren(categoryURI).orElseGet(CategoryKosik::new);
 		Set<CategoryKosik> result = new HashSet<>();
 		Set<ChildKosik> children = category.getChildren();
 		while (!children.isEmpty()) {
