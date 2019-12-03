@@ -19,7 +19,6 @@ import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 
 @Component("navigationBuilder")
 public class NavigationBuilderKosik implements NavigationBuilder {
-	@Autowired
 	private CategoryKosikOverview categoryKosikOverview;
 	private String uri;
 	static final String BASIC_URL = "https://www.kosik.cz";
