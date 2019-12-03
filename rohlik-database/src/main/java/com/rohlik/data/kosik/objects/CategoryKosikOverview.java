@@ -36,6 +36,7 @@ public class CategoryKosikOverview {
 	private String url;
 	private JsonParser jp = new JsonParser();
 	private static final String BASIC_URL = "https://www.kosik.cz";
+	private static final String SUBCATEGORIES = "subcategories";
 	@Autowired
 	public CategoryKosikOverview(Source source) {
 		this.source=source;
@@ -47,7 +48,7 @@ public class CategoryKosikOverview {
 			this.url = url;
 		}
 		return this.document
-				.map(document -> document.select("div.display-block.header-navigation__subcategory__values"))
+				.map(doc -> doc.select("div.display-block.header-navigation__subcategory__values"))
 				.map(element -> element.select("a"));
 	}
 
@@ -56,7 +57,7 @@ public class CategoryKosikOverview {
 			this.document = source.getJsoupDoc(url);
 			this.url = url;
 		}
-		return this.document.map(document -> document.select("Nav_bar").first()).map(navbar -> navbar.attr("data"))
+		return this.document.map(doc -> doc.select("Nav_bar").first()).map(navbar -> navbar.attr("data"))
 				.map(data -> jp.parse(data).getAsJsonArray());
 	}
 
@@ -65,8 +66,8 @@ public class CategoryKosikOverview {
 			this.document = source.getJsoupDoc(url);
 			this.url = url;
 		}
-		return this.document.map(document -> document.select("div.breadcrumps")).map(div -> div.select("a"))
-				.map(a -> a.last());
+		return this.document.map(doc -> doc.select("div.breadcrumps")).map(div -> div.select("a"))
+				.map(Elements::last);
 	}
 
 	public Map<LinkAndName, Set<LinkAndName>> allLinksAndNamesOnSecondLevel(String url) {
@@ -79,7 +80,7 @@ public class CategoryKosikOverview {
 		}
 		if (level > 1) {
 			result = toNameAndLinkSet.apply(getSubcategoriesAnchors(url)).stream()
-					.map(linkAndName -> linkAndName.getLink()).filter(Optional::isPresent).map(Optional::get)
+					.map(LinkAndName::getLink).filter(Optional::isPresent).map(Optional::get)
 					.map(link -> allLinksAndNamesOnFirstLevel(BASIC_URL + link))
 					.collect(HashMap::new, (map, old) -> map.putAll(old), HashMap::putAll);
 		}
@@ -89,7 +90,7 @@ public class CategoryKosikOverview {
 
 	private int getLevelFromUrl(String url) {
 		if (url != null)
-			return url.replace("https://www.kosik.cz", "").split("/").length - 1;
+			return url.replace(BASIC_URL, "").split("/").length - 1;
 		return -1;
 	}
 
@@ -109,27 +110,27 @@ public class CategoryKosikOverview {
 	private Map<LinkAndName, Set<LinkAndName>> firstLevelFromJsonData(String url) {
 		Map<LinkAndName, Set<LinkAndName>> result = new HashMap<>();
 		Optional<JsonArray> data = getNav_barData(url);
-		Optional<JsonArray> subcategories = Optional.empty();
-		Optional<JsonObject> parent = Optional.empty();
+		Optional<JsonArray> subcategories;
+		Optional<JsonObject> parent;
 		if (url != null) {
-			String[] parts = url.replace("https://www.kosik.cz", "").split("/");
+			String[] parts = url.replace(BASIC_URL, "").split("/");
 			int levels = parts.length - 1;
 			switch (levels) {
 			case 1:
 				parent = getParentCategory("/" + parts[1]).apply(data);
 				subcategories = parent
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				result.put(new LinkAndName(parent, 1), toSet.apply(subcategories));
 				break;
 			case 2:
 				Optional<JsonArray> parentLevel = getParentCategory("/" + parts[1]).apply(data)
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				parent = getParentCategory("/" + parts[1] + "/" + parts[2]).apply(parentLevel);
 				subcategories = parent
-						.map(theSubCategory -> theSubCategory.get("subcategories"))
-						.map(subcategoriesElement -> subcategoriesElement.getAsJsonArray());
+						.map(theSubCategory -> theSubCategory.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				result.put(new LinkAndName(parent, 1), toSet.apply(subcategories));
 				break;
 			}
@@ -140,29 +141,29 @@ public class CategoryKosikOverview {
 	private Map<String, Set<String>> firstLevelLinksFromJsonData(String url) {
 		Map<String, Set<String>> result = new HashMap<>();
 		Optional<JsonArray> data = getNav_barData(url);
-		Optional<JsonArray> subcategories = Optional.empty();
-		Optional<JsonObject> parent = Optional.empty();
+		Optional<JsonArray> subcategories;
+		Optional<JsonObject> parent;
 		if (url != null) {
-			String[] parts = url.replace("https://www.kosik.cz", "").split("/");
+			String[] parts = url.replace(BASIC_URL, "").split("/");
 			int levels = parts.length - 1;
 			switch (levels) {
 			case 1:
 				parent = getParentCategory("/" + parts[1]).apply(data);
 				subcategories = parent
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				Optional<String> link = new LinkAndName(parent, 1).getLink();
 				if (link.isPresent())
 					result.put(link.get(), toLinkSet.apply(subcategories));
 				break;
 			case 2:
 				Optional<JsonArray> parentLevel = getParentCategory("/" + parts[1]).apply(data)
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				parent = getParentCategory("/" + parts[1] + "/" + parts[2]).apply(parentLevel);
 				subcategories = parent
-						.map(theSubCategory -> theSubCategory.get("subcategories"))
-						.map(subcategoriesElement -> subcategoriesElement.getAsJsonArray());
+						.map(theSubCategory -> theSubCategory.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				link = new LinkAndName(parent, 1).getLink();
 				if (link.isPresent())
 					result.put(link.get(), toLinkSet.apply(subcategories));
@@ -176,12 +177,12 @@ public class CategoryKosikOverview {
 		Map<String, Set<String>> result = new HashMap<>();
 		Optional<JsonArray> data = getNav_barData(url);
 		if (url != null) {
-			String[] parts = url.replace("https://www.kosik.cz", "").split("/");
+			String[] parts = url.replace(BASIC_URL, "").split("/");
 			int levels = parts.length - 1;
 			if (levels == 1) {
 				Optional<JsonArray> subcategories = getParentCategory("/" + parts[1]).apply(data)
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				toLinkSet.apply(subcategories).stream().filter(link -> !link.isEmpty()).forEach(item -> result.put(item,
 						getSubcategoriesFromLink(subcategories).andThen(toLinkSet).apply(item)));
 			}
@@ -193,12 +194,12 @@ public class CategoryKosikOverview {
 		Map<LinkAndName, Set<LinkAndName>> result = new HashMap<>();
 		Optional<JsonArray> data = getNav_barData(url);
 		if (url != null) {
-			String[] parts = url.replace("https://www.kosik.cz", "").split("/");
+			String[] parts = url.replace(BASIC_URL, "").split("/");
 			int levels = parts.length - 1;
 			if (levels == 1) {
 				Optional<JsonArray> subcategories = getParentCategory("/" + parts[1]).apply(data)
-						.map(categoryObject -> categoryObject.get("subcategories"))
-						.map(subcat -> subcat.getAsJsonArray());
+						.map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+						.map(JsonElement::getAsJsonArray);
 				toSet.apply(subcategories).stream().filter(item -> item.getLink().isPresent())
 						.forEach(item -> result.put(item, getSubcategories(subcategories).andThen(toSet).apply(item)));
 			}
@@ -208,29 +209,29 @@ public class CategoryKosikOverview {
 
 	private Function<LinkAndName, Optional<JsonArray>> getSubcategories(Optional<JsonArray> data) {
 		return item -> getParentCategory(item.getLink().get()).apply(data)
-				.map(categoryObject -> categoryObject.get("subcategories")).map(subcat -> subcat.getAsJsonArray());
+				.map(categoryObject -> categoryObject.get(SUBCATEGORIES)).map(JsonElement::getAsJsonArray);
 
 	}
 
 	private Function<String, Optional<JsonArray>> getSubcategoriesFromLink(Optional<JsonArray> data) {
-		return link -> getParentCategory(link).apply(data).map(categoryObject -> categoryObject.get("subcategories"))
-				.map(subcat -> subcat.getAsJsonArray());
+		return link -> getParentCategory(link).apply(data).map(categoryObject -> categoryObject.get(SUBCATEGORIES))
+				.map(JsonElement::getAsJsonArray);
 
 	}
 
 	private Function<Optional<JsonArray>, Optional<JsonObject>> getParentCategory(String categoryUri) {
 		return data -> data.isPresent() ? StreamSupport.stream(data.get().spliterator(), false)
 				.map(element -> Optional.ofNullable(element.getAsJsonObject()))
-				.filter(object -> object.map(obj -> obj.get("url")).map(elem -> elem.getAsString()).isPresent())
+				.filter(object -> object.map(obj -> obj.get("url")).map(JsonElement::getAsString).isPresent())
 				.map(Optional::get).filter(categoryObj -> categoryObj.get("url").getAsString().equals(categoryUri))
-				.map(maincat -> maincat.getAsJsonObject()).findFirst() : Optional.empty();
-	};
+				.map(JsonObject::getAsJsonObject).findFirst() : Optional.empty();
+	}
 
 	private Function<JsonObject, String> getUrl = categoryObject -> categoryObject.get("url").getAsString();
 	private Function<JsonObject, String> getName = categoryObject -> categoryObject.get("name").getAsString();
 	private Function<Optional<JsonArray>, Set<LinkAndName>> toSet = jsonArray -> jsonArray.isPresent() ? StreamSupport
 			.stream(jsonArray.get().spliterator(), false).map(item -> item.getAsJsonObject())
-			.map(categoryObject -> new LinkAndName(categoryObject)).collect(Collectors.toCollection(HashSet::new))
+			.map(LinkAndName::new).collect(Collectors.toCollection(HashSet::new))
 			: new HashSet<>();
 	private Function<Optional<JsonArray>, Set<String>> toLinkSet = jsonArray -> jsonArray.isPresent()
 			? StreamSupport.stream(jsonArray.get().spliterator(), false).map(item -> item.getAsJsonObject())
@@ -241,7 +242,7 @@ public class CategoryKosikOverview {
 		Function<Optional<Elements>, Set<String>> toLinksSet = as -> as.orElse(new Elements()).stream()
 				.collect(HashSet::new, (set, a) -> {
 					Optional<String> link = new LinkAndName(a).getLink();
-					link.ifPresent(theLink -> set.add(theLink));
+					link.ifPresent(set::add);
 				}, HashSet::addAll);
 		Map<String, Set<String>> result = new HashMap<>();
 		int level = getLevelFromUrl(url);
@@ -265,7 +266,7 @@ public class CategoryKosikOverview {
 		if (data.isPresent()) {
 			links = StreamSupport.stream(data.get().spliterator(), false)
 					.map(element -> Optional.ofNullable(element.getAsJsonObject()))
-					.filter(object -> object.map(obj -> obj.get("url")).map(url -> url.getAsString()).isPresent())
+					.filter(object -> object.map(obj -> obj.get("url")).map(JsonElement::getAsString).isPresent())
 					.map(Optional::get).map(categoryObject -> categoryObject.get("url").getAsString())
 					.collect(Collectors.toCollection(ArrayList::new));
 		}
@@ -282,7 +283,7 @@ public class CategoryKosikOverview {
 			result = secondLevelLinksFromJsonData(url);
 		}
 		if (level > 1) {
-			result = toLinksSet.apply(getSubcategoriesAnchors(url)).stream().map(linkAndName -> linkAndName.getLink())
+			result = toLinksSet.apply(getSubcategoriesAnchors(url)).stream().map(LinkAndName::getLink)
 					.filter(Optional::isPresent).map(Optional::get).map(link -> allLinksOnFirstLevel(BASIC_URL + link))
 					.collect(HashMap::new, (map, old) -> map.putAll(old), HashMap::putAll);
 		}
@@ -299,15 +300,14 @@ public class CategoryKosikOverview {
 		workingMap.putAll(secondLevel);
 		while (!workingMap.isEmpty()) {
 			Map<String, Set<String>> temporaryMap = new HashMap<>();
-			workingMap.values().forEach(values -> {
+			workingMap.values().forEach(values -> 
 				values.stream().filter(set -> !set.isEmpty()).forEach(link -> {
 					subcategoriesLinks.putAll(allLinksOnFirstLevel(BASIC_URL + link));
 					Map<String, Set<String>> secondLevelTemp = allLinksOnSecondLevel(BASIC_URL + link);
 					subcategoriesLinks.putAll(secondLevelTemp);
 					temporaryMap.putAll(secondLevelTemp);
-				});
-
-			});
+				})
+			);
 			workingMap = temporaryMap;
 		}
 		return subcategoriesLinks;
