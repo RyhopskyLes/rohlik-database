@@ -1,48 +1,11 @@
 package com.rohlik.data.commons.utilities;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.rohlik.data.kosik.entities.ProductKosik;
-import com.google.common.base.Stopwatch;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.rohlik.data.entities.Category;
 import com.rohlik.data.kosik.objects.CategoryKosikOverview;
-import com.rohlik.data.kosik.objects.LinkAndName;
-import com.rohlik.data.kosik.objects.MapEntry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import info.debatty.java.stringsimilarity.Cosine;
 
 @Service("dataKosik")
 public class DataKosikImpl implements DataKosik {

@@ -1,30 +1,5 @@
 package com.rohlik.data.commons.utilities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import com.rohlik.data.kosik.entities.ProductKosik;
-import com.rohlik.data.kosik.objects.LinkAndName;
-import com.rohlik.data.entities.Category;
-
-import info.debatty.java.stringsimilarity.Cosine;
-
 public interface DataKosik {
 //	public Set<ProductKosik> extractAllProductsInfoInCategory(String categoryURL);
 //	public ProductKosik extractProductInfo(Element imageInfo, Element itemInfo);	
