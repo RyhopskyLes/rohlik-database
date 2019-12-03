@@ -105,7 +105,7 @@ public class CategoryBuilder {
 	private UnaryOperator<CategoryKosik> addEquivalentCategory(Optional<ChildKosik> child) {
 		return category -> {
 			Category rohlik = all.stream().filter(cat -> cat.getCategoryId().equals(child.get().getEquiId()))
-					.findFirst().orElse(null);
+					.findFirst().orElseGet(null);
 			addEquivalentsBasedOnProductMatch(category);				
 			category.addCategory(rohlik);
 			return category;
@@ -114,7 +114,7 @@ public class CategoryBuilder {
 
 	List<Category> preFilterCategoriesForMatching(CategoryKosik category) {
 		List<Result<Category>> contained = matcher.preMatchBasedOnProducts(category, main);
-		List<Category> selected =contained.stream().map(res -> res.getEntity()).filter(Optional::isPresent).map(Optional::get)
+		List<Category> selected =contained.stream().map(Result<Category>::getEntity).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(ArrayList::new));
 		List<Category> result =selected.stream().map(cat->findChildrenToLowestLevel(cat.getCategoryId())).flatMap(Set::stream)
 		.collect(Collectors.toCollection(ArrayList::new));
@@ -144,10 +144,10 @@ public class CategoryBuilder {
 		return child -> {
 			Result<Category> result = matcher.findMatch(new CategoryKosik(child.getCategoryName()), categories);
 			Optional<Category> category = result.getEntityForLimit(dissimilarityLimit);
-			category.ifPresent(theCategory -> {
+			category.ifPresent(theCategory -> 
 				child.set(child::setEquiId, theCategory.getCategoryId()).set(child::setEquiCategoryName,
-						theCategory.getCategoryName());
-			});
+						theCategory.getCategoryName())
+			);
 			return child;
 		};
 	}
