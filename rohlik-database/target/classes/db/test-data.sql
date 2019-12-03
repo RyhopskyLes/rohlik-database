@@ -1,0 +1,1 @@
+INSERT INTO `product` VALUES (1,'1311671-losos-filet-s-kuzi-bez-kosti-duo-pack','https://images.rohlik.cz/images/grocery/products/1311671/1311671-1471387201-260.jpg',1,'?productPopup=1311671-losos-filet-s-kuzi-bez-kosti-duo-pack',300103033,NULL,239.9,599.75,1311671,'Losos filet s kůží bez kosti duo-pack','400 g','kg');
