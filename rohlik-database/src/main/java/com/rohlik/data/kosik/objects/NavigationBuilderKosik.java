@@ -20,13 +20,15 @@ import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 @Component("navigationBuilder")
 public class NavigationBuilderKosik implements NavigationBuilder {
 	@Autowired
-	CategoryKosikOverview categoryKosikOverview;
+	private CategoryKosikOverview categoryKosikOverview;
 	String uri;
 	static final String BASIC_URL = "https://www.kosik.cz";
 	private static Logger log = LoggerFactory.getLogger(NavigationBuilderKosik.class);
 
-	/*public NavigationBuilderKosik() {
-	}*/
+	@Autowired
+	public NavigationBuilderKosik(CategoryKosikOverview categoryKosikOverview) {
+		this.categoryKosikOverview=categoryKosikOverview;
+	}
 
 	public NavigationItem buildItem(String uri) {
 		NavigationItem navigationItem = new NavigationItem();
