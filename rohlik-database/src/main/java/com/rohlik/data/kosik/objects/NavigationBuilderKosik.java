@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.rohlik.data.commons.services.CategoryKosikServiceImpl;
-import com.rohlik.data.commons.utilities.DataKosik;
-import com.rohlik.data.commons.utilities.DataKosikImpl;
 import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 
 @Component("navigationBuilder")

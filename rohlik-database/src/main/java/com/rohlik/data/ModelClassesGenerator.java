@@ -19,7 +19,6 @@ import com.rohlik.data.commons.services.CategoryService;
 import com.rohlik.data.commons.services.ChildKosikService;
 import com.rohlik.data.commons.services.ProductKosikService;
 import com.rohlik.data.commons.services.ProductService;
-import com.rohlik.data.commons.utilities.DataKosik;
 import com.rohlik.data.commons.utilities.DataRohlik;
 import com.rohlik.data.commons.utilities.Source;
 import com.rohlik.data.entities.Category;
@@ -64,7 +63,6 @@ public class ModelClassesGenerator {
 		NavSections nav = ctx.getBean("navSections", NavSections.class);
 		NavigationBuilder navigationBuilder = ctx.getBean(NavigationBuilder.class);
 		DataRohlik extractFile = ctx.getBean(DataRohlik.class);
-		DataKosik dataKosik = ctx.getBean(DataKosik.class);
 		Filters filters = ctx.getBean(Filters.class);
 		RootObject rootObject = ctx.getBean(RootObject.class);
 		ProductsInCategory prInCa = ctx.getBean(ProductsInCategory.class);
