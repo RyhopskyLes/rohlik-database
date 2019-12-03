@@ -99,8 +99,8 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 
 	private Function<String, Map<LinkAndName, Set<LinkAndName>>> newnestedLinksAndNames = link -> categoryKosikOverview.allLinksAndNamesOnSecondLevel(BASIC_URL + link);
 
-	@Override
+/*	@Override
 	public List<String> mainCategoriesLinks() {
 		return categoryKosikOverview.mainCategoriesLinks();
-	}
+	}*/
 }

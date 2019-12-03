@@ -9,5 +9,5 @@ public interface NavigationBuilder {
 public NavigationItem buildItem(String uri);
 public List<NavigationItem> buildLevel(String uri);
 public Function<String, List<NavigationItem>> buildNavigationLevel();
-public List<String> mainCategoriesLinks();
+//public List<String> mainCategoriesLinks();
 }
