@@ -68,7 +68,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 			productKosikDao.save(product);
 		});
 		products.stream().filter(product -> product.getEquiId() != null)
-				.forEach(product -> System.out.println(product.getEquiId() + " " + product.getDissimilarity()));
+				.forEach(product -> log.info("{} {}", product.getEquiId(), product.getDissimilarity()));
 		log.info("Products size: {}", products.size());
 	}
 
