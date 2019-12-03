@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.rohlik.data.commons.services.CategoryKosikServiceImpl;
 import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 
 @Component("navigationBuilder")
@@ -28,8 +25,8 @@ public class NavigationBuilderKosik implements NavigationBuilder {
 	static final String BASIC_URL = "https://www.kosik.cz";
 	private static Logger log = LoggerFactory.getLogger(NavigationBuilderKosik.class);
 
-	public NavigationBuilderKosik() {
-	}
+	/*public NavigationBuilderKosik() {
+	}*/
 
 	public NavigationItem buildItem(String uri) {
 		NavigationItem navigationItem = new NavigationItem();
