@@ -48,12 +48,11 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 	
 	@Autowired
 	public CategoryKosikServiceImpl(CategoryDao catDao, CategoryService catService, CategoryKosikDao catKosikDao,
-			NavigationBuilder navigationBuilder, CategoryKosikOverview overView, CategoryBuilder categoryBuilder) {
+			NavigationBuilder navigationBuilder, CategoryBuilder categoryBuilder) {
 		this.catDao = catDao;
 		this.catService = catService;
 		this.catKosikDao = catKosikDao;
 		this.navigationBuilder = navigationBuilder;
-	//	this.overView = overView;
 		this.categoryBuilder = categoryBuilder;
 	}
 

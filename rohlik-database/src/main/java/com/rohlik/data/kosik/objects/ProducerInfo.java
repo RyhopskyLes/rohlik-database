@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -15,6 +16,7 @@ import lombok.Data;
     "count"
 })
 @Data
+@NoArgsConstructor
 public class ProducerInfo {
 
     @JsonProperty("id")

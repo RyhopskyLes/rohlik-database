@@ -34,7 +34,6 @@ import info.debatty.java.stringsimilarity.Cosine;
 public class CategoryMatcher {
 	private static Logger log = LoggerFactory.getLogger(CategoryMatcher.class);
 	private static final String BASIC_URL = "https://www.kosik.cz";
-	// private Result<CategoryKosik> result;
 	@Autowired
 	ProductKosikOverview overview;
 	private Cosine cos;
@@ -54,13 +53,13 @@ public class CategoryMatcher {
 		}
 		Dissimilar<Category> leastDissimilar = Collections.min(matches,
 				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<Category>(leastDissimilar);
+		return new Result<>(leastDissimilar);
 	}
 
 	public List<Result<Category>> findMatchBasedOnProducts(CategoryKosik kosik, List<Category> rohliky) {
 		List<WeightedDissimilar<Category>> matches = new ArrayList<>();
 		List<ProductKosik> productsForCategory = overview
-				.getCompleteProductListUsingPagination(BASIC_URL + kosik.getUri());
+				.getCompleteProductListUsingPaginationForCategoryMatching(BASIC_URL + kosik.getUri());
 		ProductMatcher matcher = new ProductMatcher();
 		for (Category rohlik : rohliky) {
 			List<Product> products = rohlik.getProducts().stream().collect(Collectors.toCollection(ArrayList::new));
@@ -98,20 +97,20 @@ matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimi
 						Comparator.reverseOrder()))
 				.map(dis -> new Result<Category>(dis)).collect(Collectors.toCollection(ArrayList::new))
 				.forEach(System.out::println);
-		return matches.stream().filter(dis -> dis.getDissimilarity() < 0.95)
-				.filter(dis -> dis.getRelativeFrequency() > 0.1 && dis.getRelativeFrequency() < 0.95)
+		return matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimilarity))
+				.filter(dis -> dis.getRelativeFrequency() >=getSumStat.apply(frequency).getMin())
 				.filter(dis -> dis.getRelativeSize() > 0.1 && dis.getRelativeSize() < 3.0)
 				.sorted(Comparator.comparing(WeightedDissimilar<Category>::getRelativeSize,
 						Comparator.reverseOrder()))
-				.map(dis -> new Result<Category>(dis)).limit(6).collect(Collectors.toCollection(ArrayList::new));
+				.map(dis -> new Result<Category>(dis)).limit(2).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	public List<Result<Category>> preMatchBasedOnProducts(CategoryKosik kosik, List<Category> rohliky) {
 		List<WeightedDissimilar<Category>> matches = new ArrayList<>();
-		rohliky = rohliky.stream().filter(cat -> cat.getActive() == true)
+		rohliky = rohliky.stream().filter(Category::getActive)
 				.collect(Collectors.toCollection(ArrayList::new));
 		List<ProductKosik> productsForCategory = overview
-				.getCompleteProductListUsingPagination(BASIC_URL + kosik.getUri());
+				.getCompleteProductListUsingPaginationForCategoryMatching(BASIC_URL + kosik.getUri());
 		for (Category rohlik : rohliky) {
 			List<Product> products = rohlik.getProducts().stream().collect(Collectors.toCollection(ArrayList::new));
 			Long productCount = (long) productsForCategory.size();
@@ -119,7 +118,7 @@ matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimi
 			if (!products.isEmpty()) {
 				Long match = productsForCategory.stream().map(product -> matcher.findMatchCosine(product, products))
 						.map(result -> result.getEntityForLimit(0.4)).filter(Optional::isPresent).count();
-				Double dissimilarity = products.size() == 0 ? 1.0 : 1.0 - ((double) match) / productCount;
+				Double dissimilarity = products.isEmpty() ? 1.0 : 1.0 - ((double) match) / productCount;
 				Double relativeFrequency = ((double) match) / products.size();
 				Double relativeSize = ((double) products.size()) / productCount;
 				matches.add(new WeightedDissimilar<Category>(rohlik, dissimilarity, relativeFrequency, relativeSize));

@@ -16,7 +16,10 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rohlik.data.commons.dao.CategoryDao;
 import com.rohlik.data.commons.dao.CategoryKosikDao;
@@ -31,7 +34,9 @@ import com.rohlik.data.kosik.objects.LinkAndName;
 import com.rohlik.data.kosik.objects.NavigationItem;
 import com.rohlik.data.kosik.objects.NavigationSubItem;
 
-@Component
+@Service("CategoryKosikUpdateService")
+@Transactional
+@SuppressWarnings("unchecked")
 public class CategoryKosikUpdateServiceImpl implements CategoryKosikUpdateService {
 	private CategoryKosikDao catKosikDao;
 	private CategoryKosikOverview overView;
@@ -41,6 +46,19 @@ public class CategoryKosikUpdateServiceImpl implements CategoryKosikUpdateServic
 	private NavigationBuilder navigationBuilder;
 
 	private static final String BASIC_URL = "https://www.kosik.cz";
+
+	@Autowired
+	public CategoryKosikUpdateServiceImpl(CategoryKosikDao catKosikDao, CategoryKosikOverview overView,
+			CategoryDao catDao, CategoryService catService, CategoryBuilder categoryBuilder,
+			NavigationBuilder navigationBuilder) {
+		super();
+		this.catKosikDao = catKosikDao;
+		this.overView = overView;
+		this.catDao = catDao;
+		this.catService = catService;
+		this.categoryBuilder = categoryBuilder;
+		this.navigationBuilder = navigationBuilder;
+	}
 
 	@Override
 	public Set<CategoryKosik> findCategoriesWithUnactiveEquivalent() {

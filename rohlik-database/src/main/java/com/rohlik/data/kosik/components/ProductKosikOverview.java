@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -38,21 +39,21 @@ import com.rohlik.data.objects.RawProduct;
 
 @Component("productOverView")
 public class ProductKosikOverview {
-	@Autowired
 	private Source source;
-	@Autowired
 	private Converter converter;
-	@Autowired
 	private CategoryKosikDao catKosikDao;
 	private static Logger log = LoggerFactory.getLogger(ProductKosikOverview.class);
 	private Optional<Document> document = Optional.empty();
 	private String url;
 	private JsonParser jp = new JsonParser();
 	private static final String BASIC_URL = "https://www.kosik.cz";
-
-	public ProductKosikOverview() {
-		// No-args constructor required by *Spring*
-	}
+	
+	@Autowired
+	public ProductKosikOverview(Source source, Converter converter, CategoryKosikDao catKosikDao) {		
+		this.source = source;
+		this.converter = converter;
+		this.catKosikDao = catKosikDao;
+	}	
 
 	public Optional<Element> getPaginationData(String url) {
 		if (this.url == null || !this.url.equals(url)) {
@@ -213,6 +214,7 @@ public class ProductKosikOverview {
 
 	private Consumer<Element> convertToProductAndAddToList(List<ProductKosik> result, ProducerInfo info,
 			Optional<CategoryKosik> category) {
+		log.info("{}", info);
 		return element -> {
 			Optional<ProductKosik> temp = converter.toProductKosik(info, element);
 			temp.ifPresent(theTemp -> {
@@ -227,6 +229,7 @@ public class ProductKosikOverview {
 			boolean setProducer) {
 		return product -> {
 			addCategoryToProduct(product, category);
+			log.info("{}", setProducer);
 			if (setProducer)
 				setProducerFromProductDetail(product);
 		};
@@ -242,6 +245,7 @@ public class ProductKosikOverview {
 	}
 
 	private void setProducerFromProductDetail(ProductKosik product) {
+		log.info("Called for setting producer");
 		Optional<String> producer = getLabelFromProductDetail(product.getProductPath());
 		producer.ifPresent(product::setProducer);
 	}
@@ -252,6 +256,16 @@ public class ProductKosikOverview {
 		if (products.isPresent()) {
 			Optional<CategoryKosik> category = catKosikDao.findByUriWithChildren(url.replace(BASIC_URL, ""));
 			products.get().stream().forEach(convertToProductAndAddToList(result, null, category)::accept);			
+		}
+		return result;
+	}
+	
+	public List<ProductKosik> getCompleteProductListUsingPaginationForCategoryMatching(String url) {
+		List<ProductKosik> result = new ArrayList<>();
+		Optional<Elements> products = getCompleteProductElementListUsingPagination(url);		
+		if (products.isPresent()) {
+			Optional<CategoryKosik> category = catKosikDao.findByUriWithChildren(url.replace(BASIC_URL, ""));
+			products.get().stream().forEach(convertToProductAndAddToList(result, new ProducerInfo(), category)::accept);			
 		}
 		return result;
 	}

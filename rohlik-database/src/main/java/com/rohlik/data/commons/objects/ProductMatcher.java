@@ -37,33 +37,48 @@ public class ProductMatcher {
 	}
 
 	public Result<Product> findMatchCosine(ProductKosik kosik, List<Product> rohliky) {
-		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars(kosik, rohliky, this.cos),
-				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<>(leastDissimilar);
+		List<Dissimilar<Product>> collectDissimilars = collectDissimilars(kosik, rohliky, this.cos);
+		 if(!collectDissimilars.isEmpty()) {			 
+		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars,
+				Comparator.comparing(Dissimilar::getDissimilarity)); 
+		return new Result<>(leastDissimilar);}
+		return new Result<>();
 	}
 
 	public Result<Product> findMatchSorensen(ProductKosik kosik, List<Product> rohliky) {
-		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars(kosik, rohliky, this.sc),
-				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<>(leastDissimilar);
+		List<Dissimilar<Product>> collectDissimilars = collectDissimilars(kosik, rohliky, this.sc);
+		if(!collectDissimilars.isEmpty()) {			 
+			Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars,
+					Comparator.comparing(Dissimilar::getDissimilarity)); 
+			return new Result<>(leastDissimilar);}
+			return new Result<>();
 	}
 
 	public Result<Product> findMatchJaroWinkler(ProductKosik kosik, List<Product> rohliky) {
-		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars(kosik, rohliky, this.jw),
-				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<>(leastDissimilar);
+		List<Dissimilar<Product>> collectDissimilars = collectDissimilars(kosik, rohliky, this.jw);
+		if(!collectDissimilars.isEmpty()) {			 
+			Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars,
+					Comparator.comparing(Dissimilar::getDissimilarity)); 
+			return new Result<>(leastDissimilar);}
+			return new Result<>();
 	}
 
 	public Result<Product> findMatchJaccard(ProductKosik kosik, List<Product> rohliky) {
-		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars(kosik, rohliky, this.jc),
-				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<>(leastDissimilar);
+		List<Dissimilar<Product>> collectDissimilars = collectDissimilars(kosik, rohliky, this.jc);
+		if(!collectDissimilars.isEmpty()) {			 
+			Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars,
+					Comparator.comparing(Dissimilar::getDissimilarity)); 
+			return new Result<>(leastDissimilar);}
+			return new Result<>();
 	}
 
 	public Result<Product> findMatchNGramm(ProductKosik kosik, List<Product> rohliky) {
-		Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars(kosik, rohliky, this.ngram),
-				Comparator.comparing(Dissimilar::getDissimilarity));
-		return new Result<>(leastDissimilar);
+		List<Dissimilar<Product>> collectDissimilars = collectDissimilars(kosik, rohliky, this.ngram);
+		if(!collectDissimilars.isEmpty()) {			 
+			Dissimilar<Product> leastDissimilar = Collections.min(collectDissimilars,
+					Comparator.comparing(Dissimilar::getDissimilarity)); 
+			return new Result<>(leastDissimilar);}
+			return new Result<>();
 	}
 
 	private List<Dissimilar<Product>> collectDissimilars(ProductKosik kosik, List<Product> rohliky,

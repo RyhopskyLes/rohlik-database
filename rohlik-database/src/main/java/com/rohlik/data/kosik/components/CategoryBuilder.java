@@ -105,7 +105,7 @@ public class CategoryBuilder {
 	private UnaryOperator<CategoryKosik> addEquivalentCategory(Optional<ChildKosik> child) {
 		return category -> {
 			Category rohlik = all.stream().filter(cat -> cat.getCategoryId().equals(child.get().getEquiId()))
-					.findFirst().orElseGet(null);
+					.findFirst().orElseGet(()->null);
 			addEquivalentsBasedOnProductMatch(category);				
 			category.addCategory(rohlik);
 			return category;
