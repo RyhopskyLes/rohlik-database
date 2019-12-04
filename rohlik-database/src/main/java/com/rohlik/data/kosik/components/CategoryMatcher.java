@@ -1,4 +1,4 @@
-package com.rohlik.data.kosik.objects;
+package com.rohlik.data.kosik.components;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +24,6 @@ import com.rohlik.data.commons.objects.Result;
 import com.rohlik.data.commons.objects.WeightedDissimilar;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Product;
-import com.rohlik.data.kosik.components.ProductKosikOverview;
 import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.entities.ProductKosik;
 
