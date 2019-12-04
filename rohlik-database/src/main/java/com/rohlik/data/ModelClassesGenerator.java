@@ -1,11 +1,9 @@
 package com.rohlik.data;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.rohlik.data.commons.config.AppConfig;
 import com.rohlik.data.commons.config.DataConfig;
 import com.rohlik.data.commons.dao.CategoryDao;
@@ -71,7 +69,8 @@ public class ModelClassesGenerator {
 		Full full = ctx.getBean(Full.class);
 		ProductMatcher matcher = new ProductMatcher();
 		AtomicInteger counter = new AtomicInteger(0);
-	productService.updateActiveStateOfAllProducts();
+	//productService.updateActiveStateOfAllProducts();
+	
 		//	catKosikService.addCategorytoCategoryKosik(95, 300105051, true);
 		//removeCategories(94, 300105046,catKosikDao, catKosikService);
 		//catKosikDao.findByIdWithCategories(95).get().getCategories().forEach(System.out::println);
@@ -132,11 +131,12 @@ public class ModelClassesGenerator {
 		 * missing.forEach(System.out::println); System.out.println(missing.size());
 		 */
 //productService.updateAllProductsFromRohlikInDatabase();
-/*catKosikService.saveMainCategoryWithChildren("/uzeniny-a-lahudky");
-catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI("/uzeniny-a-lahudky");
-catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI("/uzeniny-a-lahudky");
-catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI("/uzeniny-a-lahudky");
-catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI("/uzeniny-a-lahudky");*/
+String kategorie = "/napoje";	
+catKosikService.saveMainCategoryWithChildren(kategorie);
+catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 			
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.saveAllMissingSubcategories(category.getCategoryId()));
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.deactivateDeadSubcategories(category.getCategoryId()));
@@ -198,7 +198,7 @@ catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI("/uzeniny-a-lah
 		 * racio.get().getChildren().forEach(System.out::println);
 		 */
 		// DataKosik.mainCategoriesLinks().stream().forEach(link->catKosikService.saveSecondLevelCategoriesWithChildren("https://www.kosik.cz"+link));
-
+ctx.close();
 	}
 public static void removeCategories(Integer idKosik, Integer idRohlikNotToRemove, CategoryKosikDao catKosikDao, CategoryKosikService catKosikService) {
 	Optional<CategoryKosik> kosik= catKosikDao.findByIdWithCategories(idKosik);
