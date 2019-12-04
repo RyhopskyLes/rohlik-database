@@ -13,16 +13,16 @@ public class LinkAndName {
 	private String link;
 	private String name;
 
-	public LinkAndName() {
+	protected LinkAndName() {
 	}
 
-	public LinkAndName(Element element) {
+	protected LinkAndName(Element element) {
 		this.element = element;
 		this.link = this.element!=null ? this.element.attr("href") : null;
 		this.name = this.element!=null ? this.element.text() : null;		
 	}
 
-	public LinkAndName(JsonObject object) {
+	protected LinkAndName(JsonObject object) {
 		this.object = object;
 		this.link = this.object!=null && !this.object.isJsonNull()
 				? Optional.ofNullable(this.object).map(theObject -> theObject.get("url")).map(JsonElement::getAsString).orElseGet(()->null)
@@ -32,7 +32,7 @@ public class LinkAndName {
 				: null;
 	}
 		
-	LinkAndName(Optional<Element> element) {
+	protected LinkAndName(Optional<Element> element) {
 		this.element = element.orElseGet(()->null);
 		this.link = this.element!=null ? this.element.attr("href") : null;
 		this.name = this.element!=null ? this.element.text() : null;
