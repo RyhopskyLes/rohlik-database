@@ -2,7 +2,7 @@ package com.rohlik.data.kosik.objects;
 
 import java.util.Map;
 
-final public class MapEntry<K, V> implements Map.Entry<K, V> {
+public final class MapEntry<K, V> implements Map.Entry<K, V> {
 	private final K key;
     private V value;
     
