@@ -29,7 +29,7 @@ public class Converter {
 	public Optional<ProductKosik> toProductKosik(ProducerInfo info, Optional<Element> element) {
 		Optional<ProductKosik> product = Optional.empty();
 		if (element.isPresent()) {
-			product = buildFromElement(info, element);
+			product = buildProductKosikFromElement(info, element);
 		}
 		return product;
 	}
@@ -38,14 +38,14 @@ public class Converter {
 		Optional<ProductKosik> product = Optional.<ProductKosik>empty();
 		if (element != null) {
 			Optional<Element> elementOpt = Optional.of(element);
-			product = buildFromElement(info, elementOpt);
+			product = buildProductKosikFromElement(info, elementOpt);
 		}
 		return product;
 	}
 
 	
 
-	private Optional<ProductKosik> buildFromElement(ProducerInfo info, Optional<Element> element) {
+	private Optional<ProductKosik> buildProductKosikFromElement(ProducerInfo info, Optional<Element> element) {
 		boolean wasSet = false;
 		ProductKosik product = new ProductKosik();
 		wasSet = setFields(product, fieldsToSet(info, element));
