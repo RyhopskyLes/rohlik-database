@@ -61,7 +61,7 @@ public class Converter {
 		Set<FieldData<?>> data = new HashSet<>();
 		data.add(new FieldData<String>("name", String.class, mapper.toName(element)));
 		data.add(new FieldData<Integer>("idProduct", Integer.class, mapper.toIdProduct(element)));
-		Optional<String> producer = Optional.ofNullable(info).map(inf -> inf.getName());
+		Optional<String> producer = Optional.ofNullable(info).map(ProducerInfo::getName);
 		data.add(new FieldData<String>("producer", String.class, producer));
 		data.add(new FieldData<Double>("origPrice", Double.class, mapper.toOrigPrice(element)));
 		data.add(new FieldData<Double>("actualPrice", Double.class, mapper.toActualPrice(element)));
