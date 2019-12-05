@@ -88,7 +88,7 @@ public class Converter {
 		fieldsToSet.stream().forEach(data -> {
 			try {
 				Boolean set = setField(product, data);
-				if (!wasSet[0])
+				if (Boolean.FALSE.equals(wasSet[0]))
 					wasSet[0] = set;
 			} catch (Throwable e) {
 				e.printStackTrace();
