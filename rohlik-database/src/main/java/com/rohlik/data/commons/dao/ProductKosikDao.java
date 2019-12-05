@@ -3,9 +3,6 @@ package com.rohlik.data.commons.dao;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.repository.query.Param;
-
-import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.entities.ProductKosik;
 
 
