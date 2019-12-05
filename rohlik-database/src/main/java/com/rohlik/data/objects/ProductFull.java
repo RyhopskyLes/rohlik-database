@@ -72,21 +72,21 @@ public class ProductFull {
 	@JsonProperty("goodPriceSalePercentage")
 	private Integer goodPriceSalePercentage;
 	@JsonProperty("sales")
-	private List<Object> sales = new ArrayList<Object>();
+	private List<Object> sales = new ArrayList<>();
 	@JsonProperty("maxBasketAmount")
 	private Integer maxBasketAmount;
 	@JsonProperty("maxBasketAmountReason")
 	private String maxBasketAmountReason;
 	@JsonProperty("tags")
-	private List<String> tags = new ArrayList<String>();
+	private List<String> tags = new ArrayList<>();
 	@JsonProperty("badge")
-	private List<Object> badge = new ArrayList<Object>();
+	private List<Object> badge = new ArrayList<>();
 	@JsonProperty("stars")
 	private Object stars;
 	@JsonProperty("country")
 	private Country country;
 	@JsonProperty("countries")
-	private List<Country> countries = new ArrayList<Country>();
+	private List<Country> countries = new ArrayList<>();
 	@JsonProperty("imageScaleRatio")
 	private Object imageScaleRatio;
 	@JsonProperty("imagesCount")
@@ -131,7 +131,7 @@ public class ProductFull {
 	private Boolean inStock;
 
 	public Set<Category> getCategoriesConverted() {
-		return categories.stream().map(cat -> toCategory(cat)).collect(Collectors.toCollection(LinkedHashSet::new));
+		return categories.stream().map(this::toCategory).collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	private Category toCategory(CategoryByProduct toConvert) {

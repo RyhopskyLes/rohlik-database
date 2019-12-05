@@ -25,16 +25,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Navigation {
 
-	private static Logger log = LoggerFactory.getLogger(Navigation.class);
-	@Autowired
+	private static Logger log = LoggerFactory.getLogger(Navigation.class);	
 	private RootObject rootObject;
-	private Gson gson = new Gson();
+	private Gson gson;
 
+	@Autowired
+	public Navigation(RootObject rootObject) {
+		this.rootObject = rootObject;
+		this.gson=new Gson();
+	}	
 	public List<NavigationCategoryInfo> getAllCategoriesData() {
 		Optional<JsonObject> navigation = rootObject.getNavigationData()
 				.map(object -> object.getAsJsonObject("navigation"));
-		Set<Entry<String, JsonElement>> entrySet = navigation.map(navig -> navig.entrySet()).orElse(new HashSet<>());
-		return entrySet.stream().map(entry -> entry.getValue())
+		Set<Entry<String, JsonElement>> entrySet = navigation.map(JsonObject::entrySet).orElse(new HashSet<>());
+		return entrySet.stream().map(Entry<String, JsonElement>::getValue)
 				.map(elem -> gson.fromJson(elem, NavigationCategoryInfo.class))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -65,5 +69,7 @@ public class Navigation {
 	public String getCategoryName(Integer catNum, Set<Category> categories) {
 		Predicate<Category> idEquals = category -> category.getCategoryId().equals(catNum);
 		return categories.stream().filter(idEquals).map(Category::getCategoryName).findFirst().orElse("");
-	}	
+	}
+
+	
 }

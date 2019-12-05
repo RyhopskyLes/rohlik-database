@@ -39,7 +39,7 @@ public class NavigationCategoryInfo {
 	@JsonProperty("parentId")
 	private Integer parentId;
 	@JsonProperty("children")
-	private List<Integer> children = new ArrayList<Integer>();
+	private List<Integer> children = new ArrayList<>();
 	
 	Category toCategory() {
 	Category category = new Category();

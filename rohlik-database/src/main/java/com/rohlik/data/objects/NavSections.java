@@ -24,21 +24,21 @@ public class NavSections {
 	public static final String CATEGORIES_METADATA_START = "https://www.rohlik.cz/services/frontend-service/categories/";
 	public static final String CATEGORIES_METADATA_END = "/metadata";
 	private static Logger log = LoggerFactory.getLogger(NavSections.class);
-	@Autowired
+
 	private RootObject rootObject;
 
-	public NavSections() {
-
+	@Autowired
+	public NavSections(RootObject rootObject) {
+		this.rootObject = rootObject;
 	}
 
 	public List<NavSectionsCategoryData> ofCategory(Integer categoryId) {
-		Optional<JsonObject> data = getJsonDataObject(categoryId);				
-		Optional<JsonArray> navSections = data.map(content->content.getAsJsonArray("navSections"));
-		if(navSections.isPresent()) {return StreamSupport.stream(navSections.get().spliterator(), false)
-			.map( elem-> elem.getAsJsonObject())
-			.map(toCategoryData(categoryId)::apply)
-			.collect(Collectors.toList());					
-		}		
+		Optional<JsonObject> data = getJsonDataObject(categoryId);
+		Optional<JsonArray> navSections = data.map(content -> content.getAsJsonArray("navSections"));
+		if (navSections.isPresent()) {
+			return StreamSupport.stream(navSections.get().spliterator(), false).map(elem -> elem.getAsJsonObject())
+					.map(toCategoryData(categoryId)::apply).collect(Collectors.toList());
+		}
 		return new ArrayList<>();
 	}
 
@@ -49,7 +49,7 @@ public class NavSections {
 
 		while (!toIterate.isEmpty()) {
 			toIterate = toIterate.stream().map(categorydata -> ofCategory(categorydata.getCategoryId()))
-					.filter(list -> !list.isEmpty()).flatMap(list -> list.stream()).map(categoryData -> {
+					.filter(list -> !list.isEmpty()).flatMap(List::stream).map(categoryData -> {
 						tree.add(categoryData);
 						return categoryData;
 					}).collect(Collectors.toCollection(HashSet::new));
@@ -63,33 +63,40 @@ public class NavSections {
 		Set<NavSectionsCategoryData> toIterate = new HashSet<>(topLevel);
 
 		while (!toIterate.isEmpty()) {
-			toIterate = toIterate.stream().map(categorydata ->{
+			toIterate = toIterate.stream().map(categorydata -> {
 				List<NavSectionsCategoryData> ofCategory = ofCategory(categorydata.getCategoryId());
-				if(ofCategory.isEmpty()) {tree.add(categorydata);};
-			return ofCategory;
-			})	.filter(list -> !list.isEmpty()).flatMap(list -> list.stream())					
-				.collect(Collectors.toCollection(HashSet::new));
+				if (ofCategory.isEmpty()) {
+					tree.add(categorydata);
+				}				
+				return ofCategory;
+			}).filter(list -> !list.isEmpty()).flatMap(List::stream)
+					.collect(Collectors.toCollection(HashSet::new));
 		}
 		return tree;
 	}
-	
-	private Function<JsonObject, NavSectionsCategoryData> toCategoryData(Integer parentId) {return  object -> {
-		NavSectionsCategoryData navSectionsCategoryData = new NavSectionsCategoryData();
-		Optional<JsonElement> productDisplayCount = Optional.ofNullable(object.get("productDisplayCount"));
-		Optional<JsonElement> productsCount = Optional.ofNullable(object.get("productsCount"));
-		navSectionsCategoryData.setParentCategoryId(parentId);
-		navSectionsCategoryData.setCategoryId(object.get("categoryId").getAsInt());
-		navSectionsCategoryData.setName(object.get("name").getAsString());
-		navSectionsCategoryData
-				.setMetadataLink(CATEGORIES_METADATA_START + navSectionsCategoryData.getCategoryId() + CATEGORIES_METADATA_END);
-		productDisplayCount.ifPresent(element -> navSectionsCategoryData.setProductDisplayCount(element.getAsInt()));
-		productsCount.ifPresent(element -> navSectionsCategoryData.setProductsCount(element.getAsInt()));
-		return navSectionsCategoryData;};
+
+	private Function<JsonObject, NavSectionsCategoryData> toCategoryData(Integer parentId) {
+		return object -> {
+			NavSectionsCategoryData navSectionsCategoryData = new NavSectionsCategoryData();
+			Optional<JsonElement> productDisplayCount = Optional.ofNullable(object.get("productDisplayCount"));
+			Optional<JsonElement> productsCount = Optional.ofNullable(object.get("productsCount"));
+			navSectionsCategoryData.setParentCategoryId(parentId);
+			navSectionsCategoryData.setCategoryId(object.get("categoryId").getAsInt());
+			navSectionsCategoryData.setName(object.get("name").getAsString());
+			navSectionsCategoryData.setMetadataLink(
+					CATEGORIES_METADATA_START + navSectionsCategoryData.getCategoryId() + CATEGORIES_METADATA_END);
+			productDisplayCount
+					.ifPresent(element -> navSectionsCategoryData.setProductDisplayCount(element.getAsInt()));
+			productsCount.ifPresent(element -> navSectionsCategoryData.setProductsCount(element.getAsInt()));
+			return navSectionsCategoryData;
+		};
 	};
-	
+
 	private Optional<JsonObject> getJsonDataObject(Integer categoryId) {
-		return Objects.equals(rootObject.getCategoryId(), categoryId) && Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.METADATA) ? rootObject.getJsonObject().map(object -> object.getAsJsonObject("data"))
-				:rootObject.metadataForCategory(categoryId).map(object -> object.getAsJsonObject("data"));
+		return Objects.equals(rootObject.getCategoryId(), categoryId)
+				&& Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.METADATA)
+						? rootObject.getJsonObject().map(object -> object.getAsJsonObject("data"))
+						: rootObject.metadataForCategory(categoryId).map(object -> object.getAsJsonObject("data"));
 	}
 
 }
