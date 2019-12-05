@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.rohlik.data.commons.repos.CategoryRepository;
-import com.rohlik.data.commons.services.ProductService;
 import com.rohlik.data.entities.Category;
 @Repository("categoryDao")
 @Transactional
