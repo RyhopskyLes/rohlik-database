@@ -16,6 +16,7 @@ import com.rohlik.data.commons.utilities.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -291,17 +292,18 @@ public class CategoryKosikOverview {
 		Map<String, Set<String>> secondLevel = allLinksOnSecondLevel(url);
 		subcategoriesLinks.putAll(secondLevel);
 		workingMap.putAll(secondLevel);
+			
 		while (!workingMap.isEmpty()) {
 			Map<String, Set<String>> temporaryMap = new HashMap<>();
-			workingMap.values().forEach(set -> set.stream().filter(link -> !link.isEmpty())
-					.forEach(addNewLinksToResultAndNewLevelToTemporaryCollection(subcategoriesLinks, temporaryMap)::accept));
+			workingMap.values().forEach(set -> set.stream().filter(link -> !link.isEmpty()).forEach(
+					addNewLinksToResultAndNewLevelToTemporaryCollection(subcategoriesLinks, temporaryMap)::accept));
 			workingMap = temporaryMap;
 		}
 		return subcategoriesLinks;
 	}
 
-	private Consumer<String> addNewLinksToResultAndNewLevelToTemporaryCollection(Map<String, Set<String>> subcategoriesLinks,
-			Map<String, Set<String>> temporaryMap) {
+	private Consumer<String> addNewLinksToResultAndNewLevelToTemporaryCollection(
+			Map<String, Set<String>> subcategoriesLinks, Map<String, Set<String>> temporaryMap) {
 		return link -> {
 			subcategoriesLinks.putAll(allLinksOnFirstLevel(BASIC_URL + link));
 			Map<String, Set<String>> secondLevelTemp = allLinksOnSecondLevel(BASIC_URL + link);
