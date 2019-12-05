@@ -3,15 +3,10 @@ package com.rohlik.data.commons.services;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -29,16 +24,12 @@ import com.rohlik.data.kosik.components.CategoryBuilder;
 import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.entities.ChildKosik;
 import com.rohlik.data.kosik.interfaces.NavigationBuilder;
-import com.rohlik.data.kosik.objects.Cancelled;
-import com.rohlik.data.kosik.objects.CategoryKosikOverview;
-import com.rohlik.data.kosik.objects.LinkAndName;
 import com.rohlik.data.kosik.objects.NavigationItem;
 import com.rohlik.data.kosik.objects.NavigationSubItem;
 import com.rohlik.data.entities.Category;
 
 @Service("CategoryKosikService")
 @Transactional
-@SuppressWarnings("unchecked")
 public class CategoryKosikServiceImpl implements CategoryKosikService {
 	private CategoryDao catDao;
 	private CategoryService catService;
@@ -201,15 +192,7 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 	
 	private BiPredicate<Optional<CategoryKosik>, Optional<CategoryKosik>> parentNamesEquals = (category,
 			mainCategory) -> Objects.equals(category.map(CategoryKosik::getParentName),
-					mainCategory.map(CategoryKosik::getParentName));	
-	
-	
-	private Function<ChildKosik, Optional<String>> equivalentName = child -> {
-		Optional<Category> rohlik =catDao.findByCategoryId(child.getEquiId());
-		return rohlik.map(Category::getCategoryName);
-	};
-
-	
+					mainCategory.map(CategoryKosik::getParentName));		
 		
 
 	@Override
