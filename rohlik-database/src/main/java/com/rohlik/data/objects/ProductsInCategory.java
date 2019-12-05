@@ -15,13 +15,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-@Component("ProductInCategory")
+@Component("ProductsInCategory")
 public class ProductsInCategory {
-	@Autowired
 	private RootObject rootObject;
 
-	public ProductsInCategory() {
-		//no args constr for dependency injection
+	@Autowired
+	public ProductsInCategory(RootObject rootObject) {
+		this.rootObject=rootObject;
 	}
 
 	public List<RawProduct> getProductListForCategory(Integer categoryId, Integer limitResults) {
