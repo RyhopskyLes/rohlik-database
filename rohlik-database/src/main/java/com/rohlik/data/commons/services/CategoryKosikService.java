@@ -1,13 +1,11 @@
 package com.rohlik.data.commons.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
 import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.entities.ChildKosik;
-import com.rohlik.data.kosik.objects.Cancelled;
 import com.rohlik.data.kosik.objects.NavigationSubItem;
 
 public interface CategoryKosikService {

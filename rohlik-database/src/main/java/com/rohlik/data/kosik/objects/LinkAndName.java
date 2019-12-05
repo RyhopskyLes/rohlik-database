@@ -1,6 +1,5 @@
 package com.rohlik.data.kosik.objects;
 
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.jsoup.nodes.Element;
 

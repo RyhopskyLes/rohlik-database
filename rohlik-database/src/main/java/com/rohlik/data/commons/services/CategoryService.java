@@ -1,12 +1,9 @@
 package com.rohlik.data.commons.services;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import com.rohlik.data.entities.Category;
-import com.rohlik.data.entities.Child;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.objects.NavSectionsCategoryData;
 

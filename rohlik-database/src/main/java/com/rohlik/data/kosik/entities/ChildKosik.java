@@ -3,7 +3,6 @@ package com.rohlik.data.kosik.entities;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 

@@ -1,7 +1,6 @@
 package com.rohlik.data.objects;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -19,10 +18,6 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.rohlik.data.commons.utilities.DataRohlik;
-import com.rohlik.data.commons.utilities.Source;
-import com.rohlik.data.entities.Category;
-import com.rohlik.data.entities.Product;
 
 @Component("navSections")
 public class NavSections {

@@ -20,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import com.rohlik.data.config.AppConfigNoDB;
-import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.interfaces.NavigationBuilder;
 import com.rohlik.data.kosik.objects.NavigationItem;
 import com.rohlik.data.kosik.objects.NavigationSubItem;

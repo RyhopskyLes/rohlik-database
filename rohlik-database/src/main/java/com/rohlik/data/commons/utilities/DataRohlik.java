@@ -1,27 +1,11 @@
 package com.rohlik.data.commons.utilities;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import java.util.Map.Entry;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.groupingBy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.rohlik.data.entities.Category;
-import com.rohlik.data.entities.Child;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.entities.Sale;
-import com.rohlik.data.objects.NavSectionsCategoryData;
 import com.rohlik.data.objects.Filters;
 import com.rohlik.data.objects.RootObject;
 import com.rohlik.data.objects.SlugAndName;

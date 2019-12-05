@@ -19,7 +19,6 @@ import com.rohlik.data.commons.dao.ProductDao;
 import com.rohlik.data.commons.services.ProductService;
 import com.rohlik.data.config.AppConfigTest;
 import com.rohlik.data.config.DataTestConfig;
-import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.objects.NavSectionsCategoryData;
 import com.rohlik.data.objects.NavSections;

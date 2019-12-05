@@ -2,15 +2,11 @@ package com.rohlik.data.kosik.components;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -24,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,7 +30,6 @@ import com.rohlik.data.commons.utilities.Source;
 import com.rohlik.data.kosik.entities.CategoryKosik;
 import com.rohlik.data.kosik.entities.ProductKosik;
 import com.rohlik.data.kosik.objects.ProducerInfo;
-import com.rohlik.data.objects.RawProduct;
 
 @Component("productOverView")
 public class ProductKosikOverview {

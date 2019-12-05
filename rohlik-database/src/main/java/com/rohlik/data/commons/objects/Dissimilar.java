@@ -1,7 +1,6 @@
 package com.rohlik.data.commons.objects;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class Dissimilar<T> {
 	private T entity;

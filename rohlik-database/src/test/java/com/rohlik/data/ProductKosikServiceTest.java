@@ -1,13 +1,9 @@
 package com.rohlik.data;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jsoup.select.Elements;
@@ -28,12 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import com.rohlik.data.commons.dao.ProductDao;
 import com.rohlik.data.commons.dao.ProductKosikDao;
 import com.rohlik.data.commons.objects.Converter;
 import com.rohlik.data.commons.services.ProductKosikService;
 import com.rohlik.data.commons.services.ProductService;
-import com.rohlik.data.commons.utilities.DataRohlik;
 import com.rohlik.data.config.AppConfigTest;
 import com.rohlik.data.config.DataTestConfig;
 import com.rohlik.data.kosik.components.ProductKosikOverview;

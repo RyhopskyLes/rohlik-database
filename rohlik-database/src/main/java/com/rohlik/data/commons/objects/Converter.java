@@ -5,15 +5,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.jsoup.nodes.Element;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.google.common.primitives.Ints;
-import com.rohlik.data.entities.Category;
 import com.rohlik.data.kosik.entities.ProductKosik;
 import com.rohlik.data.kosik.objects.ElementMapper;
 import com.rohlik.data.kosik.objects.ProducerInfo;
-import com.rohlik.data.objects.productparts.CategoryByProduct;
 
 @Component
 public class Converter {

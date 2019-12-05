@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.rohlik.data.kosik.entities.CategoryKosik;
-import com.rohlik.data.kosik.entities.ProductKosik;
 
 
 public interface CategoryKosikRepository extends JpaRepository<CategoryKosik, Integer>{

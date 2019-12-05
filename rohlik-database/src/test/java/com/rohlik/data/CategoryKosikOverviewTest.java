@@ -1,12 +1,9 @@
 package com.rohlik.data;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasProperty;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
