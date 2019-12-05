@@ -73,8 +73,8 @@ public class Converter {
 		return data;
 	}
 
-	private <T> Boolean setField(ProductKosik product, FieldData<T> data) throws Throwable {
-		Boolean wasSet = false;
+	private <T> boolean setField(ProductKosik product, FieldData<T> data) throws Throwable {
+		boolean wasSet = false;
 		if (data.getFieldValue().isPresent()) {
 			field.getSetter(ProductKosik.class, data.getFieldName(), data.getFieldtype()).set(product,
 					data.getFieldValue().get());
@@ -83,12 +83,12 @@ public class Converter {
 		return wasSet;
 	}
 
-	private Boolean setFields(ProductKosik product, Set<FieldData<?>> fieldsToSet) {
-		Boolean[] wasSet = new Boolean[] { false };
+	private boolean setFields(ProductKosik product, Set<FieldData<?>> fieldsToSet) {
+		boolean[] wasSet = new boolean[] { false };
 		fieldsToSet.stream().forEach(data -> {
 			try {
-				Boolean set = setField(product, data);
-				if (Boolean.FALSE.equals(wasSet[0]))
+				boolean set = setField(product, data);
+				if (!wasSet[0])
 					wasSet[0] = set;
 			} catch (Throwable e) {
 				e.printStackTrace();
