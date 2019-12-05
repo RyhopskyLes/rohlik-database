@@ -14,10 +14,14 @@ import com.rohlik.data.kosik.objects.ProducerInfo;
 @Component
 public class Converter {
 	private static final String BASIC_URL = "https://www.kosik.cz";
+	private FieldHandler field;	
+	private ElementMapper mapper;
+
 	@Autowired
-	FieldHandler field;
-	@Autowired
-	ElementMapper mapper;
+	public Converter(FieldHandler field, ElementMapper mapper) {
+		this.field = field;
+		this.mapper = mapper;
+	}
 
 	public Converter() {
 	}
