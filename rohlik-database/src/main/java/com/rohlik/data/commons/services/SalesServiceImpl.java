@@ -13,13 +13,18 @@ import com.rohlik.data.commons.repos.SalesRepository;
 import com.rohlik.data.entities.Sale;
 @Service("jpaSalesService")
 @Transactional
-@SuppressWarnings("unchecked")
 public class SalesServiceImpl implements SalesService {
-	@PersistenceContext
-	private EntityManager em;
 	
-	@Autowired
+	@PersistenceContext
+	private EntityManager em;	
 	 private SalesRepository salesRepository;
+	 
+	 @Autowired
+	public SalesServiceImpl(SalesRepository salesRepository) {
+		super();
+		this.salesRepository = salesRepository;
+	}
+
 	@Override
 	public List<Sale> findAll() {
 		return salesRepository.findAll();
