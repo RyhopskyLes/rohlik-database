@@ -41,6 +41,7 @@ public class NavigationBuilderTest {
 		NavigationItem navigationItem =navigationBuilder.buildItem(categoryURI);		
 		assertNotNull(navigationItem);
 		List<NavigationSubItem> subItems = navigationItem.getSubcategories();
+		subItems.forEach(System.out::println);
 		NavigationSubItem prosecco =subItems.stream().filter(sub->sub.getCategoryName().equals("Prosecco")).findFirst().get();
 		subItems.forEach(subItem->logger.info(" "+subItem));
 		 assertThat(navigationItem.getCategoryName(), is(equalTo("Šumivá a šampaňské")));

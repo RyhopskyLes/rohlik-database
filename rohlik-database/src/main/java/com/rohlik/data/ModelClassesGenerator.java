@@ -1,5 +1,6 @@
 package com.rohlik.data;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -67,8 +68,7 @@ public class ModelClassesGenerator {
 		ProductMatcher matcher = new ProductMatcher();
 		AtomicInteger counter = new AtomicInteger(0);
 		
-		System.out.println(full.getProductFull(1353815));
-	productService.updateAllProductsFromRohlikInDatabase();
+//	productService.updateAllProductsFromRohlikInDatabase();
 	
 		//	catKosikService.addCategorytoCategoryKosik(95, 300105051, true);
 		//removeCategories(94, 300105046,catKosikDao, catKosikService);
@@ -130,12 +130,12 @@ public class ModelClassesGenerator {
 		 * missing.forEach(System.out::println); System.out.println(missing.size());
 		 */
 //productService.updateAllProductsFromRohlikInDatabase();
-/*String kategorie = "/napoje";	
-catKosikService.saveMainCategoryWithChildren(kategorie);
-catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+String kategorie = "/pekarna-a-cukrarna";
+//catKosikService.saveMainCategoryWithChildren(kategorie);
+//catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
-catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);*/
+catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 			
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.saveAllMissingSubcategories(category.getCategoryId()));
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.deactivateDeadSubcategories(category.getCategoryId()));

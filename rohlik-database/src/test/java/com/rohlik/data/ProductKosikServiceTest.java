@@ -71,7 +71,7 @@ public class ProductKosikServiceTest {
 			
 		log.info("saved: "+products.size()+" uniqueIdsSaved: "+uniqueIds.size()+" raw: "+raw.get().size()+" "+rawProducts.size()+" expected: "+toSave.size());
 		products.stream().filter(product->product.getProduct()!=null)
-		.forEach(product->System.out.println(product.getName()+"\t"+product.getProduct().getProductName()));
+		.forEach(product->System.out.println(product+"\n Ekvivalent: "+product.getProduct()));
 		assertEquals(products.size(), toSave.size());
 	}
 	
