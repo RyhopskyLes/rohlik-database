@@ -2,7 +2,6 @@ package com.rohlik.data;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import com.rohlik.data.commons.config.AppConfig;
 import com.rohlik.data.commons.config.DataConfig;
@@ -35,9 +34,7 @@ import com.rohlik.data.objects.RootObject;
 public class ModelClassesGenerator {
 
 	public static void main(String[] args)  {
-		LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log",
-				"org.apache.commons.logging.impl.NoOpLog");
-
+		
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.getEnvironment().setActiveProfiles("production");
 		ctx.register(AppConfig.class, DataConfig.class);
@@ -69,6 +66,8 @@ public class ModelClassesGenerator {
 		Full full = ctx.getBean(Full.class);
 		ProductMatcher matcher = new ProductMatcher();
 		AtomicInteger counter = new AtomicInteger(0);
+		
+		System.out.println(full.getProductFull(1353815));
 	//productService.updateActiveStateOfAllProducts();
 	
 		//	catKosikService.addCategorytoCategoryKosik(95, 300105051, true);
@@ -131,12 +130,12 @@ public class ModelClassesGenerator {
 		 * missing.forEach(System.out::println); System.out.println(missing.size());
 		 */
 //productService.updateAllProductsFromRohlikInDatabase();
-String kategorie = "/napoje";	
+/*String kategorie = "/napoje";	
 catKosikService.saveMainCategoryWithChildren(kategorie);
 catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
-catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);*/
 			
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.saveAllMissingSubcategories(category.getCategoryId()));
 //catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.deactivateDeadSubcategories(category.getCategoryId()));

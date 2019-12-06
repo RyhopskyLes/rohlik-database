@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.openqa.selenium.By;
+/*import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -23,7 +23,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.WebDriverWait;*/
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,8 +36,8 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 @Service("Source")
 public class Source {
-	public static long count = 0;
-	public static long countKosik = 0;
+	private long count = 0;
+	private long countKosik = 0;
 	private static Logger log = LoggerFactory.getLogger(Source.class);
 	public Source() {}
 
@@ -51,7 +51,7 @@ public class Source {
 			return processConnection(jp, request1);
 		} catch (IOException e1) {			
 		//	e1.printStackTrace();	
-		log.info("Caused by: "+e1.getCause().toString()+"\n" +e1.getCause().getMessage());
+		log.info("{}", e1);
 		
 		} 
 		 
@@ -81,7 +81,7 @@ public class Source {
 }
 	
 	
-	public Document getFilteredPage(String URI, String label) {
+/*	public Document getFilteredPage(String URI, String label) {
 	   String chromeDriverPath = "C:\\Users\\RadimP\\chromedriver.exe" ;
 	   String basicURL ="https://www.kosik.cz";
        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
@@ -148,7 +148,7 @@ public class Source {
 	         driver.quit();  
 	       
 	         return Jsoup.parse(source);	
-		}
+		}*/
 	
 	
 	private Optional<JsonObject> processConnection(JsonParser jp, HttpURLConnection con) {

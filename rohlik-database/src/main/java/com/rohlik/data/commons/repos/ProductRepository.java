@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
+
 
 import com.rohlik.data.entities.Product;
 
@@ -53,10 +53,7 @@ public List<Product> findAllEagerlyWithCategoriesAndChildren();
 		+ " LEFT JOIN FETCH p.categories category"
 		+ " WHERE category.categoryId=(:id)")
 public List<Product> findAllProductsByCategoryId(@Param("id") Integer id);
-@RestResource(path = "productnamecontains", rel = "productnamecontains")
 public Page<Product> findByProductNameIgnoreCaseContaining(@Param("name") String name, Pageable p);
-
-@RestResource(path = "premiumproducts", rel = "premiumproducts")
 @Query(
 		  value = "SELECT product.id, product.productId, product.productName, product.producer, product.originalPrice, product.price,"
 					+ "product.textualAmount, product.unit, product.baseLink, product.imgPath, product.inStock, product.hasSales, product.link, product.pricePerUnit,"
@@ -70,7 +67,6 @@ public Page<Product> findByProductNameIgnoreCaseContaining(@Param("name") String
 		  		" inner join rohlik_data.sales on rohlik_data.product_sales.id_sales=rohlik_data.sales.idSales where rohlik_data.sales.type=\"premium\";", 
 		  nativeQuery = true)
 public Page<Product> findAllPremiumProductsWithPagination(Pageable pageable);
-@RestResource(path = "incategory", rel = "incategory")
 @Query(
 		  value = "SELECT product.id, product.productId, product.productName, product.producer, product.originalPrice, product.price,"
 					+ "product.textualAmount, product.unit, product.baseLink, product.imgPath, product.inStock, product.hasSales, product.link, product.pricePerUnit,"

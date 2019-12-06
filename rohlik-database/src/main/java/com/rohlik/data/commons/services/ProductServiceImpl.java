@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -40,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Objects;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -504,10 +504,10 @@ public class ProductServiceImpl implements ProductService {
 	public void updateMainCategoryIdAndNameByAllProductsInCategory(Integer categoryId) {
 		BiFunction<List<RawProduct>, Product, Optional<Pair<Product, RawProduct>>> getEquivalentProducts = (rawproducts,
 				product) -> rawproducts.stream()
-						.filter(rawproduct -> Objects.equal(rawproduct.getProductId(), product.getProductId()))
+						.filter(rawproduct -> Objects.equals(rawproduct.getProductId(), product.getProductId()))
 						.map(rawproduct -> Pair.of(product, rawproduct)).findFirst();
 		Predicate<Pair<Product, RawProduct>> mainCategoryIdIsNotEqual = pair -> !Objects
-				.equal(pair.getLeft().getMainCategoryId(), pair.getRight().getMainCategoryId());
+				.equals(pair.getLeft().getMainCategoryId(), pair.getRight().getMainCategoryId());
 		IntFunction<String> getMainCategoryName = id -> {
 			Optional<Category> category = categoryDao.findByCategoryId(id);
 			if (!category.isPresent()) {

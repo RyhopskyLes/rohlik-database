@@ -18,6 +18,8 @@ import com.rohlik.data.objects.productparts.OriginalPrice;
 import com.rohlik.data.objects.productparts.Price;
 import com.rohlik.data.objects.productparts.PricePerUnit;
 import com.rohlik.data.objects.productparts.RecommendedPricePerUnit;
+import com.rohlik.data.objects.productparts.Sale;
+import com.rohlik.data.objects.productparts.Badge;
 
 import lombok.Data;
 
@@ -72,7 +74,7 @@ public class ProductFull {
 	@JsonProperty("goodPriceSalePercentage")
 	private Integer goodPriceSalePercentage;
 	@JsonProperty("sales")
-	private List<Object> sales = new ArrayList<>();
+	private List<Sale> sales = new ArrayList<>();
 	@JsonProperty("maxBasketAmount")
 	private Integer maxBasketAmount;
 	@JsonProperty("maxBasketAmountReason")
@@ -80,7 +82,7 @@ public class ProductFull {
 	@JsonProperty("tags")
 	private List<String> tags = new ArrayList<>();
 	@JsonProperty("badge")
-	private List<Object> badge = new ArrayList<>();
+	private List<Badge> badge = new ArrayList<>();
 	@JsonProperty("stars")
 	private Object stars;
 	@JsonProperty("country")
@@ -112,7 +114,7 @@ public class ProductFull {
 	@JsonProperty("allowedAllergens")
 	private Boolean allowedAllergens;
 	@JsonProperty("images")
-	private List<String> images = new ArrayList<String>();
+	private List<String> images = new ArrayList<>();
 	@JsonProperty("producerHtml")
 	private Object producerHtml;
 	@JsonProperty("categories")
