@@ -49,7 +49,8 @@ public class CategoryKosikOverview {
 			this.document = source.getJsoupDoc(url);
 			this.url = url;
 		}
-		return this.document.map(doc -> doc.select("div.display-block.header-navigation__subcategory__values"))
+				
+		return this.document.map(doc -> doc.select("div.js-subcategory-values"))
 				.map(element -> element.select("a"));
 	}
 
