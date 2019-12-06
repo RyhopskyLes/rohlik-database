@@ -163,6 +163,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 		setEquiIdAndDissimilarityForProductsInCategory(rohliky, products, 0.35);
 		products = reduceDuplicateEquiIds.apply(products);
 		products.forEach(setEquivalentProduct(sortedById)::accept);
+		products.stream().filter(product->product.getProduct()==null).forEach(setEquivalentEmptyProductWithKosikData()::accept);
 		return products;
 	}
 
@@ -183,8 +184,8 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 			productRohlik.setInStock(product.getInStock());
 			productRohlik.setProductName(product.getName());
 			productRohlik.setHasSales(false);
-			
-
+			getCategoriesForEmptyEquivalentProduct().apply(product).forEach(productRohlik::addCategory);
+			product.setProduct(productRohlik);
 		};
 	}
 	
