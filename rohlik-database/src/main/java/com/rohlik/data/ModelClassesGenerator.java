@@ -68,7 +68,7 @@ public class ModelClassesGenerator {
 		AtomicInteger counter = new AtomicInteger(0);
 		
 		System.out.println(full.getProductFull(1353815));
-	//productService.updateActiveStateOfAllProducts();
+	productService.updateAllProductsFromRohlikInDatabase();
 	
 		//	catKosikService.addCategorytoCategoryKosik(95, 300105051, true);
 		//removeCategories(94, 300105046,catKosikDao, catKosikService);
