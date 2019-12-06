@@ -111,7 +111,6 @@ public class CategoryKosikServiceImpl implements CategoryKosikService {
 		Set<CategoryKosik> secondLevel = mainParent.getChildren().stream().map(ChildKosik::getUri)
 				.map(catKosikDao::findByUri).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(HashSet::new));
-
 		List<CategoryKosik> result = new ArrayList<>();
 		secondLevel.stream().forEach(category -> {
 			List<CategoryKosik> temp = navigationBuilder.buildNavigationLevel().andThen(buildCategories(category))
