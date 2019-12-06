@@ -9,9 +9,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,6 +35,7 @@ import com.rohlik.data.commons.dao.ProductDao;
 import com.rohlik.data.commons.dao.ProductKosikDao;
 import com.rohlik.data.commons.objects.ProductMatcher;
 import com.rohlik.data.commons.objects.Result;
+import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.kosik.components.ProductKosikOverview;
 import com.rohlik.data.kosik.entities.CategoryKosik;
@@ -47,18 +50,25 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 	private static final String BASIC_URL = "https://www.kosik.cz";
 	@PersistenceContext
 	private EntityManager em;
-	@Autowired
 	private ProductKosikDao productKosikDao;
-	@Autowired
 	private ProductDao productDao;
-	
-	@Autowired
+	private CategoryService catService;
 	private ProductKosikOverview productKosikOverview;
-	@Autowired
 	private CategoryKosikService catKosikService;
 	@Value("${rootDirectory}")
-	public String rootDirectory;
+	private  String rootDirectory;
 	private ProductMatcher matcher;
+	
+	@Autowired
+	public ProductKosikServiceImpl(ProductKosikDao productKosikDao, ProductDao productDao, CategoryService catService,
+			ProductKosikOverview productKosikOverview, CategoryKosikService catKosikService) {
+		super();
+		this.productKosikDao = productKosikDao;
+		this.productDao = productDao;
+		this.catService = catService;
+		this.productKosikOverview = productKosikOverview;
+		this.catKosikService = catKosikService;		
+	}	
 
 	@Override
 	public void saveAllKosikProductsInCategoryToDatabase(String categoryURL) {
@@ -163,6 +173,29 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 				product.setProduct(equivalent);
 			}
 		};
+	}
+
+	private Consumer<ProductKosik> setEquivalentEmptyProductWithKosikData() {
+		return product -> {
+			Product productRohlik = new Product();
+			productRohlik.setFromRohlik(false);
+			productRohlik.setActive(product.getActive());
+			productRohlik.setInStock(product.getInStock());
+			productRohlik.setProductName(product.getName());
+			productRohlik.setHasSales(false);
+			
+
+		};
+	}
+	
+	private Function<ProductKosik, Set<Category>> getCategoriesForEmptyEquivalentProduct() {
+	return	product-> 
+		 product.getCategories().stream().map(CategoryKosik::getCategories).flatMap(Set::stream)
+				.map(category->{
+					Set<Category> temp=	catService.findParentsUpToHighestParent(category.getCategoryId()).values().stream().collect(Collectors.toCollection(HashSet::new));
+					temp.add(category);
+					return temp;
+				}).flatMap(Set::stream).collect(Collectors.toCollection(HashSet::new));			
 	}
 
 	private UnaryOperator<List<ProductKosik>> reduceDuplicateEquiIds = products -> {
