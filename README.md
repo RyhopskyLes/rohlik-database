@@ -1,5 +1,5 @@
 ## Projekt rohlik-database
-Tato aplikace shromažïuje a propojuje data z www.rohlik.cz a www.kosik.cz.
+Tato aplikace naèítá do databáze data z www.rohlik.cz a www.kosik.cz a propojuje je. Vytváøí datový základ pro webovou aplikaci umožòující provnat cenu obdobního nákupu v obou obchodech.
 Zbývá dodìlat:
 - vylepšit algoritmus pro spárování kategorií z rohlíku a košíku
 - vypracovat metody pro aktualizaci dat z  www.kosik.cz
