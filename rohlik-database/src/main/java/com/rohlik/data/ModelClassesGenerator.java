@@ -130,9 +130,9 @@ public class ModelClassesGenerator {
 		 * missing.forEach(System.out::println); System.out.println(missing.size());
 		 */
 //productService.updateAllProductsFromRohlikInDatabase();
-String kategorie = "/pekarna-a-cukrarna";
-//catKosikService.saveMainCategoryWithChildren(kategorie);
-//catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
+String kategorie = "/mlecne-a-chlazene";
+catKosikService.saveMainCategoryWithChildren(kategorie);
+catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);

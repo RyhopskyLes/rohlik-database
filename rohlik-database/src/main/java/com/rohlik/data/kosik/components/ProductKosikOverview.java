@@ -239,7 +239,6 @@ public class ProductKosikOverview {
 	}
 
 	private void setProducerFromProductDetail(ProductKosik product) {
-		log.info("Called for setting producer");
 		Optional<String> producer = getLabelFromProductDetail(product.getProductPath());
 		producer.ifPresent(product::setProducer);
 	}
