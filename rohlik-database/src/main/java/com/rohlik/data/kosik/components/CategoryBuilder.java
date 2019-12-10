@@ -96,6 +96,11 @@ public class CategoryBuilder {
 			CategoryKosik toBuild = buildCategoryFromChild(child).apply(CategoryKosik::new);
 			buildChildrenFromSubItems(navigationItem, 0.45).andThen(addChildrenToCategory(toBuild))
 					.andThen(addEquivalentCategory(child)).apply(toBuild);
+			if(toBuild.getCategories().isEmpty()) {
+				toBuild.setEquiCategoryName(parent.getEquiCategoryName());
+				toBuild.setEquiId(parent.getEquiId());
+				parent.getCategories().forEach(toBuild::addCategory);
+			}
 			return Optional.ofNullable(toBuild);
 		}
 		return Optional.empty();
@@ -217,11 +222,14 @@ public class CategoryBuilder {
 	
 	private void addEquivalentsBasedOnProductMatch(CategoryKosik category) {
 		List<Result<Category>> matchesBasedOnProducts = matcher.findMatchBasedOnProducts(category, preFilterCategoriesForMatching(category));
+		log.info("Stepped into addEquivalentsBasedOnProductMatch for {}", category);
 		Result<Category> min = matchesBasedOnProducts.isEmpty() ? new Result<>() : matchesBasedOnProducts.get(0);
 		Integer equiId = min.getEntity().orElseGet(Category::new).getCategoryId();
 		String equiCategoryName = min.getEntity().orElseGet(Category::new).getCategoryName();
 		matchesBasedOnProducts.stream().map(Result::getEntity).filter(Optional::isPresent).map(Optional::get)
 				.forEach(category::addCategory);
+		matchesBasedOnProducts.stream().map(Result::getEntity).filter(Optional::isPresent).map(Optional::get)
+		.forEach(System.out::println);
 		if (category.getEquiId() == null) {
 			category.setEquiId(equiId);
 			category.setEquiCategoryName(equiCategoryName);
