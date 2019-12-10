@@ -200,15 +200,13 @@ public class ProductKosikOverview {
 			});
 		} else {
 			getProductList(url).orElseGet(Elements::new).stream()
-					.forEach(convertToProductAndAddToList(result, null, category)::accept);
-			log.info("Url bez výrobce: {}", url);
+					.forEach(convertToProductAndAddToList(result, null, category)::accept);			
 		}
 		return result;
 	}
 
 	private Consumer<Element> convertToProductAndAddToList(List<ProductKosik> result, ProducerInfo info,
 			Optional<CategoryKosik> category) {
-		log.info("{}", info);
 		return element -> {
 			Optional<ProductKosik> temp = converter.toProductKosik(info, element);
 			temp.ifPresent(theTemp -> {
@@ -223,7 +221,6 @@ public class ProductKosikOverview {
 			boolean setProducer) {
 		return product -> {
 			addCategoryToProduct(product, category);
-			log.info("{}", setProducer);
 			if (setProducer)
 				setProducerFromProductDetail(product);
 		};
