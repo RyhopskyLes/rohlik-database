@@ -72,7 +72,7 @@ public class CategoryBuilder {
 		mainCategory.set(mainCategory::setUri, categoryURI)
 		.set(mainCategory::setActive, true)
 		.set(mainCategory::setCategoryName,
-				review.getCurrentMainCategoryName(BASIC_URL + categoryURI).orElse(null));
+				review.getCurrentMainCategoryName(BASIC_URL + categoryURI).orElseGet(()->null));
 		setCategoryPropertiesFromMatch(main, 0.45).apply(mainCategory);
 		return mainCategory.set(mainCategory::setParentName, "root").set(mainCategory::setParentUri, "");
 	}
