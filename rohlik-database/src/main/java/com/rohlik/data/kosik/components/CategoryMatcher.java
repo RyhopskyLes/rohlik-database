@@ -7,6 +7,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -69,35 +70,18 @@ public class CategoryMatcher {
 			}
 		}
 
-matches.stream().forEach(System.out::println);		
+	
  List<WeightedDissimilar<Category>>	filtered = matches.stream().filter(dis -> dis.getDissimilarity() < 1.0)
 			.filter(dis -> dis.getRelativeFrequency() > 0.1 )
 			.filter(dis -> dis.getRelativeSize() > 0.1 && dis.getRelativeSize() < 3.0).collect(Collectors.toList());
  List<Double> dissimilarity =filtered.stream().map(WeightedDissimilar<Category>::getDissimilarity).collect(Collectors.toList());
  List<Double> frequency =filtered.stream().map(WeightedDissimilar<Category>::getRelativeFrequency).collect(Collectors.toList());
- List<Double> relSize =filtered.stream().map(WeightedDissimilar<Category>::getRelativeSize).collect(Collectors.toList());
-matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimilarity))
-.filter(dis -> dis.getRelativeFrequency() >=getSumStat.apply(frequency).getMin())
-.filter(dis -> /*dis.getRelativeSize() > getMedian.apply(relSize) &&*/ dis.getRelativeSize() < 3.0)
-.sorted(Comparator.comparing(WeightedDissimilar<Category>::getRelativeSize,
-		Comparator.reverseOrder()))
-.forEach(x->System.out.println(x.getEntity().getCategoryName()+" "+x.getDissimilarity()+" "+x.getRelativeFrequency()+" "+x.getRelativeSize()));
-		System.out.println("Relative Frequency odchylka: " + Math.sqrt(getVariance.apply(frequency))+" average "+getSumStat.apply(frequency).getAverage()+" median "+getMedian.apply(frequency)+ " max "+getSumStat.apply(frequency).getMax()+ " min "+getSumStat.apply(frequency).getMin());
-		System.out.println("Dissimilarity odchylka: " + Math.sqrt(getVariance.apply(dissimilarity))+" average "+getSumStat.apply(dissimilarity).getAverage()+" median "+getMedian.apply(dissimilarity)+ " max "+getSumStat.apply(dissimilarity).getMax()+ " min "+getSumStat.apply(dissimilarity).getMin());
-		System.out.println("Relative Size odchylka: " + Math.sqrt(getVariance.apply(relSize))+" average "+getSumStat.apply(relSize).getAverage()+" median "+getMedian.apply(relSize)+ " max "+getSumStat.apply(relSize).getMax()+ " min "+getSumStat.apply(relSize).getMin());
-		matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimilarity))
-		.filter(dis -> dis.getRelativeFrequency() >=getSumStat.apply(frequency).getMin())
-		.filter(dis -> /*dis.getRelativeSize() > getMedian.apply(relSize) &&*/ dis.getRelativeSize() < 3.0)
-				.sorted(Comparator.comparing(WeightedDissimilar<Category>::getRelativeSize,
-						Comparator.reverseOrder()))
-				.map(dis -> new Result<Category>(dis)).collect(Collectors.toCollection(ArrayList::new))
-				.forEach(System.out::println);
-		return matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimilarity))
+ 				return matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.applyAsDouble(dissimilarity))
 				.filter(dis -> dis.getRelativeFrequency() >=getSumStat.apply(frequency).getMin())
 				.filter(dis -> dis.getRelativeSize() > 0.1 && dis.getRelativeSize() < 3.0)
 				.sorted(Comparator.comparing(WeightedDissimilar<Category>::getRelativeSize,
 						Comparator.reverseOrder()))
-				.map(dis -> new Result<Category>(dis)).limit(2).collect(Collectors.toCollection(ArrayList::new));
+				.map(Result<Category>::new).limit(2).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	public List<Result<Category>> preMatchBasedOnProducts(CategoryKosik kosik, List<Category> rohliky) {
@@ -119,21 +103,24 @@ matches.stream().filter(dis -> dis.getDissimilarity() <= getMedian.apply(dissimi
 				matches.add(new WeightedDissimilar<Category>(rohlik, dissimilarity, relativeFrequency, relativeSize));
 			}
 		}
-		return matches.stream().filter(dis -> dis.getDissimilarity() < 1.0).map(dis -> new Result<Category>(dis))
+		return matches.stream().filter(dis -> dis.getDissimilarity() < 1.0).map(Result<Category>::new)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	Function<List<Double>, DoubleSummaryStatistics> getSumStat = matches -> matches.stream()
+private	Function<List<Double>, DoubleSummaryStatistics> getSumStat = matches -> matches.stream()
 			.mapToDouble(Double::doubleValue).summaryStatistics();
 
-	Function<List<Double>, Double> getVariance = matches -> getSumForVariance(getSumStat.apply(matches)).apply(matches)
+private ToDoubleFunction<List<Double>> getVariance = matches -> getSumForVariance(getSumStat.apply(matches)).apply(matches)
 			/ getSumStat.apply(matches).getCount();
 
-	Function<List<Double>, Double> getSumForVariance(DoubleSummaryStatistics sumStat) {
+	private Function<List<Double>, Double> getSumForVariance(DoubleSummaryStatistics sumStat) {
 		return matches -> matches.stream().map(dis -> dis - sumStat.getAverage()).map(res -> res * res)
 				.mapToDouble(Double::doubleValue).sum();
 	}
-Function<List<Double>, Double> getMedian = list -> list.size()%2 == 0?
-	 list.size()>1 ?   list.stream().sorted().skip(list.size()/2-1).limit(2).mapToDouble(Double::doubleValue).average().getAsDouble(): list.stream().findFirst().orElseGet(()->0.0) :        
-	        list.stream().sorted().skip(list.size()/2).mapToDouble(Double::doubleValue).findFirst().getAsDouble();
+private ToDoubleFunction<List<Double>> getMedian = list -> {
+if(list.size()%2 != 0)	return  list.stream().sorted().skip(list.size()/2).mapToDouble(Double::doubleValue).findFirst().getAsDouble();
+return list.size()>1 ?  list.stream().sorted().skip(list.size()/2-1L).limit(2).mapToDouble(Double::doubleValue).average().getAsDouble(): list.stream().findFirst().orElseGet(()->0.0); 
+};
 }
+
+	
