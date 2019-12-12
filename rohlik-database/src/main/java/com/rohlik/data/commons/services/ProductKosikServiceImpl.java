@@ -48,6 +48,7 @@ import com.rohlik.data.kosik.entities.ProductKosik;
 public class ProductKosikServiceImpl implements ProductKosikService {
 	private static Logger log = LoggerFactory.getLogger(ProductKosikServiceImpl.class);
 	private static final String BASIC_URL = "https://www.kosik.cz";
+	private static final String IMAGE_URL = "https://static.kosik.cz";
 	@PersistenceContext
 	private EntityManager em;
 	private ProductKosikDao productKosikDao;
@@ -115,7 +116,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 		int index = url.lastIndexOf('/');
 		String urlwithoutFile = url.substring(0, index) + "/";
 		String fileName = url.substring(index + 1, url.length());
-		String pathToFile = urlwithoutFile.replace("https://static.kosik.cz", "");
+		String pathToFile = urlwithoutFile.replace(IMAGE_URL, "");
 		String[] pathParts = new String[] { url, pathToFile, fileName };
 		try {
 			URL imgURL = new URL(url);
@@ -146,7 +147,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 	}
 
 	private boolean existFile(String url) {
-		String pathToFile = url.replace("https://static.kosik.cz", this.rootDirectory);
+		String pathToFile = url.replace(IMAGE_URL, this.rootDirectory);
 		return new File(pathToFile).isFile();
 	}
 
