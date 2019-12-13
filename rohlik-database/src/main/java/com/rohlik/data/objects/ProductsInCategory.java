@@ -19,10 +19,10 @@ import com.rohlik.data.entities.Product;
 @Component("ProductsInCategory")
 public class ProductsInCategory {
 	private RootObject rootObject;
- private final String PRODUCT_LIST = "productList";
- private final String DATA = "data";
- private final String PRODUCT_ID = "productId";
- private final String TOTAL_HITS = "totalHits";
+ private static final String PRODUCT_LIST = "productList";
+ private static final String DATA = "data";
+ private static final String PRODUCT_ID = "productId";
+ private static final String TOTAL_HITS = "totalHits";
 	@Autowired
 	public ProductsInCategory(RootObject rootObject) {
 		this.rootObject=rootObject;
