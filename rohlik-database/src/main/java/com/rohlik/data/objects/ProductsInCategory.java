@@ -19,7 +19,10 @@ import com.rohlik.data.entities.Product;
 @Component("ProductsInCategory")
 public class ProductsInCategory {
 	private RootObject rootObject;
-
+ private final String PRODUCT_LIST = "productList";
+ private final String DATA = "data";
+ private final String PRODUCT_ID = "productId";
+ private final String TOTAL_HITS = "totalHits";
 	@Autowired
 	public ProductsInCategory(RootObject rootObject) {
 		this.rootObject=rootObject;
@@ -29,7 +32,7 @@ public class ProductsInCategory {
 		Gson gson = new Gson();
 		List<RawProduct> products = new ArrayList<>();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
-		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);
@@ -43,7 +46,7 @@ public class ProductsInCategory {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
-		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);			
@@ -57,7 +60,7 @@ public class ProductsInCategory {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
-		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);			
@@ -68,18 +71,18 @@ public class ProductsInCategory {
 	
 	public Optional<JsonArray> getProductListJsonArrayForCategory(Integer categoryId, Integer limitResults) {
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
-		return data.map(theData -> theData.getAsJsonArray("productList"));
+		return data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 	}
 
 	public List<Integer> getProductIdsForCategory(Integer categoryId, Integer limitResults) {
 		List<Integer> products = new ArrayList<>();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
-		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).map(Optional::ofNullable).forEach(productElement -> {
 			Integer productId = productElement.map(JsonElement::getAsJsonObject)
-					.map(object -> object.get("productId")).map(JsonElement::getAsInt).orElse(null);
+					.map(object -> object.get(PRODUCT_ID)).map(JsonElement::getAsInt).orElse(null);
 			if(productId!=null) products.add(productId);
 		});
 		return products;
@@ -87,13 +90,13 @@ public class ProductsInCategory {
 	
 	private Optional<JsonObject> getJsonDataObject(Integer categoryId, Integer limitResults) {
 		return Objects.equals(rootObject.getCategoryId(), categoryId)&&Objects.equals(rootObject.getLimitResults(), limitResults)
-				&& Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.CATEGORYDATA) ? rootObject.getJsonObject().map(object -> object.getAsJsonObject("data"))
-				:rootObject.dataForCategory(categoryId, limitResults).map(object -> object.getAsJsonObject("data"));
+				&& Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.CATEGORYDATA) ? rootObject.getJsonObject().map(object -> object.getAsJsonObject(DATA))
+				:rootObject.dataForCategory(categoryId, limitResults).map(object -> object.getAsJsonObject(DATA));
 	}
 	
 	public Optional<String> getTotalHitsForCategory(Integer number) {
 		return rootObject.dataForCategory(number, 25)
-				.map(object -> object.getAsJsonObject("data").get("totalHits").getAsString());
+				.map(object -> object.getAsJsonObject(DATA).get(TOTAL_HITS).getAsString());
 	}
 
 }
