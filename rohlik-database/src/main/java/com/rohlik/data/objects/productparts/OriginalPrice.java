@@ -18,12 +18,12 @@ import lombok.Data;
 public class OriginalPrice {
 
     @JsonProperty("full")
-    public Integer full;
+    private Integer full;
     @JsonProperty("whole")
-    public Integer whole;
+    private Integer whole;
     @JsonProperty("fraction")
-    public Integer fraction;
+    private Integer fraction;
     @JsonProperty("currency")
-    public String currency;
+    private String currency;
 
 }
