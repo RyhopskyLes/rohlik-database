@@ -478,7 +478,7 @@ public class ProductServiceImpl implements ProductService {
 			pair.getLeft().setMainCategoryName(getMainCategoryName.apply(mainCategoryId));
 		};
 
-		List<RawProduct> rawProducts = productsInCategory.getProductListForCategory(categoryId, 3000);
+		List<RawProduct> rawProducts = productsInCategory.getRawProductListForCategory(categoryId, 3000);
 		List<Product> active = productDao.findAllProductsByCategoryId(categoryId).stream().filter(Product::isFromRohlik)
 				.filter(Product::getActive).collect(Collectors.toCollection(ArrayList::new));
 		active.stream().map(product -> getEquivalentProducts.apply(rawProducts, product)).filter(Optional::isPresent)
@@ -493,7 +493,7 @@ public class ProductServiceImpl implements ProductService {
 				.map(categoryId -> productsInCategory.getProductIdsForCategory(categoryId, 3000)).flatMap(List::stream)
 				.collect(Collectors.toCollection(HashSet::new));
 		Set<RawProduct> activeRaw = mainCategories.stream().map(Category::getCategoryId)
-				.map(categoryId -> productsInCategory.getProductListForCategory(categoryId, 3000)).flatMap(List::stream)
+				.map(categoryId -> productsInCategory.getRawProductListForCategory(categoryId, 3000)).flatMap(List::stream)
 				.collect(Collectors.toCollection(HashSet::new));
 		Set<Product> allProducts = mainCategories.stream().map(Category::getCategoryId)
 				.map(productDao::findAllProductsByCategoryId).flatMap(List::stream).filter(Product::isFromRohlik)

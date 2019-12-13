@@ -24,7 +24,7 @@ public class ProductsInCategory {
 		this.rootObject=rootObject;
 	}
 
-	public List<RawProduct> getProductListForCategory(Integer categoryId, Integer limitResults) {
+	public List<RawProduct> getRawProductListForCategory(Integer categoryId, Integer limitResults) {
 		Gson gson = new Gson();
 		List<RawProduct> products = new ArrayList<>();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
