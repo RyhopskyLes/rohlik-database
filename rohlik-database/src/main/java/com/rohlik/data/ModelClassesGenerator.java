@@ -20,6 +20,7 @@ import com.rohlik.data.commons.services.ProductService;
 import com.rohlik.data.commons.utilities.DataRohlik;
 import com.rohlik.data.commons.utilities.Source;
 import com.rohlik.data.entities.Category;
+import com.rohlik.data.entities.Product;
 import com.rohlik.data.kosik.components.CategoryMatcher;
 import com.rohlik.data.kosik.components.ProductKosikOverview;
 import com.rohlik.data.kosik.entities.CategoryKosik;
@@ -30,6 +31,7 @@ import com.rohlik.data.objects.Full;
 import com.rohlik.data.objects.NavSections;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.ProductsInCategory;
+import com.rohlik.data.objects.RawProduct;
 import com.rohlik.data.objects.RootObject;
 
 public class ModelClassesGenerator {
@@ -68,87 +70,27 @@ public class ModelClassesGenerator {
 		ProductMatcher matcher = new ProductMatcher();
 		AtomicInteger counter = new AtomicInteger(0);
 		
-//	productService.updateAllProductsFromRohlikInDatabase();
-	
-		//	catKosikService.addCategorytoCategoryKosik(95, 300105051, true);
-		//removeCategories(94, 300105046,catKosikDao, catKosikService);
-		//catKosikDao.findByIdWithCategories(95).get().getCategories().forEach(System.out::println);
-		
-		//catKosikService.addCategorytoCategoryKosik(idCategoryKosik, categoryIdCategoryRohlik, setParameters);
-	//catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI("/mlecne-a-chlazene");
-						
-	//	catKosikService.addCategorytoCategoryKosik(58, 300101016, true);
-	//	catKosikDao.findByIdWithCategories(58).get().getCategories().forEach(System.out::println);
-				
-//System.out.println("sumitKumarChaurasia".replaceAll("(.)([A-Z])", "$1_$2").toLowerCase());
-		/*
-		 * List<Result<Category>> result
-		 * =catmatcher.findMatchBasedOnProducts(catKosikDao.findByIdWithCategories(17).
-		 * get(), catDao.findAllWithCategoriesKosikAndProducts());
-		 * result.stream().forEach(x->x.getClass());
-		 */
-		/*
-		 * Set<CategoryKosik> lowest =
-		 * catKosikService.getLowestLevelCategoriesInTreeOf("/napoje/vina/bila");
-		 * List<ProductKosik> products = lowest.stream().map(CategoryKosik::getUri)
-		 * .map(uri->productKosikOverview.
-		 * getProductKosikListForcategoryGroupedByProducers("https://www.kosik.cz"+uri))
-		 * .flatMap(List::stream) .collect(Collectors.toCollection(ArrayList::new));
-		 * System.out.println(products.size()); products.forEach(System.out::println);
-		 * List<Product> rohliky = productDao.findAll(); products.forEach(product->{
-		 * Optional<Product> ekvi = matcher.findMatchCosine(product,
-		 * rohliky).getEntityForLimit(0.38); Optional<Product> ekvi2 =
-		 * matcher.findMatchSorensen(product, rohliky).getEntityForLimit(0.33);
-		 * Optional<Product> ekvi3 = matcher.findMatchJaccard(product,
-		 * rohliky).getEntityForLimit(0.45); Optional<Product> ekvi4 =
-		 * matcher.findMatchNGramm(product, rohliky).getEntityForLimit(0.35);
-		 * if(ekvi.isPresent() || ekvi2.isPresent() || ekvi3.isPresent() ||
-		 * ekvi4.isPresent()) { counter.getAndIncrement();
-		 * System.out.println(product.getName()); System.out.println(ekvi.orElse(new
-		 * Product()).getProductName()); System.out.println(ekvi2.orElse(new
-		 * Product()).getProductName()); System.out.println(ekvi3.orElse(new
-		 * Product()).getProductName()); System.out.println(ekvi4.orElse(new
-		 * Product()).getProductName()); System.out.println(counter.get());
-		 * System.out.println("---------------------------------------");}});
-		 */
-
-//review.allLinksAndNamesOnFirstLevel("https://www.kosik.cz/napoje/vina/cervena").entrySet().forEach(System.out::println);
-		/*
-		 * StreamSupport.stream(subcategories.spliterator(),
-		 * false).forEach(System.out::println); String levels=
-		 * "https://www.kosik.cz/napoje";
-		 * System.out.println(levels.replace("https://www.kosik.cz",
-		 * "").split("/").length);
-		 */
-		// System.out.println(scrap.rootObject("https://www.kosik.cz/pekarna-a-cukrarna?brands[0]=1087"));
-
-		/*
-		 * List<CategoryKosik> allCategories = catKosikDao.findAllWithChildren();
-		 * List<ChildKosik> missing = allCategories.stream().map(CategoryKosik::getUri)
-		 * .map(catKosikService::buildMissingChildrenOfCategory)
-		 * .flatMap(list->list.stream()) .collect(Collectors.toList());
-		 * missing.forEach(System.out::println); System.out.println(missing.size());
-		 */
+List<Product> chleb =prInCa.getProductListForCategory(300116465, 20);
+chleb.forEach(pr->System.out.println(pr+"\n"+pr.getSales()));
 //productService.updateAllProductsFromRohlikInDatabase();
-String kategorie = "/mlecne-a-chlazene";
+		//catService.updateActiveStateByAllChildren();
+		//catService.saveAllMissingSubcategories(300112985);	
+		//catService.deactivateDeadSubcategories(300112985);
+
+//productService.updateActiveStateOfAllProducts();
+//catDao.findAllWithCategoriesKosikAndProducts().forEach(category-> productService.updateMainCategoryIdAndNameByAllProductsInCategory(category.getCategoryId()));
+		//productService.updateMainCategoryIdAndNameByAllProductsInCategory(300106000);
+		//productService.updateActiveStateOfProductsInCategory(300109082);
+	
+/*String kategorie = "/uzeniny-a-lahudky";
 catKosikService.saveMainCategoryWithChildren(kategorie);
 catKosikService.saveSecondLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveThirdLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 catKosikService.saveFourthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
-catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
-			
-//catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.saveAllMissingSubcategories(category.getCategoryId()));
-//catDao.findAll().stream().filter(category->category.getActive()).forEach(category->catService.deactivateDeadSubcategories(category.getCategoryId()));
-//catService.updateActiveStateByAllChildren();
-//catService.saveAllMissingSubcategories(300112985);	
-//catService.deactivateDeadSubcategories(300112985);
-//prInCa.getProductIdsForCategory(300116467, 20).stream().forEach(System.out::println);
-//prInCa.getProductListForCategory(300116467, 20).stream().forEach(System.out::println);  
-//catService.addMissingProductsToCategory(300101000);
-//productService.updateAllProductsFromRohlikInDatabase();
+catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);*/
+		
 
-//productService.updateMainCategoryIdAndNameByAllProductsInCategory(300106000);
-//productService.updateActiveStateOfProductsInCategory(300109082);
+
 
 		/*
 		 * int initial; int initialChildren; try { List<Category> categories =
@@ -181,20 +123,7 @@ catKosikService.saveFifthLevelCategoriesWithChildrenBuiltFromURI(kategorie);
 		 * catch (ClassNotFoundException e) { // TODO Auto-generated catch block
 		 * e.printStackTrace(); }
 		 * 
-		 * String
-		 * categoryURL="https://www.kosik.cz/mlecne-a-chlazene?do=productList-load"; /*
-		 * Optional<CategoryKosik> racio =
-		 * catKosikDao.findByCategoryNameWithChildren("Racio a Knäckebrot");
-		 * System.out.println(racio);
-		 * racio.get().getChildren().forEach(System.out::println); ChildKosik child =
-		 * new ChildKosik(); child.setCategoryName("Pufované");
-		 * child.setEquiCategoryName("Sladké pufované pečivo");
-		 * child.setEquiId(300101048);
-		 * 
-		 * racio.get().addChildKosik(child); catKosikDao.save(racio.get()); racio =
-		 * catKosikDao.findByCategoryNameWithChildren("Racio a Knäckebrot");
-		 * System.out.println(racio);
-		 * racio.get().getChildren().forEach(System.out::println);
+		 
 		 */
 		// DataKosik.mainCategoriesLinks().stream().forEach(link->catKosikService.saveSecondLevelCategoriesWithChildren("https://www.kosik.cz"+link));
 ctx.close();
