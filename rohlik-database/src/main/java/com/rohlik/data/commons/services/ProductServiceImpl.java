@@ -74,38 +74,41 @@ public class ProductServiceImpl implements ProductService {
 	public static final String ROHLIK_IMAGES_START = "https://images.rohlik.cz";
 	@PersistenceContext
 	private EntityManager em;
-	@Autowired
+	
 	private ProductDao productDao;
-	@Autowired
-	private ProductKosikDao kosikDao;
-	@Autowired
 	private CategoryDao categoryDao;
-	@Autowired
 	private CategoryService categoryService;
-	@Autowired
 	private Source source;
-	@Autowired
 	private DataRohlik dataRohlik;
-	@Autowired
-	private SalesService salesService;
-	@Autowired
 	private Filters filters;
-	@Autowired
 	private RootObject rootObject;
-	@Autowired
 	private ProductsInCategory productsInCategory;
-	@Autowired
 	private Navigation navigation;
-	@Autowired
 	private Full full;
+	
 	private static Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 	private long countUpdated = 0;
 	private long countSaved = 0;
 
-	public ProductServiceImpl() {
-		//no args constr for dependency injection
+	@Autowired
+	public ProductServiceImpl(ProductDao productDao, CategoryDao categoryDao,
+			CategoryService categoryService, Source source, DataRohlik dataRohlik, 
+			Filters filters, RootObject rootObject, ProductsInCategory productsInCategory, Navigation navigation,
+			Full full) {
+		super();
+		this.productDao = productDao;
+		this.categoryDao = categoryDao;
+		this.categoryService = categoryService;
+		this.source = source;
+		this.dataRohlik = dataRohlik;
+		this.filters = filters;
+		this.rootObject = rootObject;
+		this.productsInCategory = productsInCategory;
+		this.navigation = navigation;
+		this.full = full;
 	}
 
+	
 	@Override
 	public void deletAllDataFromALLTables() {
 		StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("deleteAllData");
@@ -510,11 +513,12 @@ public class ProductServiceImpl implements ProductService {
 				.equals(pair.getLeft().getMainCategoryId(), pair.getRight().getMainCategoryId());
 		IntFunction<String> getMainCategoryName = id -> {
 			Optional<Category> category = categoryDao.findByCategoryId(id);
+			log.info("{} Befor if {}", id, category);
 			if (!category.isPresent()) {
 				categoryService.addMissingChildToParent(id);
 				category = categoryDao.findByCategoryId(id);
-			}
-			return category.get().getCategoryName();
+							}
+			return category.orElseGet(Category::new).getCategoryName();
 		};
 		Consumer<Pair<Product, RawProduct>> updateMainCategoryIdAndName = pair -> {
 			Integer mainCategoryId = pair.getRight().getMainCategoryId();
