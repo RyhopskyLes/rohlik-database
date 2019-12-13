@@ -186,6 +186,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 			productRohlik.setProductName(product.getName());
 			productRohlik.setHasSales(false);
 			productRohlik.setProducer(product.getProducer());
+			productRohlik.setImgPath(getImageSrc(product).replace(IMAGE_URL, ""));
 			getCategoriesForEmptyEquivalentProduct().apply(product).forEach(productRohlik::addCategory);
 			product.setProduct(productRohlik);
 		};
