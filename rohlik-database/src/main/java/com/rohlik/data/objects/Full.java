@@ -26,7 +26,7 @@ public class Full {
 	public ProductFull getProductFull(Integer productId) {
 		Optional<JsonObject> product = rootObject.dataForProduct(productId).map(obj -> obj.getAsJsonObject("data"))
 				.map(data -> data.get("product")).map(JsonElement::getAsJsonObject);
-		return gson.fromJson(product.orElse(new JsonObject()), ProductFull.class);		
+		return gson.fromJson(product.orElseGet(JsonObject::new), ProductFull.class);		
 	}
 
 	
