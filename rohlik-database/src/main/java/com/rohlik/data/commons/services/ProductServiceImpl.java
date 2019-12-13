@@ -78,10 +78,8 @@ public class ProductServiceImpl implements ProductService {
 	private ProductDao productDao;
 	private CategoryDao categoryDao;
 	private CategoryService categoryService;
-	private Source source;
 	private DataRohlik dataRohlik;
 	private Filters filters;
-	private RootObject rootObject;
 	private ProductsInCategory productsInCategory;
 	private Navigation navigation;
 	private Full full;
@@ -92,17 +90,15 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	public ProductServiceImpl(ProductDao productDao, CategoryDao categoryDao,
-			CategoryService categoryService, Source source, DataRohlik dataRohlik, 
-			Filters filters, RootObject rootObject, ProductsInCategory productsInCategory, Navigation navigation,
+			CategoryService categoryService, DataRohlik dataRohlik, 
+			Filters filters, ProductsInCategory productsInCategory, Navigation navigation,
 			Full full) {
 		super();
 		this.productDao = productDao;
 		this.categoryDao = categoryDao;
 		this.categoryService = categoryService;
-		this.source = source;
 		this.dataRohlik = dataRohlik;
 		this.filters = filters;
-		this.rootObject = rootObject;
 		this.productsInCategory = productsInCategory;
 		this.navigation = navigation;
 		this.full = full;
@@ -125,10 +121,8 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void saveAllProductsInCategoryToDatabase(Integer categoryId, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		String categoryURL = createCategoryURL(categoryId);
 		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
-		Optional<JsonObject> data = source.rootObject(categoryURL).map(object -> object.getAsJsonObject("data"));
-		Optional<JsonArray> productList = data.map(object -> object.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(categoryId, 3000);
 		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		if (productList.isPresent()) {
 			for (JsonElement listElement : productList.get()) {
@@ -231,10 +225,8 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void updateAllProductsInCategoryInDatabase(Integer number, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		String categoryURL = createCategoryURL(number);
 		Map<String, Set<Integer>> producers = producersWithProductsForCategory(number);
-		Optional<JsonObject> data = source.rootObject(categoryURL).map(object -> object.getAsJsonObject("data"));
-		Optional<JsonArray> productList = data.map(object -> object.getAsJsonArray("productList"));
+		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(number, 3000);
 		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		if (productList.isPresent()) {
 			for (JsonElement listElement : productList.get()) {
@@ -405,60 +397,20 @@ public class ProductServiceImpl implements ProductService {
 	public void deleteRemovedProductsFromDatabase() {
 		// TODO Auto-generated method stub
 
-	}
-
-
-
-	
+	}	
 
 	@Override
 	public Integer addMissingImgPathToProducts() {
-		Function<Product, Optional<JsonElement>> getImgPath = prod -> rootObject.dataForProduct(prod.getProductId())
-				.map(object -> object.getAsJsonObject("data")).map(data -> data.getAsJsonObject("product"))
-				.map(product -> product.get("imgPath"));
+		Function<Product, String> getImgPath = prod -> full.getProductFull(prod.getProductId()).getImgPath();
 
+		
 		List<Product> products = productDao.findAllWithoutImgPath();
 		products.stream().filter(Product::isFromRohlik).forEach(product -> 
-		getImgPath.apply(product).ifPresent(imgPath -> {
-				if (!imgPath.isJsonNull())
-					product.setImgPath(imgPath.getAsString());
-			})			
-		);
+		product.setImgPath(getImgPath.apply(product)));
 		return products.size();
 	}
 
-	// @Override
-	public Integer oldaddMissingMainCategoryNameToProducts() {
-		Function<Product, Optional<Category>> getMainCategory = product -> categoryDao
-				.findByCategoryId(product.getMainCategoryId());
-
-		Function<Product, Optional<JsonArray>> getCategories = prod -> rootObject.dataForProduct(prod.getProductId())
-				.map(object -> object.getAsJsonObject("data")).map(data -> data.getAsJsonObject("product"))
-				.map(product -> product.getAsJsonArray("categories"));
-
-		Consumer<Product> setMainCategoryName = product -> {
-			Optional<Category> mainCategory = getMainCategory.apply(product);
-			if (mainCategory.isPresent()) {
-				product.setMainCategoryName(mainCategory.get().getCategoryName());
-			} else {
-				Optional<JsonArray> categories = getCategories.apply(product);
-				if (categories.isPresent()) {
-					String name = categories.get().get(0).getAsJsonObject().get("name").getAsString();
-					product.setMainCategoryName(name);
-					Integer id = categories.get().get(0).getAsJsonObject().get("id").getAsInt();
-					product.setMainCategoryId(id);
-				}
-			}
-		};
-
-		List<Product> products = productDao.findAllWithoutMainCategoryName();
-		products.stream().filter(Product::isFromRohlik).forEach(setMainCategoryName::accept);
-
-		products = productDao.findAllWithoutMainCategoryName();
-		products.stream().filter(Product::isFromRohlik).forEach(product -> log.info("{}", product));
-		return products.size();
-	}
-
+	
 	@Override
 	public Integer addMissingMainCategoryNameToProducts() {
 		Function<Product, Optional<Category>> getCategory = prod -> full.getProductFull(prod.getProductId())
