@@ -62,7 +62,6 @@ public class Sale {
 		sale.setOriginalPrice(this.getFullOriginalPrice());
 		sale.setPrice(getFullPrice());
 		sale.setPricePerUnit(this.getFullPriceForUnit());
-		sale.setId(this.getId());
 		sale.setPromoted(this.getPromoted());
 		return sale;
 	}
