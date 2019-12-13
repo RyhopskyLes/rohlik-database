@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.rohlik.data.entities.Product;
 
 @Component("ProductsInCategory")
 public class ProductsInCategory {
@@ -35,6 +36,33 @@ public class ProductsInCategory {
 			products.add(converted);
 		});
 
+		return products;
+	}
+	
+	public List<Product> getProductListForCategory(Integer categoryId, Integer limitResults) {
+		Gson gson = new Gson();
+		List<Product> products = new ArrayList<>();
+		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
+		StreamSupport.stream(elements, false).forEach(product -> {
+			RawProduct converted = gson.fromJson(product, RawProduct.class);			
+			products.add(converted.toProduct());
+		});
+
+		return products;
+	}
+	
+	public List<Product> getProductListForCategoryWithSales(Integer categoryId, Integer limitResults) {
+		Gson gson = new Gson();
+		List<Product> products = new ArrayList<>();
+		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray("productList"));
+		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
+		StreamSupport.stream(elements, false).forEach(product -> {
+			RawProduct converted = gson.fromJson(product, RawProduct.class);			
+			products.add(converted.toProductWithSales());
+		});
 		return products;
 	}
 	
