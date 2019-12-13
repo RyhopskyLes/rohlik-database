@@ -37,6 +37,11 @@ public class ProductsInCategory {
 
 		return products;
 	}
+	
+	public Optional<JsonArray> getProductListJsonArrayForCategory(Integer categoryId, Integer limitResults) {
+		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
+		return data.map(theData -> theData.getAsJsonArray("productList"));
+	}
 
 	public List<Integer> getProductIdsForCategory(Integer categoryId, Integer limitResults) {
 		List<Integer> products = new ArrayList<>();
