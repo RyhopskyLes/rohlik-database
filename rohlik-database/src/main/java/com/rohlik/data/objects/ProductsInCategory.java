@@ -95,6 +95,22 @@ public class ProductsInCategory {
 		return products;
 	}
 
+	public List<Product> getProductListForCategoryWithSalesAndProducers(Integer categoryId, Integer limitResults) {
+		Gson gson = new Gson();
+		List<Product> products = new ArrayList<>();
+		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
+		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
+		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
+		StreamSupport.stream(elements, false).forEach(product -> {
+			RawProduct converted = gson.fromJson(product, RawProduct.class);
+			Product productConverted = converted.toProductWithSales();
+			setProducerName(productConverted, producers);
+			products.add(productConverted);			
+		});
+		return products;
+	}
+	
 	public Optional<JsonArray> getProductListJsonArrayForCategory(Integer categoryId, Integer limitResults) {
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		return data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
