@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.stream.StreamSupport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,7 @@ public class ProductsInCategory {
 	private static final String DATA = "data";
 	private static final String PRODUCT_ID = "productId";
 	private static final String TOTAL_HITS = "totalHits";
+	private static Logger log = LoggerFactory.getLogger(ProductsInCategory.class);
 
 	@Autowired
 	public ProductsInCategory(RootObject rootObject, Filters filters, Navigation navigation) {
@@ -124,7 +127,7 @@ public class ProductsInCategory {
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).map(Optional::ofNullable).forEach(productElement -> {
 			Integer productId = productElement.map(JsonElement::getAsJsonObject).map(object -> object.get(PRODUCT_ID))
-					.map(JsonElement::getAsInt).orElse(null);
+					.map(JsonElement::getAsInt).orElseGet(()->null);
 			if (productId != null)
 				products.add(productId);
 		});
@@ -140,6 +143,15 @@ public class ProductsInCategory {
 								.map(object -> object.getAsJsonObject(DATA));
 	}
 
+	private Optional<JsonObject> getJsonDataObjectForCategoryAndProducer(Integer categoryId, String slug) {
+		return Objects.equals(rootObject.getCategoryId(), categoryId)
+				&& Objects.equals(rootObject.getSlug(), slug)
+				&& Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.PRODUCER)
+						? rootObject.getJsonObject().map(object -> object.getAsJsonObject(DATA))
+						: rootObject.dataForCategoryAndProducer(categoryId, slug)
+						.map(object -> object.getAsJsonObject(DATA));
+	}
+	
 	public Optional<String> getTotalHitsForCategory(Integer categoryId) {
 		return rootObject.dataForCategory(categoryId, 25)
 				.map(object -> object.getAsJsonObject(DATA).get(TOTAL_HITS).getAsString());
@@ -154,8 +166,7 @@ public class ProductsInCategory {
 		Map<String, Set<Integer>> productMap = new HashMap<>();
 		String producer = "";
 		for (SlugAndName slugAndName : slugsAndNames) {
-			Optional<JsonObject> data = rootObject.dataForCategoryAndProducer(categoryId, slugAndName.getSlug())
-					.map(object -> object.getAsJsonObject(DATA));
+			Optional<JsonObject> data =getJsonDataObjectForCategoryAndProducer(categoryId, slugAndName.getSlug());
 			Optional<JsonArray> productList = data.map(object -> object.get(PRODUCT_LIST).getAsJsonArray());
 			producer = slugAndName.getName();
 			if (productList.isPresent()) {
@@ -176,7 +187,6 @@ public class ProductsInCategory {
 		product.setProducer("");
 		producers.entrySet().stream().filter(entry -> entry.getValue().contains(productId))
 				.forEach(entry -> product.setProducer(entry.getKey()));
-
 	}
 
 }
