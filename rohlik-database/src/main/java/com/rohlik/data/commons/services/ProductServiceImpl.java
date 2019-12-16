@@ -121,27 +121,44 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void saveAllProductsInCategoryToDatabase(Integer categoryId, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
-		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(categoryId, 3000);
-		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
-		if (productList.isPresent()) {
-			for (JsonElement listElement : productList.get()) {
-				JsonObject productData = listElement.getAsJsonObject();
-				Product product = dataRohlik.extractProductFromJson(productData, producers, categories);
-				product.setActive(true);
-				if (!productIdSet.contains(product.getProductId())) {
-					saveNewProduct(product, productData);
-					productIdSet.add(product.getProductId());
-				}
-			}
-		}
+		buildAllProductsInCategory(categoryId).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(productDao::save);
 		Instant later = Instant.now();
 
 		Duration d = Duration.between(earlier, later);
 		String output = d.toString();
 		log.info("Kategorie {} trvala: {}", categoryId, output);
 	}
+	
+	private List<Product> oldBuildAllProductsInCategory(Integer categoryId) {
+		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(categoryId, 3000);
+		List<Product> products = new ArrayList<>();
+		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
+		if (productList.isPresent()) {
+			for (JsonElement listElement : productList.get()) {
+				JsonObject productData = listElement.getAsJsonObject();
+				Product product = dataRohlik.extractProductFromJson(productData, producers, categories);
+				product.setActive(true);
+				JsonArray salesData = productData.get("sales").getAsJsonArray();
+				if (salesData.size() > 0) {
+					setSalesForProduct(salesData, product);
+					product.setHasSales(true);
+				}
+				setCategoriesForProduct(product);
+				products.add(product);
+			}
+		}
+		return products;
+	}
 
+
+	@Override
+	public List<Product> buildAllProductsInCategory(Integer categoryId) {
+		List<Product> products = productsInCategory.getProductListForCategoryWithSalesAndProducers(categoryId, 3000);
+		products.forEach(this::setCategoriesForProduct);
+		return products;
+	}	
+		
 	@Override
 	public void saveAllProductsFromRohlikToDatabase() {
 		Instant earlier = Instant.now();
@@ -555,4 +572,5 @@ public class ProductServiceImpl implements ProductService {
 		return new File(pathToFile).isFile();
 
 	}
+	
 }
