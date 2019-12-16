@@ -123,6 +123,7 @@ public class ProductServiceImpl implements ProductService {
 		Instant earlier = Instant.now();
 		buildAllProductsInCategory(categoryId).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(
 				product->{productIdSet.add(product.getProductId());
+				saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
 					productDao.save(product);});
 		Instant later = Instant.now();
 
