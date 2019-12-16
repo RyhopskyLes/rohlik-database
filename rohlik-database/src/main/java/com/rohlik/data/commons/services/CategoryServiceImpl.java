@@ -64,7 +64,6 @@ public class CategoryServiceImpl implements CategoryService {
 			Optional<Category> saved = catDao.findByCategoryId(category.getCategoryId());
 			if(!saved.isPresent()) {catDao.save(category);}
 		}
-		categoriesByProduct.forEach(System.out::println);
 		return categoriesByProduct;
 	}
 
