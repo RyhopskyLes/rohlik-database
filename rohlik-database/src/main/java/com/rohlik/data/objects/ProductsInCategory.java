@@ -57,12 +57,16 @@ public class ProductsInCategory {
 	public List<Product> getProductListForCategory(Integer categoryId, Integer limitResults) {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
+		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);
-			products.add(converted.toProduct());
+			Product productConverted = converted.toProduct();
+			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
+			productConverted.setMainCategoryName(mainCategoryName);
+			products.add(productConverted);
 		});
 
 		return products;
@@ -72,12 +76,15 @@ public class ProductsInCategory {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
 		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);
 			Product productConverted = converted.toProduct();
+			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
+			productConverted.setMainCategoryName(mainCategoryName);
 			setProducerName(productConverted, producers);
 			products.add(productConverted);
 		});
@@ -88,12 +95,16 @@ public class ProductsInCategory {
 	public List<Product> getProductListForCategoryWithSales(Integer categoryId, Integer limitResults) {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
+		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);
-			products.add(converted.toProductWithSales());
+			Product productConverted = converted.toProductWithSales();
+			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
+			productConverted.setMainCategoryName(mainCategoryName);
+			products.add(productConverted);
 		});
 		return products;
 	}
@@ -102,12 +113,15 @@ public class ProductsInCategory {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
 		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
 		Spliterator<JsonElement> elements = productList.orElseGet(JsonArray::new).spliterator();
 		StreamSupport.stream(elements, false).forEach(product -> {
 			RawProduct converted = gson.fromJson(product, RawProduct.class);
 			Product productConverted = converted.toProductWithSales();
+			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
+			productConverted.setMainCategoryName(mainCategoryName);
 			setProducerName(productConverted, producers);
 			products.add(productConverted);			
 		});
@@ -187,6 +201,11 @@ public class ProductsInCategory {
 		product.setProducer("");
 		producers.entrySet().stream().filter(entry -> entry.getValue().contains(productId))
 				.forEach(entry -> product.setProducer(entry.getKey()));
+	}
+	
+	private String getCategoryName(Integer catNum, Map<Integer, String> categoriesMap) {
+		String catName = categoriesMap.get(catNum);
+		return catName == null ? "" : catName;
 	}
 
 }
