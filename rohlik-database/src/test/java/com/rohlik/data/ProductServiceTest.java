@@ -3,8 +3,12 @@ package com.rohlik.data;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -21,6 +25,7 @@ import com.rohlik.data.config.AppConfigTest;
 import com.rohlik.data.config.DataTestConfig;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.objects.NavSectionsCategoryData;
+import com.rohlik.data.objects.ProductsInCategory;
 import com.rohlik.data.objects.NavSections;
 
 @SpringJUnitConfig(classes = {AppConfigTest.class, DataTestConfig.class})
@@ -36,16 +41,33 @@ public class ProductServiceTest {
 	ProductService productService;
 	@Autowired
 	NavSections navSections;
+	@Autowired
+	ProductsInCategory inCategory;
+	private static final Integer CHLEB_VOLNY =300116463;
+	private static final Integer TMAVY_CHLEB =300116467;
 	@Test
 	@Order(1) 
-	@DisplayName("should save products from 300116463")	
-	public void saveAllProductsInCategoryToDatabase() {
+	@DisplayName("should save products from 300116467")	
+	public void saveAllProductsInCategoryToDatabase() {		
+		List<NavSectionsCategoryData> categories = navSections.ofCategory(CHLEB_VOLNY);
+		NavSectionsCategoryData tmavyChleb = categories.stream().filter(category->category.getCategoryId().equals(TMAVY_CHLEB)).findFirst().orElseGet(NavSectionsCategoryData::new);
+		productService.saveAllProductsInCategoryToDatabase(TMAVY_CHLEB, new HashSet<>());
 		List<Product> products = productDao.findAllEagerlyWithCategories();
-		List<NavSectionsCategoryData> categories = navSections.ofCategory(300116463);
-		NavSectionsCategoryData tmavyChleb = categories.stream().filter(category->category.getCategoryId().equals(300116467)).findFirst().orElseGet(NavSectionsCategoryData::new);
-		productService.saveAllProductsInCategoryToDatabase(300116467, new HashSet<>());
-		products = productDao.findAllEagerlyWithCategories();
-		assertTrue(products.size() == tmavyChleb.getProductsCount());		
+		List<Product> incategory = 	inCategory.getProductListForCategoryWithSalesAndProducers(TMAVY_CHLEB, 100);
+		assertTrue(products.size() == tmavyChleb.getProductsCount());
+		Long sales1= products.stream().map(Product::getSales).filter(sales->!sales.isEmpty()).flatMap(Set::stream).count();
+		Long sales2= incategory.stream().map(Product::getSales).filter(sales->!sales.isEmpty()).flatMap(Set::stream).count();
+		Set<String> producers1 = products.stream().map(Product::getProducer).collect(Collectors.toCollection(HashSet::new));
+		Set<String> producers2 = incategory.stream().map(Product::getProducer).collect(Collectors.toCollection(HashSet::new));
+		Set<String> names1 = products.stream().map(Product::getProductName).collect(Collectors.toCollection(HashSet::new));
+		Set<String> names2 = incategory.stream().map(Product::getProductName).collect(Collectors.toCollection(HashSet::new));
+		Set<Integer> ids1 = products.stream().map(Product::getProductId).collect(Collectors.toCollection(HashSet::new));
+		Set<Integer> ids2 = incategory.stream().map(Product::getProductId).collect(Collectors.toCollection(HashSet::new));
+		assertTrue(products.size() == incategory.size());	
+		assertTrue(sales1 == sales2);
+		assertThat(producers1, containsInAnyOrder(producers2.toArray(new String[producers2.size()])));
+		assertThat(names1, containsInAnyOrder(names2.toArray(new String[names2.size()])));
+		assertThat(ids1, containsInAnyOrder(ids2.toArray(new Integer[ids2.size()])));
 	}
 
 	@Test
@@ -76,4 +98,27 @@ public class ProductServiceTest {
 		
 	}
 
+	@Test
+	@Order(4) 
+	@DisplayName("should build category TMAVY_CHLEB")	
+	public void buildAllProductsInCategory() {
+	List<Product> products = productService.buildAllProductsInCategory(TMAVY_CHLEB);
+	List<Product> incategory = inCategory.getProductListForCategoryWithSalesAndProducers(TMAVY_CHLEB, 100);
+	Long sales1= products.stream().map(Product::getSales).filter(sales->!sales.isEmpty()).flatMap(Set::stream).count();
+	Long sales2= incategory.stream().map(Product::getSales).filter(sales->!sales.isEmpty()).flatMap(Set::stream).count();
+	Set<String> producers1 = products.stream().map(Product::getProducer).collect(Collectors.toCollection(HashSet::new));
+	Set<String> producers2 = incategory.stream().map(Product::getProducer).collect(Collectors.toCollection(HashSet::new));
+	Set<String> names1 = products.stream().map(Product::getProductName).collect(Collectors.toCollection(HashSet::new));
+	Set<String> names2 = incategory.stream().map(Product::getProductName).collect(Collectors.toCollection(HashSet::new));
+	Set<Integer> ids1 = products.stream().map(Product::getProductId).collect(Collectors.toCollection(HashSet::new));
+	Set<Integer> ids2 = incategory.stream().map(Product::getProductId).collect(Collectors.toCollection(HashSet::new));
+
+	assertTrue(products.size() == incategory.size());	
+	assertTrue(sales1 == sales2);
+	assertThat(producers1, containsInAnyOrder(producers2.toArray(new String[producers2.size()])));
+	assertThat(names1, containsInAnyOrder(names2.toArray(new String[names2.size()])));
+	assertThat(ids1, containsInAnyOrder(ids2.toArray(new Integer[ids2.size()])));
+	}
+	
+	
 }
