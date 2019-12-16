@@ -121,7 +121,9 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void saveAllProductsInCategoryToDatabase(Integer categoryId, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		buildAllProductsInCategory(categoryId).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(productDao::save);
+		buildAllProductsInCategory(categoryId).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(
+				product->{productIdSet.add(product.getProductId());
+					productDao.save(product);});
 		Instant later = Instant.now();
 
 		Duration d = Duration.between(earlier, later);
