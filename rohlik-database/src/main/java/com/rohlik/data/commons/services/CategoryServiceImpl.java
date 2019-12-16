@@ -31,24 +31,30 @@ import com.rohlik.data.objects.ProductsInCategory;
 
 @Service("CategoryService")
 @Transactional
-@SuppressWarnings("unchecked")
-public class CategoryServiceImpl implements CategoryService {
-	@Autowired
-	CategoryDao catDao;
-	@Autowired
-	Full full;
-	@Autowired
-	ProductDao productDao;
-	@Autowired
-	DataRohlik dataRohlik;
-	@Autowired
-	NavSections nav;
-	@Autowired
-	ProductsInCategory productsInCategory;
-	@Autowired
-	ChildDao childDao;
-	private static Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
+public class CategoryServiceImpl implements CategoryService {
+	CategoryDao catDao;
+	Full full;
+	ProductDao productDao;
+	DataRohlik dataRohlik;
+	NavSections nav;
+	ProductsInCategory productsInCategory;	
+	ChildDao childDao;
+	
+	private static Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
+	
+	@Autowired
+	public CategoryServiceImpl(CategoryDao catDao, Full full, ProductDao productDao, DataRohlik dataRohlik,
+			NavSections nav, ProductsInCategory productsInCategory, ChildDao childDao) {
+		super();
+		this.catDao = catDao;
+		this.full = full;
+		this.productDao = productDao;
+		this.dataRohlik = dataRohlik;
+		this.nav = nav;
+		this.productsInCategory = productsInCategory;
+		this.childDao = childDao;
+	}
 	
 	@Override
 	public Set<Category> saveUnsavedCategories(Product product) {
@@ -56,11 +62,13 @@ public class CategoryServiceImpl implements CategoryService {
 				: full.getProductFull(product.getProductId()).getCategoriesConverted();
 		for (Category category : categoriesByProduct) {
 			Optional<Category> saved = catDao.findByCategoryId(category.getCategoryId());
-			saved.ifPresent(catDao::save);
+			if(!saved.isPresent()) {catDao.save(category);}
 		}
+		categoriesByProduct.forEach(System.out::println);
 		return categoriesByProduct;
 	}
 
+	
 	@Override
 	public void addMissingChildToParent(Integer childCategoryId) {
 		Optional<Category> child = catDao.findByCategoryId(childCategoryId);
