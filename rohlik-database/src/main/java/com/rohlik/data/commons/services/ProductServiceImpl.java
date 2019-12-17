@@ -41,21 +41,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.rohlik.data.objects.Filters;
 import com.rohlik.data.objects.Full;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.ProductsInCategory;
 import com.rohlik.data.objects.RawProduct;
-import com.rohlik.data.objects.RootObject;
-import com.rohlik.data.objects.SlugAndName;
 import com.rohlik.data.commons.dao.CategoryDao;
 import com.rohlik.data.commons.dao.ProductDao;
-import com.rohlik.data.commons.dao.ProductKosikDao;
-import com.rohlik.data.commons.utilities.DataRohlik;
-import com.rohlik.data.commons.utilities.Source;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.entities.Sale;
@@ -78,8 +69,6 @@ public class ProductServiceImpl implements ProductService {
 	private ProductDao productDao;
 	private CategoryDao categoryDao;
 	private CategoryService categoryService;
-	private DataRohlik dataRohlik;
-	private Filters filters;
 	private ProductsInCategory productsInCategory;
 	private Navigation navigation;
 	private Full full;
@@ -90,15 +79,12 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	public ProductServiceImpl(ProductDao productDao, CategoryDao categoryDao,
-			CategoryService categoryService, DataRohlik dataRohlik, 
-			Filters filters, ProductsInCategory productsInCategory, Navigation navigation,
+			CategoryService categoryService, ProductsInCategory productsInCategory, Navigation navigation,
 			Full full) {
 		super();
 		this.productDao = productDao;
 		this.categoryDao = categoryDao;
 		this.categoryService = categoryService;
-		this.dataRohlik = dataRohlik;
-		this.filters = filters;
 		this.productsInCategory = productsInCategory;
 		this.navigation = navigation;
 		this.full = full;
@@ -132,29 +118,7 @@ public class ProductServiceImpl implements ProductService {
 		log.info("Kategorie {} trvala: {}", categoryId, output);
 	}
 	
-	private List<Product> oldBuildAllProductsInCategory(Integer categoryId) {
-		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
-		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(categoryId, 3000);
-		List<Product> products = new ArrayList<>();
-		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
-		if (productList.isPresent()) {
-			for (JsonElement listElement : productList.get()) {
-				JsonObject productData = listElement.getAsJsonObject();
-				Product product = dataRohlik.extractProductFromJson(productData, producers, categories);
-				product.setActive(true);
-				JsonArray salesData = productData.get("sales").getAsJsonArray();
-				if (salesData.size() > 0) {
-					setSalesForProduct(salesData, product);
-					product.setHasSales(true);
-				}
-				setCategoriesForProduct(product);
-				products.add(product);
-			}
-		}
-		return products;
-	}
-
-
+	
 	@Override
 	public List<Product> buildAllProductsInCategory(Integer categoryId) {
 		List<Product> products = productsInCategory.getProductListForCategoryWithSalesAndProducers(categoryId, 3000);
@@ -172,15 +136,6 @@ public class ProductServiceImpl implements ProductService {
 		}
 		Instant later = Instant.now();
 		printDuration(earlier, later);
-	}
-
-	private void setSalesForProduct(JsonArray salesData, Product product) {
-		Set<Sale> salesSet = dataRohlik.createSalesSetForProductFromJson(salesData);
-		for (Iterator<Sale> i = salesSet.iterator(); i.hasNext();) {
-			Sale element = i.next();
-			product.addSales(element);
-		}
-
 	}
 
 	@Override
@@ -213,7 +168,6 @@ public class ProductServiceImpl implements ProductService {
 	public void updateAllProductsWithoutProducer() {
 		Map<Integer, Set<Product>> productsByCategories = findAllProductsWithoutProducer().stream()
 				.collect(groupingBy(Product::getMainCategoryId, Collectors.toSet()));
-
 		for (Map.Entry<Integer, Set<Product>> item : productsByCategories.entrySet()) {
 			Instant earlier = Instant.now();
 			Integer categoryNum = item.getKey();
@@ -245,34 +199,19 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void updateAllProductsInCategoryInDatabase(Integer number, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		Map<String, Set<Integer>> producers = producersWithProductsForCategory(number);
-		Optional<JsonArray> productList = productsInCategory.getProductListJsonArrayForCategory(number, 3000);
-		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
-		if (productList.isPresent()) {
-			for (JsonElement listElement : productList.get()) {
-				JsonObject productData = listElement.getAsJsonObject();
-				Product newProduct = createNewProductForUpdate(productData, producers, categories);
-				Optional<Product> oldProduct = loadOldProductForUpdate(newProduct);
-				Integer productId = newProduct.getProductId();
-				if (!productIdSet.contains(productId)) {
-					saveNewOrUpdateOld(newProduct, oldProduct);
-					productIdSet.add(newProduct.getProductId());
-				}
-			}
-		}
+			buildAllProductsInCategory(number).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(
+				product->{Optional<Product> oldProduct = loadOldProductForUpdate(product);
+				saveNewOrUpdateOld(product, oldProduct);
+				productIdSet.add(product.getProductId());				
+				});
 		Instant later = Instant.now();
 		printDuration(earlier, later, number);
 
 	}
 
-	private Map<String, Set<Integer>> producersWithProductsForCategory(Integer catNum) {
-		List<SlugAndName> slugMap = filters.forCategoryAndSlug(catNum, "znacka");
-		return dataRohlik.producersWithProducts(slugMap, catNum);
-	}
-
 	private Optional<String> findProducerForProduct(Product product, Integer categoryNum) {
 		Integer productId = product.getProductId();
-		Map<String, Set<Integer>> producersWithProductIds = producersWithProductsForCategory(categoryNum);
+		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryNum);
 		Optional<String> producer = Optional.empty();
 		for (Map.Entry<String, Set<Integer>> producerEntry : producersWithProductIds.entrySet()) {
 			Set<Integer> idSet = producerEntry.getValue();
@@ -302,20 +241,8 @@ public class ProductServiceImpl implements ProductService {
 				
 	}
 
-	private void saveNewProduct(Product product, JsonObject productData) {
+		private void saveNewProductByUpdate(Product product) {
 		saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
-		JsonArray salesData = productData.get("sales").getAsJsonArray();
-		if (salesData.size() > 0) {
-			setSalesForProduct(salesData, product);
-			product.setHasSales(true);
-		}
-		setCategoriesForProduct(product);
-		productDao.save(product);
-	}
-
-	private void saveNewProductByUpdate(Product product) {
-		saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
-		setCategoriesForProduct(product);
 		Product saved = productDao.save(product);
 		countSaved++;
 		log.info("{} saved new: {} {} {}", countSaved,  saved, saved.getSales(), saved.getCategories());
@@ -333,27 +260,12 @@ public class ProductServiceImpl implements ProductService {
 	private void updateOldProduct(Product product, Optional<Product> oldProduct) {
 		if (oldProduct.isPresent()) {
 			saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
-			removeSalesFromProductInDatabase(oldProduct.get());
-			product.setProducer(oldProduct.get().getProducer());
 			product.setId(oldProduct.get().getId());
-			product.setCategories(oldProduct.get().getCategories());
-			product.setActive(true);
+			product.setProductKosik(oldProduct.get().getProductKosik());		
 			Product saved = productDao.save(product);
 			countUpdated++;
 			log.info("{} updated old: {} {}", countUpdated, saved, saved.getSales());
 		}
-	}
-
-	private Product createNewProductForUpdate(JsonObject productData, Map<String, Set<Integer>> producers,
-			Map<Integer, String> categories) {
-		Product product = dataRohlik.extractProductFromJson(productData, producers, categories);
-		product.setActive(true);
-		JsonArray salesData = productData.get("sales").getAsJsonArray();
-		if (salesData.size() > 0) {
-			setSalesForProduct(salesData, product);
-			product.setHasSales(true);
-		}		
-		return product;
 	}
 
 	private Optional<Product> loadOldProductForUpdate(Product product) {
@@ -373,11 +285,6 @@ public class ProductServiceImpl implements ProductService {
 		log.info("Celkem: {}", output);
 	}
 
-	private String createCategoryURL(Integer number) {
-		String totalHits = productsInCategory.getTotalHitsForCategory(number).orElse("3000");
-		return CATEGORY_URL + number + OFFSET_LIMIT + totalHits;
-	}
-
 	@Override
 	public void updateAllProductsFromRohlikInDatabase() {
 		Instant earlier = Instant.now();
@@ -388,7 +295,7 @@ public class ProductServiceImpl implements ProductService {
 		}
 		Instant later = Instant.now();
 		printDuration(earlier, later);
-		log.info("Total updated: " + countUpdated + " total new saved: " + countSaved);
+		log.info("Total updated: {}, total new saved: {}", countUpdated, countSaved);
 	}
 
 	@Override
@@ -569,7 +476,8 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 	}
-
+	
+	
 	private static boolean existFile(String url, String rootDirectory) {
 		String pathToFile = url.replace(ROHLIK_IMAGES_START, rootDirectory);
 		return new File(pathToFile).isFile();
