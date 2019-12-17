@@ -49,33 +49,17 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public List<Product> findAllPremiumProducts() {
-		Query query = em.createNativeQuery("SELECT product.id, product.productId, product.productName, product.producer, product.originalPrice, product.price,"
-				+ "product.textualAmount, product.unit, product.baseLink, product.imgPath, product.inStock, product.hasSales, product.link, product.pricePerUnit,"
-				+ "product.mainCategoryId, product.mainCategoryName"
-				+ " FROM product\r\n" + 
-				" inner join product_sales on product_sales.id_product=product.id\r\n" + 
-				" inner join sales on product_sales.id_sales=sales.idSales where sales.type=\"premium\";", Product.class);
-		
-		return query.getResultList();
+		return productRepository.findBySalesTypeIgnoreCase("premium");
 	}
 
 	@Override
 	public List<Product> findAllProductsWithNearingExpiryDate() {
-		Query query = em.createNativeQuery("SELECT product.id, product.productId, product.productName, product.producer, product.originalPrice, product.price,"
-				+ "product.textualAmount, product.unit, product.baseLink, product.imgPath, product.inStock, product.hasSales, product.link, product.pricePerUnit,"
-				+ "product.mainCategoryId, product.mainCategoryName"
-				+ " FROM product\r\n" + 
-				" inner join product_sales on product_sales.id_product=product.id\r\n" + 
-				" inner join sales on product_sales.id_sales=sales.idSales where sales.type=\"expiration\";", Product.class);
-		
-		return query.getResultList();
+		return productRepository.findBySalesTypeIgnoreCase("expiration");
 	}
 
 	@Override
 	public List<Product> findAllProductsWithoutProducer() {
-		Query query = em.createNativeQuery("SELECT * FROM rohlik_data.product where producer=\"\";", Product.class);
-		
-		return query.getResultList();
+		return productRepository.findByProducerIgnoreCaseEqualsAndActiveTrueAndIsFromRohlikTrue("");
 	}
 
 	@Override
