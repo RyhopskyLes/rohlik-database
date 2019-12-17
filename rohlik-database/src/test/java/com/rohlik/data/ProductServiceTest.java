@@ -1,10 +1,13 @@
 package com.rohlik.data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -71,7 +74,37 @@ public class ProductServiceTest {
 	}
 
 	@Test
-	@Order(2) 
+	@Order(2)
+	@Transactional
+	@DisplayName("should update all products in 300116467")	
+	public void updateAllProducstInCategory() {
+		List<Product> products = productDao.findAllEagerlyWithCategories();
+		Product zero = products.get(0);		
+		productDao.delete(zero);
+		products = productDao.findAllEagerlyWithCategories();
+		List<Integer> ids = products.stream().map(Product::getProductId).collect(Collectors.toCollection(ArrayList::new));
+		assertThat(ids, not(hasItem(zero.getProductId())));
+		Product one = products.get(1);
+		one.setInStock(!one.isInStock());		
+		productDao.save(one);
+		boolean inStock = one.isInStock();
+		Product two = products.get(2);
+		two.setImgPath("");
+		productDao.save(two);
+		String imgPath = two.getImgPath();
+		productService.updateAllProductsInCategoryInDatabase(TMAVY_CHLEB, new HashSet<>());
+		Optional<Product> oneUpdated = productDao.findByProductId(one.getProductId());
+		assertTrue(oneUpdated.isPresent());		
+		oneUpdated.ifPresent(theOne->assertTrue(theOne.isInStock()==!inStock));
+		Optional<Product> twoUpdated = productDao.findByProductId(two.getProductId());
+		assertTrue(twoUpdated.isPresent());
+		oneUpdated.ifPresent(theTwo->{assertThat(theTwo.getImgPath(), is(not(two.getImgPath())));		
+		});
+		
+	}
+	
+	@Test
+	@Order(3) 
 	@DisplayName("should set MainCategoryName by 1 product")	
 	public void setMissingMainCategoryName() {
 		productService.saveAllProductsInCategoryToDatabase(300101013, new HashSet<>());
@@ -91,15 +124,15 @@ public class ProductServiceTest {
 	}
 	
 	@Test
-	@Order(3) 
+	@Order(4) 
 	@DisplayName("should set categories by 1 product")	
 	public void setCategoriesForProducts() {
-		productDao.findAllEagerlyWithCategories().stream().limit(2).forEach(product->product.getCategories().forEach(System.out::println));
+		productDao.findAllEagerlyWithCategories().stream().limit(1).forEach(product->product.getCategories().forEach(System.out::println));
 		
 	}
 
 	@Test
-	@Order(4) 
+	@Order(5) 
 	@DisplayName("should build category TMAVY_CHLEB")	
 	public void buildAllProductsInCategory() {
 	List<Product> products = productService.buildAllProductsInCategory(TMAVY_CHLEB);
