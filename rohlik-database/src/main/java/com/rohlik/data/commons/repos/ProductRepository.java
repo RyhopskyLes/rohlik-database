@@ -53,7 +53,9 @@ public List<Product> findAllEagerlyWithCategoriesAndChildren();
 		+ " LEFT JOIN FETCH p.categories category"
 		+ " WHERE category.categoryId=(:id)")
 public List<Product> findAllProductsByCategoryId(@Param("id") Integer id);
+public List<Product> findByProducerIgnoreCaseEqualsAndActiveTrueAndIsFromRohlikTrue(@Param("producer") String producer);
 public Page<Product> findByProductNameIgnoreCaseContaining(@Param("name") String name, Pageable p);
+public List<Product> findBySalesTypeIgnoreCase(@Param("type") String type);
 @Query(
 		  value = "SELECT product.id, product.productId, product.productName, product.producer, product.originalPrice, product.price,"
 					+ "product.textualAmount, product.unit, product.baseLink, product.imgPath, product.inStock, product.hasSales, product.link, product.pricePerUnit,"
