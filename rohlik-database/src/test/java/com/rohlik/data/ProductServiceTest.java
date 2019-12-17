@@ -79,6 +79,7 @@ public class ProductServiceTest {
 	@DisplayName("should update all products in 300116467")	
 	public void updateAllProducstInCategory() {
 		List<Product> products = productDao.findAllEagerlyWithCategories();
+		long categoriesCount = products.stream().map(Product::getCategories).flatMap(Set::stream).count();
 		Product zero = products.get(0);		
 		productDao.delete(zero);
 		products = productDao.findAllEagerlyWithCategories();
@@ -100,11 +101,33 @@ public class ProductServiceTest {
 		assertTrue(twoUpdated.isPresent());
 		oneUpdated.ifPresent(theTwo->{assertThat(theTwo.getImgPath(), is(not(two.getImgPath())));		
 		});
-		
+		products = productDao.findAllEagerlyWithCategories();
+		long categoriesCountUpdated = products.stream().map(Product::getCategories).flatMap(Set::stream).count();
+		assertTrue(categoriesCount==categoriesCountUpdated);
 	}
-	
 	@Test
 	@Order(3) 
+	@Transactional
+	@DisplayName("should update producer by 2 products")	
+	public void updateAllProductsWithoutProducer() {
+		List<Product> products = productDao.findAllEagerlyWithCategories();	
+		long withoutProducer = products.stream().filter(product->product.getProducer().equals("")).count();
+		assertTrue(withoutProducer==0);
+		Product zero = products.get(0);	
+		zero.setProducer("");
+		productDao.save(zero);
+		products = productDao.findAllEagerlyWithCategories();	
+		long removedProducer = products.stream().filter(product->product.getProducer().equals("")).count();
+		assertTrue(removedProducer==1);
+		productService.updateAllProductsWithoutProducer();
+		products = productDao.findAllEagerlyWithCategories();	
+		long afterUpdate = products.stream().filter(product->product.getProducer().equals("")).count();
+		assertTrue(afterUpdate==0);
+	}
+	
+	
+	@Test
+	@Order(4) 
 	@DisplayName("should set MainCategoryName by 1 product")	
 	public void setMissingMainCategoryName() {
 		productService.saveAllProductsInCategoryToDatabase(300101013, new HashSet<>());
@@ -124,7 +147,7 @@ public class ProductServiceTest {
 	}
 	
 	@Test
-	@Order(4) 
+	@Order(5) 
 	@DisplayName("should set categories by 1 product")	
 	public void setCategoriesForProducts() {
 		productDao.findAllEagerlyWithCategories().stream().limit(1).forEach(product->product.getCategories().forEach(System.out::println));
@@ -132,7 +155,7 @@ public class ProductServiceTest {
 	}
 
 	@Test
-	@Order(5) 
+	@Order(6) 
 	@DisplayName("should build category TMAVY_CHLEB")	
 	public void buildAllProductsInCategory() {
 	List<Product> products = productService.buildAllProductsInCategory(TMAVY_CHLEB);
