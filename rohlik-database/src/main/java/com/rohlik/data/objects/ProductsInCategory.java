@@ -171,7 +171,7 @@ public class ProductsInCategory {
 				.map(object -> object.getAsJsonObject(DATA).get(TOTAL_HITS).getAsString());
 	}
 
-	private Map<String, Set<Integer>> producersWithProductsForCategory(Integer categoryId) {
+	public Map<String, Set<Integer>> producersWithProductsForCategory(Integer categoryId) {
 		List<SlugAndName> slugMap = filters.forCategoryAndSlug(categoryId, "znacka");
 		return producersWithProducts(slugMap, categoryId);
 	}
