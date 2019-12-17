@@ -221,7 +221,7 @@ public class Product implements Serializable, IdMediator {
 	@Override
 	public int hashCode() {
 		return Objects.hash(baseLink, hasSales, imgPath, inStock, link, mainCategoryId, mainCategoryName,
-				originalPrice, price, pricePerUnit, producer, productId, productName, sales, textualAmount, unit, productKosik, isFromRohlik);
+				originalPrice, price, pricePerUnit, producer, productId, productName, sales, textualAmount, unit, active, isFromRohlik);
 	}
 	@Override
 	public boolean equals(Object obj) {
