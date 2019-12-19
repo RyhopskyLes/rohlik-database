@@ -21,6 +21,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	@Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.sales"
 			+ " LEFT JOIN FETCH p.categories categories"
 			+ " LEFT JOIN FETCH categories.children WHERE p.productId = (:id)")
+	Optional<Product> findByProductIdEagerlyWithCategories(@Param("id") Integer id);
+	@Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.sales"
+			+ " LEFT JOIN FETCH p.categories categories"
+			+ " WHERE p.productId = (:id)")
 	Optional<Product> findByProductIdEagerlyWithCategoriesAndChildren(@Param("id") Integer id);
 @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.sales WHERE p.id = (:id)")
 public Product findByIdEagerly(@Param("id") Integer id);
