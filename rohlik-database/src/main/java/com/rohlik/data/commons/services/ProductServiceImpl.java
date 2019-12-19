@@ -57,12 +57,14 @@ import com.rohlik.data.entities.Sale;
 public class ProductServiceImpl implements ProductService {
 	public static final Long LEKARNA_KEY = 300112985L;
 	public static final String ROOT_DIRECTORY = "C:/Images";
+	public static final String NO_IMAGE_ICON = "https://www.rohlik.cz/static/img/icons/product-no-image.svg";
 	public static final String NAVIGATION_URL = "https://www.rohlik.cz/services/frontend-service/renderer/navigation/flat.json";
 	public static final String CATEGORY_URL = "https://www.rohlik.cz/services/frontend-service/products/";
 	public static final String BASIC_LIMIT = "25";
 	public static final String CATEGORY_METADATA_URL = "https://www.rohlik.cz/services/frontend-service/category-metadata/";
 	public static final String OFFSET_LIMIT = "?offset=0&limit=";
 	public static final String ROHLIK_IMAGES_START = "https://images.rohlik.cz";
+	public static final String ROHLIK_STATIC_START = "https://www.rohlik.cz";
 	@PersistenceContext
 	private EntityManager em;
 	
@@ -125,7 +127,11 @@ public class ProductServiceImpl implements ProductService {
 		products.forEach(this::setCategoriesForProduct);
 		return products;
 	}	
-		
+	
+	private List<Product> buildAllProductsInCategoryForUpdate(Integer categoryId) {
+		return productsInCategory.getProductListForCategoryWithSales(categoryId, 3000);		
+	}	
+	
 	@Override
 	public void saveAllProductsFromRohlikToDatabase() {
 		Instant earlier = Instant.now();
@@ -197,21 +203,32 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void updateAllProductsInCategoryInDatabase(Integer number, Set<Integer> productIdSet) {
+	public void updateAllProductsInCategoryInDatabase(Integer categoryId, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-			buildAllProductsInCategory(number).stream().filter(product->!productIdSet.contains(product.getProductId())).forEach(
-				product->{Optional<Product> oldProduct = loadOldProductForUpdate(product);
-				saveNewOrUpdateOld(product, oldProduct);
-				productIdSet.add(product.getProductId());				
+		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryId);
+			buildAllProductsInCategoryForUpdate(categoryId).stream().forEach(
+				product->{
+				if(!productIdSet.contains(product.getProductId()))	
+				{Optional<Product> oldProduct = loadOldProductForUpdate(product);
+				saveNewOrUpdateOld(product, oldProduct, producersWithProductIds);
+				productIdSet.add(product.getProductId());}
+				else {
+				Optional<Product> duplicate =	productDao.findByIdEagerlyWithCategories(product.getProductId());
+				duplicate.ifPresent(theDuplicate->{
+				Set<Category> categories =	product.getCategories();
+				categories.forEach(theDuplicate::addCategory);
+				productDao.save(theDuplicate);
+				log.info("Added categories {}", categories);
+				});
+				}
 				});
 		Instant later = Instant.now();
-		printDuration(earlier, later, number);
+		printDuration(earlier, later, categoryId);
 
 	}
 
-	private Optional<String> findProducerForProduct(Product product, Integer categoryNum) {
+	private Optional<String> findProducerForProduct(Product product, Map<String, Set<Integer>> producersWithProductIds) {
 		Integer productId = product.getProductId();
-		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryNum);
 		Optional<String> producer = Optional.empty();
 		for (Map.Entry<String, Set<Integer>> producerEntry : producersWithProductIds.entrySet()) {
 			Set<Integer> idSet = producerEntry.getValue();
@@ -222,6 +239,19 @@ public class ProductServiceImpl implements ProductService {
 		return producer;
 	}
 
+	private Optional<String> findProducerForProduct(Product product, Integer categoryId) {
+		Integer productId = product.getProductId();
+		Optional<String> producer = Optional.empty();
+		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryId);
+		for (Map.Entry<String, Set<Integer>> producerEntry : producersWithProductIds.entrySet()) {
+			Set<Integer> idSet = producerEntry.getValue();
+			if (idSet.contains(productId)) {
+				return Optional.ofNullable(producerEntry.getKey());
+			}
+		}
+		return producer;
+	}
+	
 	@Override
 	public void updateHasSalesByProductsInCategory(Integer number) {
 		List<Product> products = productDao.findByMainCategoryIdEagerly(number);
@@ -236,21 +266,24 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void updateHasSalesByAllProductsInDatabase() {
-		productDao.findAll().stream().filter(Product::isFromRohlik).map(Product::getMainCategoryId)
+		productDao.findAll().stream().filter(Product::isFromRohlik).filter(Product::getActive).map(Product::getMainCategoryId)
 		.forEach(this::updateHasSalesByProductsInCategory);
 				
 	}
 
-		private void saveNewProductByUpdate(Product product) {
+		private void saveNewProductByUpdate(Product product, Map<String, Set<Integer>>producersWithProductIds) {
 		saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
+		Optional<String> producer = findProducerForProduct(product, producersWithProductIds);
+		product.setProducer(producer.orElseGet(()->""));
+		setCategoriesForProduct(product);
 		Product saved = productDao.save(product);
 		countSaved++;
 		log.info("{} saved new: {} {} {}", countSaved,  saved, saved.getSales(), saved.getCategories());
 	}
 
-	private void saveNewOrUpdateOld(Product product, Optional<Product> oldproduct) {
+	private void saveNewOrUpdateOld(Product product, Optional<Product> oldproduct, Map<String, Set<Integer>>producersWithProductIds) {
 		if (!oldproduct.isPresent()) {
-			saveNewProductByUpdate(product);
+			saveNewProductByUpdate(product, producersWithProductIds);
 		} else if (!product.equals(oldproduct.get())) {
 			updateOldProduct(product, oldproduct);
 		}
@@ -261,7 +294,9 @@ public class ProductServiceImpl implements ProductService {
 		if (oldProduct.isPresent()) {
 			saveImageIfNotSaved(product.getImgPath(), ROOT_DIRECTORY);
 			product.setId(oldProduct.get().getId());
-			product.setProductKosik(oldProduct.get().getProductKosik());		
+			product.setProducer(oldProduct.get().getProducer());
+			product.setProductKosik(oldProduct.get().getProductKosik());
+			product.setCategories(oldProduct.get().getCategories());
 			Product saved = productDao.save(product);
 			countUpdated++;
 			log.info("{} updated old: {} {}", countUpdated, saved, saved.getSales());
@@ -269,7 +304,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private Optional<Product> loadOldProductForUpdate(Product product) {
-		return productDao.findByProductIdEagerlyWithCategoriesAndChildren(product.getProductId());
+		return productDao.findByProductIdEagerlyWithCategories(product.getProductId());
 
 	}
 
@@ -469,18 +504,24 @@ public class ProductServiceImpl implements ProductService {
 
 	public void saveImageIfNotSaved(String imgPath, String rootDirectory) {
 		log.info("Image path: {}", imgPath);
-		if (!"".equals(imgPath) && !existFile(imgPath, rootDirectory)) {
+		if (imgPath!= null && !"".equals(imgPath) && !existFile(imgPath, rootDirectory)) {
 			if(imgPath.contains(ROHLIK_IMAGES_START))
 			{saveImageFromUrl(imgPath, rootDirectory);}
 			else {saveImageFromUrl(ROHLIK_IMAGES_START+imgPath, rootDirectory);}
-		}
+		} 
 
 	}
 	
 	
 	private static boolean existFile(String url, String rootDirectory) {
-		String pathToFile = url.replace(ROHLIK_IMAGES_START, rootDirectory);
-		return new File(pathToFile).isFile();
+		url = url.replace(ROHLIK_IMAGES_START, "");
+		String pathToFile = rootDirectory+url;	
+		File file = new File(pathToFile);
+		Long size = file.length();
+		log.info("length {} ", size);
+		boolean isFile = file.isFile();
+		log.info("Is file {} {}", isFile, pathToFile);
+		return isFile && size>0;
 
 	}
 	

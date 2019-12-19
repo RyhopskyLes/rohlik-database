@@ -130,7 +130,7 @@ public class RawProduct {
 		product.setTextualAmount(this.getTextualAmount());
 		product.setUnit(this.getUnit());
 		product.setBaseLink(this.getBaseLink());
-		product.setImgPath(this.getImgPath());
+		if(this.getImgPath()!=null) {product.setImgPath(this.getImgPath());} else {product.setImgPath("");}
 		product.setInStock(this.getInStock());
 		product.setLink(this.getLink());
 		product.setPricePerUnit(this.getFullPricePerUnit());

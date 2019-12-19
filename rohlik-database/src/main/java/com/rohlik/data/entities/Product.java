@@ -237,7 +237,7 @@ public class Product implements Serializable, IdMediator {
 				&& Objects.equals(link, other.link) && Objects.equals(mainCategoryId, other.mainCategoryId)
 				&& Objects.equals(mainCategoryName, other.mainCategoryName)
 				&& Objects.equals(originalPrice, other.originalPrice) && Objects.equals(price, other.price)
-				&& Objects.equals(pricePerUnit, other.pricePerUnit) && Objects.equals(producer, other.producer)
+				&& Objects.equals(pricePerUnit, other.pricePerUnit) /*&& Objects.equals(producer, other.producer)*/
 				&& Objects.equals(productId, other.productId) && Objects.equals(productName, other.productName)
 				&& Objects.equals(sales, other.sales) && Objects.equals(textualAmount, other.textualAmount)
 				&& Objects.equals(unit, other.unit)&& Objects.equals(productKosik, other.productKosik)
@@ -247,7 +247,7 @@ public class Product implements Serializable, IdMediator {
 		return categories;
 	}
 	public void setCategories(Set<Category> categories) {
-		this.categories = categories;
+		this.categories = categories;		
 	}
 	public Boolean getActive() {
 		return active;
