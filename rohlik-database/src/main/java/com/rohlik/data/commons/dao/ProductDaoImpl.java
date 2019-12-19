@@ -126,4 +126,10 @@ public class ProductDaoImpl implements ProductDao {
 	public List<Product> findAllWithoutMainCategoryName() {
 		return productRepository.findAllWithoutMainCategoryName();
 	}
+
+	@Override
+	public Optional<Product> findByProductIdEagerlyWithCategories(Integer id) {
+		return productRepository.findByProductIdEagerlyWithCategories(id);
+	}
 }
+;

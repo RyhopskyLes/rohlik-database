@@ -2,15 +2,19 @@ package com.rohlik.data.commons.dao;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.repository.query.Param;
+
 import com.rohlik.data.entities.Product;
 
 public interface ProductDao {
 	public Product findById(Integer id);
 	public List<Product> findAll();
-	Product save(Product product);
+	public Product save(Product product);
 	public void delete(Product product);
 	public Optional<Product> findByProductId(Integer id);
-	Optional<Product> findByProductIdEagerlyWithCategoriesAndChildren(Integer id);
+	public Optional<Product> findByProductIdEagerlyWithCategories(Integer id);
+	public Optional<Product> findByProductIdEagerlyWithCategoriesAndChildren(Integer id);
 	public List<Product> findAllPremiumProducts();
 	public List<Product> findAllProductsWithNearingExpiryDate();
 	public List<Product> findAllProductsWithoutProducer();
