@@ -23,4 +23,6 @@ public interface CategoryDao {
 	public List<Category> findMainCategoriesFromNavigationWithChildren();
 	public Category findByCategoryIdWithChildrenAndCategoriesKosik(Integer id);
 	public Category findByCategoryIdWithCategoriesKosik(Integer id);
+	public List<Category> findSubcategoriesOfCategoryOnAllLevels(Integer categoryId);
+	public List<Category> findCompleteParentChainOfCategory(Integer categoryId);
 }

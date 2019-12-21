@@ -1,7 +1,9 @@
 package com.rohlik.data.commons.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +104,17 @@ public class CategoryDaoImpl implements CategoryDao {
 	@Override
 	public Category findByCategoryIdWithCategoriesKosik(Integer id) {
 		return catRepository.findByCategoryIdWithCategoriesKosik(id);
+	}
+
+	@Override
+	public List<Category> findSubcategoriesOfCategoryOnAllLevels(Integer categoryId) {
+		return catRepository.findSubcategoriesOfCategoryOnAllLevels(categoryId).stream().filter(Category::getActive)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	@Override
+	public List<Category> findCompleteParentChainOfCategory(Integer categoryId) {
+		return catRepository.findCompleteParentChainOfCategory(categoryId);
 	}
 
 }
