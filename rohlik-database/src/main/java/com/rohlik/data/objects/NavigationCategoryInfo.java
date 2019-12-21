@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.rohlik.data.entities.Category;
+import com.rohlik.data.entities.Child;
 
 import lombok.Data;
 
@@ -50,4 +51,12 @@ public class NavigationCategoryInfo {
 	return category;	
 		
 	}
+	
+	public Child toChild() {
+		Child child = new Child();
+		child.setCategoryId(id);
+		child.setCategoryName(name);
+		child.setActive(true);
+		return child;			
+		}
 }
