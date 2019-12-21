@@ -48,8 +48,9 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public List<Category> buildAllMainCategories() {
-		// TODO Auto-generated method stub
-		return null;
+		List<NavigationCategoryInfo> categoriesInfo = navigation.getAllMainCategoriesInfo();
+		return categoriesInfo.stream().map(NavigationCategoryInfo::toCategory).collect(Collectors.toCollection(ArrayList::new));
+		
 	}
 
 	@Override

@@ -1,14 +1,20 @@
 package com.rohlik.data;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -44,11 +50,14 @@ private Navigation navigation;
 private final Integer PEKARNA=300101000;
 private  List<NavigationCategoryInfo> allCategoriesInfo;
 private Optional<NavigationCategoryInfo> pekarnaInfo;
+private  List<NavigationCategoryInfo> allMainCategoriesInfo;
 @BeforeAll
 public void setup() {
 	allCategoriesInfo = navigation.getAllCategoriesData();
 	pekarnaInfo =allCategoriesInfo.stream()
 			.filter(category -> Objects.equals(category.getId(), PEKARNA)).findFirst();
+	allMainCategoriesInfo=allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
+			.filter(cat -> cat.getParentId().equals(0)).collect(Collectors.toCollection(ArrayList::new));
 }
 @Test
 @Order(1) 
@@ -77,4 +86,27 @@ public void buildMainCategoryWithChildren() {
 	assertEquals(sizeExpected, sizeActual);	
 }
 
+@Test
+@Order(3) 
+@DisplayName("should build all main categories")
+public void buildAllMainCategories() {
+	List<Category> all = buildService.buildAllMainCategories();
+	assertEquals(allMainCategoriesInfo.size(), all.size());
+	assertThat(all, hasItems(
+			Matchers.<Category>hasProperty("categoryId", equalTo(300101000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300102000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300103000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300104000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300105000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300106000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300107000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300108000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300109000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300110000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300111000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112393)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112985))			
+			));	
+}
 }
