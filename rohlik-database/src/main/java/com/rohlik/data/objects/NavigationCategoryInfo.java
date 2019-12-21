@@ -41,11 +41,12 @@ public class NavigationCategoryInfo {
 	@JsonProperty("children")
 	private List<Integer> children = new ArrayList<>();
 	
-	Category toCategory() {
+	public Category toCategory() {
 	Category category = new Category();
 	category.setParentId(parentId);
 	category.setCategoryId(id);
 	category.setCategoryName(name);
+	category.setActive(true);
 	return category;	
 		
 	}

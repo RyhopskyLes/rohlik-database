@@ -22,7 +22,6 @@ import com.rohlik.data.entities.Category;
 import lombok.NoArgsConstructor;
 
 @Component("navigation")
-@NoArgsConstructor
 public class Navigation {
 
 	private static Logger log = LoggerFactory.getLogger(Navigation.class);	
