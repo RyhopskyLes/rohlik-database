@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -18,13 +19,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 @Component("filters")
 public class Filters {
-@Autowired
 private RootObject rootObject;	
 private String name;
 private String slug;
 private List<SlugAndName> items;
 private static Logger log = LoggerFactory.getLogger(Filters.class);
-public Filters() {	
+@Autowired
+public Filters(RootObject rootObject) {	
+	this.rootObject=rootObject;
 }
 public String getName() {
 	return name;
@@ -49,10 +51,10 @@ public List<SlugAndName> forCategoryAndSlug(Integer categoryId, String slug) {
 	Optional<JsonObject> data = getJsonDataObject(categoryId);
 	Optional<JsonArray> filters = data.map(content->content.getAsJsonArray("filters"));
 	if(filters.isPresent()) {
-		return StreamSupport.stream(filters.orElse(new JsonArray()).spliterator(), false)
-				.filter(filter -> slug.equals(getFilterName(filter))).map(filter -> filter.getAsJsonObject())
-				.findFirst().map(filterData -> getFilterItems(filterData))
-				.map(filterItems -> getSlugsAndNames(filterItems)).get();}
+		return StreamSupport.stream(filters.orElseGet(JsonArray::new).spliterator(), false)
+				.filter(filter -> slug.equals(getFilterName(filter))).map(JsonElement::getAsJsonObject)
+				.findFirst().map(this::getFilterItems)
+				.map(this::getSlugsAndNames).orElseGet(ArrayList::new);}
 	return new ArrayList<>();
 }
 
@@ -72,10 +74,10 @@ private JsonArray getFilterItems(JsonObject filterData) {
 private List<SlugAndName> getSlugsAndNames(JsonArray filterItems) {
 	Function<JsonObject, String> toSlug = object-> object.get("slug").getAsString();
 	Function<JsonObject, String> toName = object-> object.get("name").getAsString();
-	Function<JsonObject, Integer> toAmount = object-> object.get("amount").getAsInt();
+	ToIntFunction<JsonObject> toAmount = object-> object.get("amount").getAsInt();
 	return StreamSupport.stream(filterItems.spliterator(), false)
-	.map(item->item.getAsJsonObject())
-	.map(description->new SlugAndName(toSlug.apply(description), toName.apply(description), toAmount.apply(description)))
+	.map(JsonElement::getAsJsonObject)
+	.map(description->new SlugAndName(toSlug.apply(description), toName.apply(description), toAmount.applyAsInt(description)))
 	.collect(Collectors.toCollection(ArrayList::new));	
 }
 
