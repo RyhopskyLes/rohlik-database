@@ -2,15 +2,17 @@ package com.rohlik.data.objects;
 
 import java.util.Objects;
 
+import com.rohlik.data.entities.Category;
+import com.rohlik.data.entities.Child;
 import com.rohlik.data.kosik.interfaces.Setter;
 
 public class NavSectionsCategoryData {
-Integer categoryId;
-Integer parentCategoryId;
-String name;
-String metadataLink;
-Integer productDisplayCount;
-Integer productsCount;
+private Integer categoryId;
+private Integer parentCategoryId;
+private String name;
+private String metadataLink;
+private Integer productDisplayCount;
+private Integer productsCount;
 public NavSectionsCategoryData() {	
 }
 public NavSectionsCategoryData(Integer categoryId, String name) {
@@ -81,6 +83,23 @@ public Integer getParentCategoryId() {
 }
 public void setParentCategoryId(Integer parentCategoryId) {
 	this.parentCategoryId = parentCategoryId;
+}
+
+public Category toCategory() {
+	Category category = new Category();
+	category.setCategoryId(this.categoryId);
+	category.setCategoryName(this.name);
+	category.setParentId(this.parentCategoryId);
+	category.setActive(true);
+	return category;
+}
+
+public Child toChild() {
+	Child child = new Child();
+	child.setCategoryId(this.categoryId);
+	child.setCategoryName(this.name);
+	child.setActive(true);
+	return child;
 }
 
 }
