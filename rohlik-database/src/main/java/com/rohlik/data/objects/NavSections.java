@@ -2,6 +2,7 @@ package com.rohlik.data.objects;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,9 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.rohlik.data.entities.Category;
+import com.rohlik.data.entities.Child;
 
 @Component("navSections")
 public class NavSections {
@@ -36,12 +40,53 @@ public class NavSections {
 		Optional<JsonObject> data = getJsonDataObject(categoryId);
 		Optional<JsonArray> navSections = data.map(content -> content.getAsJsonArray("navSections"));
 		if (navSections.isPresent()) {
-			return StreamSupport.stream(navSections.get().spliterator(), false).map(elem -> elem.getAsJsonObject())
+			return StreamSupport.stream(navSections.get().spliterator(), false).map(JsonElement::getAsJsonObject)
 					.map(toCategoryData(categoryId)::apply).collect(Collectors.toList());
 		}
 		return new ArrayList<>();
 	}
 
+	public LinkedList<Breadcrumb> breadcrumbsOfCategory(Integer categoryId) {
+		Optional<JsonObject> data = getJsonDataObject(categoryId);
+		Gson gson = new Gson();
+		Optional<JsonArray> breadcrumbs = data.map(content -> content.getAsJsonArray("breadcrumbs"));
+		if (breadcrumbs.isPresent()) {
+			return StreamSupport.stream(breadcrumbs.get().spliterator(), false).map(JsonElement::getAsJsonObject)
+					.map(breadcrumb->gson.fromJson(breadcrumb, Breadcrumb.class)).collect(Collectors.toCollection(LinkedList::new));
+		}
+		return new LinkedList<>();
+	}
+	
+	public Optional<Category> getAsCategoryFromBreadCrumbs(Integer categoryId) {
+		LinkedList<Breadcrumb> breadcrumbs = breadcrumbsOfCategory(categoryId);
+		Category category = null;
+		if(!breadcrumbs.isEmpty()) {
+		Breadcrumb last = breadcrumbs.getLast();
+		breadcrumbs.removeLast();
+		Breadcrumb nexttolast = breadcrumbs.pollLast();
+		Integer parentId= nexttolast==null ? 0 : nexttolast.getCategoryId();
+		category = new Category();
+		category.setCategoryId(last.getCategoryId());
+		category.setCategoryName(last.getTitle());
+		category.setParentId(parentId);
+		category.setActive(true);
+		}	
+		return Optional.ofNullable(category);
+	}
+	
+	public Optional<Child> getAsChildFromBreadcrumbs(Integer categoryId) {
+		LinkedList<Breadcrumb> breadcrumbs = breadcrumbsOfCategory(categoryId);
+		Child child = null;
+		if(!breadcrumbs.isEmpty()) {
+			Breadcrumb last = breadcrumbs.getLast();
+			child = new Child();
+			child.setCategoryId(last.getCategoryId());
+			child.setCategoryName(last.getTitle());
+			child.setActive(true);
+			}	
+		return Optional.ofNullable(child);		
+	}
+	
 	public Set<NavSectionsCategoryData> completeTreeOfCategory(Integer categoryId) {
 		List<NavSectionsCategoryData> topLevel = ofCategory(categoryId);
 		Set<NavSectionsCategoryData> tree = new HashSet<>(topLevel);
