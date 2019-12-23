@@ -125,8 +125,10 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public Optional<Category> buildCategoryWithChildren(Integer categoryId) {
+		boolean isContained = allCategoriesId.contains(categoryId);
 		Optional<NavigationCategoryInfo> categoryInfo = getCategoryInfo(allCategoriesInfo).apply(categoryId);
-		return convertToCategoryAndAddChildren(categoryInfo);
+		boolean isNotEmpty = !categoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new).isEmpty();		
+		return isContained&&isNotEmpty ? convertToCategoryAndAddChildren(categoryInfo) : buildCategoryNotContainedInNavigationJsonWithChildren(categoryId);
 	}
 
 	@Override

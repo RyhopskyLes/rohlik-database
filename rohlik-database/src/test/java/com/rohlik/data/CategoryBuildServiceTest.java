@@ -235,6 +235,19 @@ public void buildCategoryLekarna() {
 	assertEquals(Optional.ofNullable(LEKARNA), lekarna.map(Category::getCategoryId));
 	assertEquals(Optional.ofNullable(0), lekarna.map(Category::getParentId));
 	assertEquals(Optional.ofNullable(true), lekarna.map(Category::getActive));	
-	lekarna.ifPresent(lek->assertTrue(!lek.getChildren().isEmpty()));
+	lekarna.ifPresent(lek->assertFalse(lek.getChildren().isEmpty()));
+}
+
+@Test
+@Order(11) 
+@DisplayName("should build category 300116325")
+public void buildCategoryFrancouzskaCervenaVinaWithChildren() {
+	Optional<Category> francouzska = buildService.buildCategoryWithChildren(FRANCOUZSKA);
+	assertEquals(true, francouzska.isPresent());
+	assertEquals(Optional.ofNullable("Francouzská"), francouzska.map(Category::getCategoryName));
+	assertEquals(Optional.ofNullable(FRANCOUZSKA), francouzska.map(Category::getCategoryId));
+	assertEquals(Optional.ofNullable(CERVENA), francouzska.map(Category::getParentId));
+	assertEquals(Optional.ofNullable(true), francouzska.map(Category::getActive));
+	francouzska.ifPresent(franc->assertFalse(franc.getChildren().isEmpty()));
 }
 }
