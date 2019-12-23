@@ -1,62 +1,145 @@
 package com.rohlik.data.commons.services.build;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rohlik.data.commons.services.CategoryKosikServiceImpl;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
+import com.rohlik.data.objects.NavSections;
+import com.rohlik.data.objects.NavSectionsCategoryData;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.NavigationCategoryInfo;
 
 @Service("CategoryBuildService")
 @Transactional
 public class CategoryBuildServiceImpl implements CategoryBuildService {
+	private static Logger logger = LoggerFactory.getLogger(CategoryBuildServiceImpl.class);
 	private Navigation navigation;
+	private NavSections navsections;
+
+	private List<NavigationCategoryInfo> allCategoriesInfo;
+	private List<Integer> allCategoriesId;
+	private List<NavigationCategoryInfo> mainCategoriesInfo;
+	private final Integer LEKARNA = 300112985;
 
 	@Autowired
-	public CategoryBuildServiceImpl(Navigation navigation) {
+	public CategoryBuildServiceImpl(Navigation navigation, NavSections navsections) {
 		super();
 		this.navigation = navigation;
+		this.navsections = navsections;
+	}
+
+	@PostConstruct
+	public void initDB() {
+		logger.info("Starting navigation loading...");
+		allCategoriesInfo = navigation.getAllCategoriesData();
+		allCategoriesId= allCategoriesInfo.stream().map(NavigationCategoryInfo::getId).collect(Collectors.toCollection(ArrayList::new));
+		mainCategoriesInfo = allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
+				.filter(cat -> cat.getParentId().equals(0)).collect(Collectors.toCollection(ArrayList::new));
+		logger.info("Navigation loading finished.");
 	}
 
 	@Override
 	public Optional<Category> buildMainCategory(Integer categoryId) {
-		Optional<NavigationCategoryInfo> categoryInfo = navigation.getAllMainCategoriesInfo().stream()
-				.filter(category -> Objects.equals(category.getId(), categoryId)).findFirst();
-		return categoryInfo.map(NavigationCategoryInfo::toCategory);
+		return getMainCategoryInfo(mainCategoriesInfo).apply(categoryId).map(NavigationCategoryInfo::toCategory);
 
+	}
+
+	private Function<Integer, Optional<NavigationCategoryInfo>> getMainCategoryInfo(
+			List<NavigationCategoryInfo> categoriesInfo) {
+		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getId(), categoryId))
+				.findFirst();
+	}
+
+	private Function<Integer, Optional<NavigationCategoryInfo>> getCategoryInfo(
+			List<NavigationCategoryInfo> categoriesInfo) {
+		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getId(), categoryId))
+				.findFirst();
 	}
 
 	@Override
 	public Optional<Category> buildMainCategoryWithChildren(Integer categoryId) {
-		List<NavigationCategoryInfo> allCategoriesInfo = navigation.getAllCategoriesData();
-		Optional<NavigationCategoryInfo> mainCategoryInfo = allCategoriesInfo.stream()
-				.filter(category -> Objects.equals(category.getId(), categoryId)).findFirst();
+		Optional<NavigationCategoryInfo> mainCategoryInfo = getMainCategoryInfo(mainCategoriesInfo).apply(categoryId);
+		List<Integer> children = mainCategoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new);
+		boolean isEmpty = children.stream().filter(id->allCategoriesId.contains(id)).collect(Collectors.toCollection(ArrayList::new)).isEmpty();
+		return isEmpty ? buildCategoryNotContainedInNavigationJsonWithChildren(categoryId) : convertToCategoryAndAddChildren(mainCategoryInfo);
+	}
+
+	private Optional<Category> convertToCategoryAndAddChildren(Optional<NavigationCategoryInfo> mainCategoryInfo) {
 		Optional<Category> mainCategory = mainCategoryInfo.map(NavigationCategoryInfo::toCategory);
 		List<Integer> childrenId = mainCategoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new);
 		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getId()))
-				.map(NavigationCategoryInfo::toChild).forEach(child -> mainCategory.ifPresent(category->category.addChild(child)));
+				.map(NavigationCategoryInfo::toChild)
+				.forEach(child -> mainCategory.ifPresent(category -> category.addChild(child)));
+		return mainCategory;
+	}
+
+	private Category convertToCategoryAndAddChildren(NavigationCategoryInfo mainCategoryInfo) {
+		Category mainCategory = mainCategoryInfo.toCategory();
+		List<Integer> childrenId = mainCategoryInfo.getChildren();
+		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getId()))
+				.map(NavigationCategoryInfo::toChild).forEach(mainCategory::addChild);
 		return mainCategory;
 	}
 
 	@Override
 	public List<Category> buildAllMainCategories() {
-		List<NavigationCategoryInfo> categoriesInfo = navigation.getAllMainCategoriesInfo();
-		return categoriesInfo.stream().map(NavigationCategoryInfo::toCategory).collect(Collectors.toCollection(ArrayList::new));
-		
+		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::toCategory)
+				.collect(Collectors.toCollection(ArrayList::new));
+
 	}
 
 	@Override
 	public List<Category> buildAllMainCategoriesWithChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getId)
+				.map(this::buildMainCategoryWithChildren)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	@Override
+	public Optional<Category> buildCategory(Integer categoryId) {
+		boolean isContained = allCategoriesId.contains(categoryId);
+		return isContained ?  getCategoryInfo(allCategoriesInfo).apply(categoryId).map(NavigationCategoryInfo::toCategory): buildCategoryNotContainedInNavigationJson(categoryId) ;
+	}
+
+	@Override
+	public Optional<Category> buildCategoryWithChildren(Integer categoryId) {
+		Optional<NavigationCategoryInfo> categoryInfo = getCategoryInfo(allCategoriesInfo).apply(categoryId);
+		return convertToCategoryAndAddChildren(categoryInfo);
+	}
+
+	@Override
+	public Optional<Category> buildCategoryNotContainedInNavigationJson(Integer categoryId) {
+		return navsections.getAsCategoryFromBreadCrumbs(categoryId);
+	}
+
+	@Override
+	public Optional<Category> buildCategoryNotContainedInNavigationJsonWithChildren(Integer categoryId) {
+		Optional<Category> category = navsections.getAsCategoryFromBreadCrumbs(categoryId);
+		navsections.ofCategory(categoryId).stream().map(NavSectionsCategoryData::toChild)
+				.forEach(child -> category.ifPresent(theCategory -> theCategory.addChild(child)));
+		return category;
 	}
 
 }
