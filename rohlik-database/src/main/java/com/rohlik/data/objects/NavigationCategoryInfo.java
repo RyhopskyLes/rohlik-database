@@ -9,37 +9,16 @@ import com.rohlik.data.entities.Child;
 
 import lombok.Data;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-"id",
-"occurrence",
-"position",
-"name",
-"aboveAverage",
-"link",
-"companyId",
-"parentId",
-"children"
-})
 @Data
 public class NavigationCategoryInfo {
-	@JsonProperty("id")
 	private Integer id;
-	@JsonProperty("occurrence")
 	private Integer occurrence;
-	@JsonProperty("position")
 	private Integer position;
-	@JsonProperty("name")
 	private String name;
-	@JsonProperty("aboveAverage")
 	private Boolean aboveAverage;
-	@JsonProperty("link")
 	private String link;
-	@JsonProperty("companyId")
 	private Integer companyId;
-	@JsonProperty("parentId")
 	private Integer parentId;
-	@JsonProperty("children")
 	private List<Integer> children = new ArrayList<>();
 	
 	public Category toCategory() {
