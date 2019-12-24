@@ -9,7 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +36,8 @@ import com.rohlik.data.commons.services.build.CategoryBuildService;
 import com.rohlik.data.config.AppConfigTest;
 import com.rohlik.data.config.DataTestConfig;
 import com.rohlik.data.entities.Category;
+import com.rohlik.data.objects.NavSections;
+import com.rohlik.data.objects.NavSectionsCategoryData;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.NavigationCategoryInfo;
 
@@ -48,6 +52,9 @@ private static Logger logger = LoggerFactory.getLogger(CategoryBuildServiceTest.
 private CategoryBuildService buildService;
 @Autowired	
 private Navigation navigation;
+@Autowired	
+private NavSections navSections;
+
 private final Integer PEKARNA=300101000;
 private final Integer CHIPSY_A_BRAMBURKY=300106154;
 private final Integer VOLNE_PRODEJNE_LEKY=300113171;
@@ -57,6 +64,7 @@ private final Integer SLANE_SNACKY_A_ORECHY =300106153;
 private final Integer FRANCOUZSKA=300116325;
 private final Integer CERVENA=300108066;
 private final Integer BORDEAUX=300116331;
+private final Integer ZVIRE=300112000;
 
 
 private  List<NavigationCategoryInfo> allCategoriesInfo;
@@ -249,5 +257,20 @@ public void buildCategoryFrancouzskaCervenaVinaWithChildren() {
 	assertEquals(Optional.ofNullable(CERVENA), francouzska.map(Category::getParentId));
 	assertEquals(Optional.ofNullable(true), francouzska.map(Category::getActive));
 	francouzska.ifPresent(franc->assertFalse(franc.getChildren().isEmpty()));
+}
+
+@Test
+@Order(12) 
+@DisplayName("should build category 300112000")
+public void buildCompleteTreeOfMainCategoryZvire() {
+	Map<Integer, Set<Category>> zvire = buildService.buildCompleteTreeOfMainCategory(ZVIRE);
+	zvire.remove(1);
+	Set<NavSectionsCategoryData> categories = navSections.completeTreeOfCategory(ZVIRE);
+	Set<Integer> names =categories.stream().map(NavSectionsCategoryData::getCategoryId).collect(Collectors.toCollection(HashSet::new));
+	Set<Integer> namesTree = zvire.values().stream().flatMap(Set::stream).map(Category::getCategoryId).collect(Collectors.toCollection(HashSet::new));
+namesTree.removeAll(names);
+
+int count =zvire.values().stream().map(Set::size).reduce(0, Integer::sum);
+	assertEquals(categories.size()+namesTree.size(), count);
 }
 }

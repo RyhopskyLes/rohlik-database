@@ -6,10 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	private List<Integer> allCategoriesId;
 	private List<NavigationCategoryInfo> mainCategoriesInfo;
 	private final Integer LEKARNA = 300112985;
+	
 
 	@Autowired
 	public CategoryBuildServiceImpl(Navigation navigation, NavSections navsections) {
@@ -52,7 +56,9 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public void initDB() {
 		logger.info("Starting navigation loading...");
 		allCategoriesInfo = navigation.getAllCategoriesData();
-		allCategoriesId= allCategoriesInfo.stream().map(NavigationCategoryInfo::getId).collect(Collectors.toCollection(ArrayList::new));
+		allCategoriesInfo.stream().filter(info->info.getName().equals("BARF")).forEach(System.out::println);
+		allCategoriesId = allCategoriesInfo.stream().map(NavigationCategoryInfo::getId)
+				.collect(Collectors.toCollection(ArrayList::new));
 		mainCategoriesInfo = allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
 				.filter(cat -> cat.getParentId().equals(0)).collect(Collectors.toCollection(ArrayList::new));
 		logger.info("Navigation loading finished.");
@@ -80,8 +86,10 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public Optional<Category> buildMainCategoryWithChildren(Integer categoryId) {
 		Optional<NavigationCategoryInfo> mainCategoryInfo = getMainCategoryInfo(mainCategoriesInfo).apply(categoryId);
 		List<Integer> children = mainCategoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new);
-		boolean isEmpty = children.stream().filter(id->allCategoriesId.contains(id)).collect(Collectors.toCollection(ArrayList::new)).isEmpty();
-		return isEmpty ? buildCategoryNotContainedInNavigationJsonWithChildren(categoryId) : convertToCategoryAndAddChildren(mainCategoryInfo);
+		boolean isEmpty = children.stream().filter(id -> allCategoriesId.contains(id))
+				.collect(Collectors.toCollection(ArrayList::new)).isEmpty();
+		return isEmpty ? buildCategoryNotContainedInNavigationJsonWithChildren(categoryId)
+				: convertToCategoryAndAddChildren(mainCategoryInfo);
 	}
 
 	private Optional<Category> convertToCategoryAndAddChildren(Optional<NavigationCategoryInfo> mainCategoryInfo) {
@@ -110,25 +118,25 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public List<Category> buildAllMainCategoriesWithChildren() {
-		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getId)
-				.map(this::buildMainCategoryWithChildren)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(Collectors.toCollection(ArrayList::new));
+		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getId).map(this::buildMainCategoryWithChildren)
+				.filter(Optional::isPresent).map(Optional::get).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override
 	public Optional<Category> buildCategory(Integer categoryId) {
 		boolean isContained = allCategoriesId.contains(categoryId);
-		return isContained ?  getCategoryInfo(allCategoriesInfo).apply(categoryId).map(NavigationCategoryInfo::toCategory): buildCategoryNotContainedInNavigationJson(categoryId) ;
+		return isContained
+				? getCategoryInfo(allCategoriesInfo).apply(categoryId).map(NavigationCategoryInfo::toCategory)
+				: buildCategoryNotContainedInNavigationJson(categoryId);
 	}
 
 	@Override
 	public Optional<Category> buildCategoryWithChildren(Integer categoryId) {
 		boolean isContained = allCategoriesId.contains(categoryId);
 		Optional<NavigationCategoryInfo> categoryInfo = getCategoryInfo(allCategoriesInfo).apply(categoryId);
-		boolean isNotEmpty = !categoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new).isEmpty();		
-		return isContained&&isNotEmpty ? convertToCategoryAndAddChildren(categoryInfo) : buildCategoryNotContainedInNavigationJsonWithChildren(categoryId);
+		boolean isNotEmpty = !categoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new).isEmpty();
+		return isContained && isNotEmpty ? convertToCategoryAndAddChildren(categoryInfo)
+				: buildCategoryNotContainedInNavigationJsonWithChildren(categoryId);
 	}
 
 	@Override
@@ -144,4 +152,51 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 		return category;
 	}
 
+	@Override
+	public Map<Integer, Set<Category>> buildCompleteTreeOfMainCategory(Integer categoryId) {
+		/*Map<Integer, Set<Category>> tree = new HashMap<>();
+		Optional<Category> mainCategory = buildMainCategoryWithChildren(categoryId);
+		int counter = 1;
+		if (mainCategory.isPresent()) {
+			Set<Child> childrenOnLevel = addStartingCategoryToTreeAndReturnItsChildren(tree, mainCategory.get(), counter);
+			counter++;
+			while (!childrenOnLevel.isEmpty()) {
+				childrenOnLevel = addAnotherLevelToTreeAndReturnChildrenCollection(tree, childrenOnLevel, counter);
+				counter++;			
+			}
+		}*/
+		return buildCompleteTreeOfMainCategoryDownToLevel(categoryId, -1);
+	}
+	
+	private Set<Child> addStartingCategoryToTreeAndReturnItsChildren(Map<Integer, Set<Category>> tree, Category category, int counter) {
+		Set<Category> categoriesOnLevel = new HashSet<>();
+		categoriesOnLevel.add(category);
+		tree.put(counter, categoriesOnLevel);
+		return category.getChildren();		
+	}
+
+	private Set<Child> addAnotherLevelToTreeAndReturnChildrenCollection(Map<Integer, Set<Category>> tree, Set<Child> childrenOnLevel, int counter) {
+		Set<Category> categoriesOnLevel = childrenOnLevel.stream().map(Child::getCategoryId)
+				.map(this::buildCategoryWithChildren).filter(Optional::isPresent).map(Optional::get)
+				.collect(Collectors.toCollection(HashSet::new));
+		tree.put(counter, categoriesOnLevel);
+		return categoriesOnLevel.stream().map(Category::getChildren).flatMap(Set::stream)
+				.collect(Collectors.toCollection(HashSet::new));
+				
+	}
+	
+	private Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryDownToLevel(Integer categoryId, Integer level) {
+		Map<Integer, Set<Category>> tree = new HashMap<>();
+		Optional<Category> mainCategory = buildMainCategoryWithChildren(categoryId);
+		int counter = 1;		
+		if (mainCategory.isPresent()) {
+			Set<Child> childrenOnLevel = addStartingCategoryToTreeAndReturnItsChildren(tree, mainCategory.get(), counter);
+			counter++;
+			while (Objects.equals(level, -1) ? !childrenOnLevel.isEmpty() : !childrenOnLevel.isEmpty() && counter > level) {
+				childrenOnLevel = addAnotherLevelToTreeAndReturnChildrenCollection(tree, childrenOnLevel, counter);
+				counter++;			
+			}
+		}
+		return tree;
+	}
 }
