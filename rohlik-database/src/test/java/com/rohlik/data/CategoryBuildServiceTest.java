@@ -304,4 +304,28 @@ public void buildLevel1ofCategoryZvire() {
 	assertThat(zvire, hasSize(4));
 	
 }
+
+@Test
+@Order(16) 
+@DisplayName("should build lowest levels of category 300112000")
+public void buildLowestLevelOfEachBranchOfCategoryZvire() {
+	Map<Integer, Set<Category>> zvire = buildService.buildLowestLevelOfEachBranchOfMainCategoryTree(ZVIRE);
+	zvire.forEach((k, v)->System.out.println(k+"\t"+v));
+	assertThat(zvire.get(2), hasItems(
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112011)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112014)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112013)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112017)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112004)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112003)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112875)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112009)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112008)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300115115)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112019)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112020)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112022))						
+			));	
+	
+}
 }

@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -205,4 +208,23 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 		}
 		return result.containsKey(level) ? result.get(level) : new HashSet<>();
 	}
+
+	@Override
+	public Map<Integer, Set<Category>> buildLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId) {
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		Map<Integer, Set<Category>> completeTree = buildCompleteTreeOfMainCategoryToLevel(categoryId, -1);
+		completeTree.entrySet().stream()
+				.filter(containsCategoryWithoutChildren::test)
+				.forEach(entry -> {
+					Set<Category> lowest = collectCategoriesWithoutChildren.apply(entry.getValue());
+					if (!lowest.isEmpty())
+						result.put(entry.getKey(), lowest);
+				});
+		return result;
+	}
+
+	Predicate<Entry<Integer, Set<Category>>> containsCategoryWithoutChildren = entry -> entry.getValue().stream()
+			.map(Category::getChildren).anyMatch(Set::isEmpty);
+	UnaryOperator<Set<Category>> collectCategoriesWithoutChildren = set -> set.stream()
+			.filter(category -> category.getChildren().isEmpty()).collect(Collectors.toCollection(HashSet::new));
 }
