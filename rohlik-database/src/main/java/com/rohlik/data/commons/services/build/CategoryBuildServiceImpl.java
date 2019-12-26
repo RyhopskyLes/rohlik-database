@@ -1,10 +1,5 @@
 package com.rohlik.data.commons.services.build;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.rohlik.data.commons.services.CategoryKosikServiceImpl;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.objects.NavSections;
@@ -43,7 +37,6 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	private List<Integer> allCategoriesId;
 	private List<NavigationCategoryInfo> mainCategoriesInfo;
 	private final Integer LEKARNA = 300112985;
-	
 
 	@Autowired
 	public CategoryBuildServiceImpl(Navigation navigation, NavSections navsections) {
@@ -56,7 +49,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public void initDB() {
 		logger.info("Starting navigation loading...");
 		allCategoriesInfo = navigation.getAllCategoriesData();
-		//allCategoriesInfo.stream().filter(info->info.getCategoryName().equals("BARF")).forEach(System.out::println);
+		// allCategoriesInfo.stream().filter(info->info.getCategoryName().equals("BARF")).forEach(System.out::println);
 		allCategoriesId = allCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId)
 				.collect(Collectors.toCollection(ArrayList::new));
 		mainCategoriesInfo = allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
@@ -72,14 +65,14 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	private Function<Integer, Optional<NavigationCategoryInfo>> getMainCategoryInfo(
 			List<NavigationCategoryInfo> categoriesInfo) {
-		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getCategoryId(), categoryId))
-				.findFirst();
+		return categoryId -> categoriesInfo.stream()
+				.filter(category -> Objects.equals(category.getCategoryId(), categoryId)).findFirst();
 	}
 
 	private Function<Integer, Optional<NavigationCategoryInfo>> getCategoryInfo(
 			List<NavigationCategoryInfo> categoriesInfo) {
-		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getCategoryId(), categoryId))
-				.findFirst();
+		return categoryId -> categoriesInfo.stream()
+				.filter(category -> Objects.equals(category.getCategoryId(), categoryId)).findFirst();
 	}
 
 	@Override
@@ -101,14 +94,6 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 		return mainCategory;
 	}
 
-	private Category convertToCategoryAndAddChildren(NavigationCategoryInfo mainCategoryInfo) {
-		Category mainCategory = mainCategoryInfo.toCategory();
-		List<Integer> childrenId = mainCategoryInfo.getChildren();
-		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getCategoryId()))
-				.map(NavigationCategoryInfo::toChild).forEach(mainCategory::addChild);
-		return mainCategory;
-	}
-
 	@Override
 	public List<Category> buildAllMainCategories() {
 		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::toCategory)
@@ -118,8 +103,9 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public List<Category> buildAllMainCategoriesWithChildren() {
-		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId).map(this::buildMainCategoryWithChildren)
-				.filter(Optional::isPresent).map(Optional::get).collect(Collectors.toCollection(ArrayList::new));
+		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId)
+				.map(this::buildMainCategoryWithChildren).filter(Optional::isPresent).map(Optional::get)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	@Override
@@ -154,49 +140,69 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public Map<Integer, Set<Category>> buildCompleteTreeOfMainCategory(Integer categoryId) {
-		/*Map<Integer, Set<Category>> tree = new HashMap<>();
-		Optional<Category> mainCategory = buildMainCategoryWithChildren(categoryId);
-		int counter = 1;
-		if (mainCategory.isPresent()) {
-			Set<Child> childrenOnLevel = addStartingCategoryToTreeAndReturnItsChildren(tree, mainCategory.get(), counter);
-			counter++;
-			while (!childrenOnLevel.isEmpty()) {
-				childrenOnLevel = addAnotherLevelToTreeAndReturnChildrenCollection(tree, childrenOnLevel, counter);
-				counter++;			
-			}
-		}*/
-		return buildCompleteTreeOfMainCategoryDownToLevel(categoryId, -1);
+		return buildCompleteTreeOfMainCategoryToLevel(categoryId, -1);
 	}
-	
-	private Set<Child> addStartingCategoryToTreeAndReturnItsChildren(Map<Integer, Set<Category>> tree, Category category, int counter) {
+
+	private Set<Child> addStartingCategoryToTreeAndReturnItsChildren(Map<Integer, Set<Category>> tree,
+			Category category, int counter) {
 		Set<Category> categoriesOnLevel = new HashSet<>();
 		categoriesOnLevel.add(category);
 		tree.put(counter, categoriesOnLevel);
-		return category.getChildren();		
+		return category.getChildren();
 	}
 
-	private Set<Child> addAnotherLevelToTreeAndReturnChildrenCollection(Map<Integer, Set<Category>> tree, Set<Child> childrenOnLevel, int counter) {
+	private Set<Child> addAnotherLevelToTreeAndReturnChildrenCollection(Map<Integer, Set<Category>> tree,
+			Set<Child> childrenOnLevel, int counter) {
 		Set<Category> categoriesOnLevel = childrenOnLevel.stream().map(Child::getCategoryId)
 				.map(this::buildCategoryWithChildren).filter(Optional::isPresent).map(Optional::get)
 				.collect(Collectors.toCollection(HashSet::new));
 		tree.put(counter, categoriesOnLevel);
 		return categoriesOnLevel.stream().map(Category::getChildren).flatMap(Set::stream)
 				.collect(Collectors.toCollection(HashSet::new));
-				
+
 	}
-	
-	private Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryDownToLevel(Integer categoryId, Integer level) {
+
+	private Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryToLevel(Integer categoryId, Integer level) {
 		Map<Integer, Set<Category>> tree = new HashMap<>();
 		Optional<Category> mainCategory = buildMainCategoryWithChildren(categoryId);
-		int counter = 1;		
+		int counter = 0;
 		if (mainCategory.isPresent()) {
-			Set<Child> childrenOnLevel = addStartingCategoryToTreeAndReturnItsChildren(tree, mainCategory.get(), counter);
+			Set<Child> childrenOnLevel = addStartingCategoryToTreeAndReturnItsChildren(tree, mainCategory.get(),
+					counter);
 			counter++;
-			while (Objects.equals(level, -1) ? !childrenOnLevel.isEmpty() : !childrenOnLevel.isEmpty() && counter > level) {
+			while (Objects.equals(level, -1) ? !childrenOnLevel.isEmpty()
+					: !childrenOnLevel.isEmpty() && counter <= level) {
 				childrenOnLevel = addAnotherLevelToTreeAndReturnChildrenCollection(tree, childrenOnLevel, counter);
-				counter++;			
+				counter++;
 			}
 		}
 		return tree;
+	}
+
+	@Override
+	public Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryDownToLevel(Integer categoryId, int toLevel) {
+		return toLevel >= 0 ? buildCompleteTreeOfMainCategoryToLevel(categoryId, toLevel) : new HashMap<>();
+
+	}
+
+	@Override
+	public Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryFromLevelToLevel(Integer categoryId,
+			int fromLevel, int toLevel) {
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		if (fromLevel <= toLevel && fromLevel >= 0) {
+			buildCompleteTreeOfMainCategoryToLevel(categoryId, toLevel).entrySet().stream()
+					.filter(entry -> entry.getKey() >= fromLevel && entry.getKey() <= toLevel)
+					.forEach(entry -> result.put(entry.getKey(), entry.getValue()));
+		}
+		return result;
+	}
+
+	@Override
+	public Set<Category> buildLevelFromCompleteTreeOfMainCategory(Integer categoryId, int level) {
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		if (level >= 0) {
+			result = buildCompleteTreeOfMainCategoryToLevel(categoryId, level);
+		}
+		return result.containsKey(level) ? result.get(level) : new HashSet<>();
 	}
 }

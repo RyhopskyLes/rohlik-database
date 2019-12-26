@@ -17,4 +17,7 @@ Optional<Category> buildCategoryWithChildren(Integer categoryId);
 Optional<Category> buildCategoryNotContainedInNavigationJson(Integer categoryId);
 Optional<Category> buildCategoryNotContainedInNavigationJsonWithChildren(Integer categoryId);
 Map<Integer, Set<Category>> buildCompleteTreeOfMainCategory(Integer categoryId);
+Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryDownToLevel(Integer categoryId, int toLevel);
+Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryFromLevelToLevel(Integer categoryId, int fromLevel, int toLevel);
+Set<Category> buildLevelFromCompleteTreeOfMainCategory(Integer categoryId, int level);
 }

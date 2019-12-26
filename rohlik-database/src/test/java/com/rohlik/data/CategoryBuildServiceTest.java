@@ -264,7 +264,8 @@ public void buildCategoryFrancouzskaCervenaVinaWithChildren() {
 @DisplayName("should build category 300112000")
 public void buildCompleteTreeOfMainCategoryZvire() {
 	Map<Integer, Set<Category>> zvire = buildService.buildCompleteTreeOfMainCategory(ZVIRE);
-	zvire.remove(1);
+	zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+	zvire.remove(0);
 	Set<NavSectionsCategoryData> categories = navSections.completeTreeOfCategory(ZVIRE);
 	Set<Integer> names =categories.stream().map(NavSectionsCategoryData::getCategoryId).collect(Collectors.toCollection(HashSet::new));
 	Set<Integer> namesTree = zvire.values().stream().flatMap(Set::stream).map(Category::getCategoryId).collect(Collectors.toCollection(HashSet::new));
@@ -272,5 +273,35 @@ namesTree.removeAll(names);
 
 int count =zvire.values().stream().map(Set::size).reduce(0, Integer::sum);
 	assertEquals(categories.size()+namesTree.size(), count);
+}
+
+@Test
+@Order(13) 
+@DisplayName("should build category 300112000 to level 2")
+public void buildCompleteTreeOfMainCategoryZvireToLevel2() {
+	Map<Integer, Set<Category>> zvire = buildService.buildCompleteTreeOfMainCategoryDownToLevel(ZVIRE, 2);
+	zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+	assertThat(zvire.keySet(), hasSize(3));
+	assertThat(zvire.keySet(), hasItems(0, 1, 2));	
+}
+
+@Test
+@Order(14) 
+@DisplayName("should build category 300112000 from level 2 to level 3")
+public void buildCompleteTreeOfMainCategoryZvireFromLevel2ToLevel3() {
+	Map<Integer, Set<Category>> zvire = buildService.buildCompleteTreeOfMainCategoryFromLevelToLevel(ZVIRE, 2, 3);
+	zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+	assertThat(zvire.keySet(), hasSize(2));
+	assertThat(zvire.keySet(), hasItems(2, 3));	
+}
+
+@Test
+@Order(15) 
+@DisplayName("should build level 1 of category 300112000")
+public void buildLevel1ofCategoryZvire() {
+	 Set<Category> zvire = buildService.buildLevelFromCompleteTreeOfMainCategory(ZVIRE, 1);
+	zvire.forEach(System.out::println);
+	assertThat(zvire, hasSize(4));
+	
 }
 }
