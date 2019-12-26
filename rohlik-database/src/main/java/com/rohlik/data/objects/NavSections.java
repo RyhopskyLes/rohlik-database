@@ -17,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
+
 
 @Component("navSections")
 public class NavSections {
@@ -122,17 +124,10 @@ public class NavSections {
 
 	private Function<JsonObject, NavSectionsCategoryData> toCategoryData(Integer parentId) {
 		return object -> {
-			NavSectionsCategoryData navSectionsCategoryData = new NavSectionsCategoryData();
-			Optional<JsonElement> productDisplayCount = Optional.ofNullable(object.get("productDisplayCount"));
-			Optional<JsonElement> productsCount = Optional.ofNullable(object.get("productsCount"));
-			navSectionsCategoryData.setParentCategoryId(parentId);
-			navSectionsCategoryData.setCategoryId(object.get("categoryId").getAsInt());
-			navSectionsCategoryData.setName(object.get("name").getAsString());
+		    NavSectionsCategoryData navSectionsCategoryData = new NavSectionsCategoryData().deserializeFromJson(object);
+		    navSectionsCategoryData.setParentId(parentId);
 			navSectionsCategoryData.setMetadataLink(
 					CATEGORIES_METADATA_START + navSectionsCategoryData.getCategoryId() + CATEGORIES_METADATA_END);
-			productDisplayCount
-					.ifPresent(element -> navSectionsCategoryData.setProductDisplayCount(element.getAsInt()));
-			productsCount.ifPresent(element -> navSectionsCategoryData.setProductsCount(element.getAsInt()));
 			return navSectionsCategoryData;
 		};
 	};

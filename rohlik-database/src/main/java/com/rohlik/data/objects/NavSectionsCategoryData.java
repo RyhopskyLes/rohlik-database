@@ -2,40 +2,38 @@ package com.rohlik.data.objects;
 
 import java.util.Objects;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.kosik.interfaces.Setter;
+import com.rohlik.data.objects.jsondeserializers.NavSectionsCategoryDataDeserializer;
 
-public class NavSectionsCategoryData {
-private Integer categoryId;
-private Integer parentCategoryId;
-private String name;
+public class NavSectionsCategoryData extends CategoryPattern {
+//private Integer categoryId;
+//private Integer parentId;
+//private String categoryName;
 private String metadataLink;
 private Integer productDisplayCount;
 private Integer productsCount;
 public NavSectionsCategoryData() {	
+	super();
 }
-public NavSectionsCategoryData(Integer categoryId, String name) {
-	this.categoryId = categoryId;
-	this.name = name;
+public NavSectionsCategoryData(Integer categoryId, String categoryName) {
+	super(categoryId, categoryName);
 }
 
+public NavSectionsCategoryData(Integer categoryId, String categoryName, Integer productDisplayCount,
+		Integer productsCount) {
+	super(categoryId, categoryName);
+	this.productDisplayCount = productDisplayCount;
+	this.productsCount = productsCount;
+}
 public <T> NavSectionsCategoryData set(Setter<T> setter, T param) {
 	setter.accept(param);
 	return this;
 }
-public Integer getCategoryId() {
-	return categoryId;
-}
-public void setCategoryId(Integer categoryId) {
-	this.categoryId = categoryId;
-}
-public String getName() {
-	return name;
-}
-public void setName(String name) {
-	this.name = name;
-}
+
 public String getMetadataLink() {
 	return metadataLink;
 }
@@ -56,13 +54,13 @@ public void setProductsCount(Integer productsCount) {
 }
 @Override
 public String toString() {
-	return "NavSectionsCategoryData [categoryId=" + categoryId + ", parentCategoryId=" + parentCategoryId + ", name=" + name
+	return "NavSectionsCategoryData [categoryId=" + categoryId + ", parentId=" + parentId + ", categoryName=" + categoryName
 			+ ", metadataLink=" + metadataLink + ", productDisplayCount=" + productDisplayCount + ", productsCount="
 			+ productsCount + "]";
 }
 @Override
 public int hashCode() {
-	return Objects.hash(categoryId, metadataLink, name, parentCategoryId, productDisplayCount, productsCount);
+	return Objects.hash(categoryId, metadataLink, categoryName, parentId, productDisplayCount, productsCount);
 }
 @Override
 public boolean equals(Object obj) {
@@ -74,22 +72,17 @@ public boolean equals(Object obj) {
 		return false;
 	NavSectionsCategoryData other = (NavSectionsCategoryData) obj;
 	return Objects.equals(categoryId, other.categoryId) && Objects.equals(metadataLink, other.metadataLink)
-			&& Objects.equals(name, other.name) && Objects.equals(parentCategoryId, other.parentCategoryId)
+			&& Objects.equals(categoryName, other.categoryName) && Objects.equals(parentId, other.parentId)
 			&& Objects.equals(productDisplayCount, other.productDisplayCount)
 			&& Objects.equals(productsCount, other.productsCount);
 }
-public Integer getParentCategoryId() {
-	return parentCategoryId;
-}
-public void setParentCategoryId(Integer parentCategoryId) {
-	this.parentCategoryId = parentCategoryId;
-}
+
 
 public Category toCategory() {
 	Category category = new Category();
 	category.setCategoryId(this.categoryId);
-	category.setCategoryName(this.name);
-	category.setParentId(this.parentCategoryId);
+	category.setCategoryName(this.categoryName);
+	category.setParentId(this.parentId);
 	category.setActive(true);
 	return category;
 }
@@ -97,9 +90,18 @@ public Category toCategory() {
 public Child toChild() {
 	Child child = new Child();
 	child.setCategoryId(this.categoryId);
-	child.setCategoryName(this.name);
+	child.setCategoryName(this.categoryName);
 	child.setActive(true);
 	return child;
 }
+
+@Override
+//fields parentId and metadataLink not included in json
+public NavSectionsCategoryData deserializeFromJson(JsonObject object) {
+	GsonBuilder gsonBldr = new GsonBuilder();
+    gsonBldr.registerTypeAdapter(NavSectionsCategoryData.class, new NavSectionsCategoryDataDeserializer());
+    return gsonBldr.create().fromJson(object, NavSectionsCategoryData.class);
+}
+
 
 }

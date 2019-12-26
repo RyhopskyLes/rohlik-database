@@ -19,26 +19,26 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.rohlik.data.entities.Category;
 
-import lombok.NoArgsConstructor;
+
 
 @Component("navigation")
 public class Navigation {
 
 	private static Logger log = LoggerFactory.getLogger(Navigation.class);	
 	private RootObject rootObject;
-	private Gson gson;
+	
 
 	@Autowired
 	public Navigation(RootObject rootObject) {
-		this.rootObject = rootObject;
-		this.gson=new Gson();
+		this.rootObject = rootObject;		
 	}	
 	public List<NavigationCategoryInfo> getAllCategoriesData() {
 		Optional<JsonObject> navigation = rootObject.getNavigationData()
 				.map(object -> object.getAsJsonObject("navigation"));
 		Set<Entry<String, JsonElement>> entrySet = navigation.map(JsonObject::entrySet).orElse(new HashSet<>());
 		return entrySet.stream().map(Entry<String, JsonElement>::getValue)
-				.map(elem -> gson.fromJson(elem, NavigationCategoryInfo.class))
+				.map(JsonElement::getAsJsonObject)
+				.map(object->new NavigationCategoryInfo().deserializeFromJson(object))
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
@@ -50,13 +50,13 @@ public class Navigation {
 
 	public Map<Integer, String> getAllMainCategoriesIdandName() {
 		return getAllMainCategoriesInfo().stream()
-				.collect(Collectors.toMap(NavigationCategoryInfo::getId, NavigationCategoryInfo::getName));
+				.collect(Collectors.toMap(NavigationCategoryInfo::getCategoryId, NavigationCategoryInfo::getCategoryName));
 
 	}
 
 	public Map<Integer, String> getAllCategoriesIdandName() {
 		return getAllCategoriesData().stream()
-				.collect(Collectors.toMap(NavigationCategoryInfo::getId, NavigationCategoryInfo::getName));
+				.collect(Collectors.toMap(NavigationCategoryInfo::getCategoryId, NavigationCategoryInfo::getCategoryName));
 
 	}
 
