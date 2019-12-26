@@ -12,6 +12,7 @@ import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.objects.jsondeserializers.NavSectionsCategoryDataDeserializer;
 import com.rohlik.data.objects.jsondeserializers.NavigationCategoryInfoDeserializer;
+import com.rohlik.data.patterns.CategoryPattern;
 
 import lombok.Data;
 

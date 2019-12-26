@@ -223,8 +223,8 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 		return result;
 	}
 
-	Predicate<Entry<Integer, Set<Category>>> containsCategoryWithoutChildren = entry -> entry.getValue().stream()
+	private Predicate<Entry<Integer, Set<Category>>> containsCategoryWithoutChildren = entry -> entry.getValue().stream()
 			.map(Category::getChildren).anyMatch(Set::isEmpty);
-	UnaryOperator<Set<Category>> collectCategoriesWithoutChildren = set -> set.stream()
+	private UnaryOperator<Set<Category>> collectCategoriesWithoutChildren = set -> set.stream()
 			.filter(category -> category.getChildren().isEmpty()).collect(Collectors.toCollection(HashSet::new));
 }

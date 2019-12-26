@@ -8,6 +8,7 @@ import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.kosik.interfaces.Setter;
 import com.rohlik.data.objects.jsondeserializers.NavSectionsCategoryDataDeserializer;
+import com.rohlik.data.patterns.CategoryPattern;
 
 public class NavSectionsCategoryData extends CategoryPattern {
 //private Integer categoryId;

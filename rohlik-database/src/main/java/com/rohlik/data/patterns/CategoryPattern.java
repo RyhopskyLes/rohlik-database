@@ -1,4 +1,4 @@
-package com.rohlik.data.objects;
+package com.rohlik.data.patterns;
 
 
 import com.google.gson.JsonObject;
