@@ -56,8 +56,8 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public void initDB() {
 		logger.info("Starting navigation loading...");
 		allCategoriesInfo = navigation.getAllCategoriesData();
-		allCategoriesInfo.stream().filter(info->info.getName().equals("BARF")).forEach(System.out::println);
-		allCategoriesId = allCategoriesInfo.stream().map(NavigationCategoryInfo::getId)
+		//allCategoriesInfo.stream().filter(info->info.getCategoryName().equals("BARF")).forEach(System.out::println);
+		allCategoriesId = allCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId)
 				.collect(Collectors.toCollection(ArrayList::new));
 		mainCategoriesInfo = allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
 				.filter(cat -> cat.getParentId().equals(0)).collect(Collectors.toCollection(ArrayList::new));
@@ -72,13 +72,13 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	private Function<Integer, Optional<NavigationCategoryInfo>> getMainCategoryInfo(
 			List<NavigationCategoryInfo> categoriesInfo) {
-		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getId(), categoryId))
+		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getCategoryId(), categoryId))
 				.findFirst();
 	}
 
 	private Function<Integer, Optional<NavigationCategoryInfo>> getCategoryInfo(
 			List<NavigationCategoryInfo> categoriesInfo) {
-		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getId(), categoryId))
+		return categoryId -> categoriesInfo.stream().filter(category -> Objects.equals(category.getCategoryId(), categoryId))
 				.findFirst();
 	}
 
@@ -95,7 +95,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	private Optional<Category> convertToCategoryAndAddChildren(Optional<NavigationCategoryInfo> mainCategoryInfo) {
 		Optional<Category> mainCategory = mainCategoryInfo.map(NavigationCategoryInfo::toCategory);
 		List<Integer> childrenId = mainCategoryInfo.map(NavigationCategoryInfo::getChildren).orElseGet(ArrayList::new);
-		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getId()))
+		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getCategoryId()))
 				.map(NavigationCategoryInfo::toChild)
 				.forEach(child -> mainCategory.ifPresent(category -> category.addChild(child)));
 		return mainCategory;
@@ -104,7 +104,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	private Category convertToCategoryAndAddChildren(NavigationCategoryInfo mainCategoryInfo) {
 		Category mainCategory = mainCategoryInfo.toCategory();
 		List<Integer> childrenId = mainCategoryInfo.getChildren();
-		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getId()))
+		allCategoriesInfo.stream().filter(info -> childrenId.contains(info.getCategoryId()))
 				.map(NavigationCategoryInfo::toChild).forEach(mainCategory::addChild);
 		return mainCategory;
 	}
@@ -118,7 +118,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public List<Category> buildAllMainCategoriesWithChildren() {
-		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getId).map(this::buildMainCategoryWithChildren)
+		return mainCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId).map(this::buildMainCategoryWithChildren)
 				.filter(Optional::isPresent).map(Optional::get).collect(Collectors.toCollection(ArrayList::new));
 	}
 

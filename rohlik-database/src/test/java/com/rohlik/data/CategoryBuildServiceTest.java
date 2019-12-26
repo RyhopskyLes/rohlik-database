@@ -75,11 +75,11 @@ private Optional<NavigationCategoryInfo> chipsyInfo;
 public void setup() {
 	allCategoriesInfo = navigation.getAllCategoriesData();
 	pekarnaInfo =allCategoriesInfo.stream()
-			.filter(category -> Objects.equals(category.getId(), PEKARNA)).findFirst();
+			.filter(category -> Objects.equals(category.getCategoryId(), PEKARNA)).findFirst();
 	allMainCategoriesInfo=allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
 			.filter(cat -> cat.getParentId().equals(0)).collect(Collectors.toCollection(ArrayList::new));
 	chipsyInfo = allCategoriesInfo.stream()
-			.filter(category -> Objects.equals(category.getId(), CHIPSY_A_BRAMBURKY)).findFirst();
+			.filter(category -> Objects.equals(category.getCategoryId(), CHIPSY_A_BRAMBURKY)).findFirst();
 }
 @Test
 @Order(1) 

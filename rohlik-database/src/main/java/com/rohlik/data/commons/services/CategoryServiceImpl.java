@@ -173,8 +173,8 @@ public class CategoryServiceImpl implements CategoryService {
 		Function<NavSectionsCategoryData, Category> toCategory = data -> {
 			Category category = new Category();
 			category.setCategoryId(data.getCategoryId());
-			category.setCategoryName(data.getName());
-			category.setParentId(data.getParentCategoryId());
+			category.setCategoryName(data.getCategoryName());
+			category.setParentId(data.getParentId());
 			category.setActive(true);
 			return category;
 		};
