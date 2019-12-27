@@ -58,6 +58,15 @@ public class CategorySaveServiceTest {
 	DataSource dataSource;
 	
 	private final Integer PEKARNA=300101000;
+	private final Integer CHIPSY_A_BRAMBURKY=300106154;
+	private final Integer VOLNE_PRODEJNE_LEKY=300113171;
+	private final Integer LEKARNA=300112985;
+	private final Integer LUSTENINOVE_A_RYZOVE=300114931;
+	private final Integer SLANE_SNACKY_A_ORECHY =300106153;
+	private final Integer FRANCOUZSKA=300116325;
+	private final Integer CERVENA=300108066;
+	private final Integer BORDEAUX=300116331;
+	private final Integer ZVIRE=300112000;
 	
 	@AfterEach
 	public void tearDown() {
@@ -206,6 +215,42 @@ public class CategorySaveServiceTest {
 		logger.info("Test n. 4 finished");
 		}
 	
+	@Test
+	@Order(5) 
+	@DisplayName("should save category 300106154")
+	public void saveCategory() {
+		Optional<Category> chipsy = saveService.saveCategory(CHIPSY_A_BRAMBURKY);
+		assertEquals(true, chipsy.isPresent());
+		assertEquals(Optional.ofNullable("Chipsy a brambůrky"), chipsy.map(Category::getCategoryName));
+		assertEquals(Optional.ofNullable(300106154), chipsy.map(Category::getCategoryId));
+		assertEquals(Optional.ofNullable(300106153), chipsy.map(Category::getParentId));
+		assertEquals(Optional.ofNullable(true), chipsy.map(Category::getActive));
+		assertTrue(chipsy.map(Category::getId).isPresent());
+		assertTrue(chipsy.map(Category::getId).get().equals(1));	
+		logger.info("Test n. 5 finished");
+		}
+	
+	@Test
+	@Order(6)
+	@DisplayName("should save category 300106154 with children")
+	public void saveCategoryWithChildren() {
+		Optional<Category> chipsy = saveService.saveCategoryWithChildren(CHIPSY_A_BRAMBURKY);
+		Set<Child> children = chipsy.orElseGet(Category::new).getChildren();
+		assertEquals(true, chipsy.isPresent());
+		assertEquals(Optional.ofNullable("Chipsy a brambůrky"), chipsy.map(Category::getCategoryName));
+		assertEquals(Optional.ofNullable(300106154), chipsy.map(Category::getCategoryId));
+		assertEquals(Optional.ofNullable(300106153), chipsy.map(Category::getParentId));
+		assertEquals(Optional.ofNullable(true), chipsy.map(Category::getActive));
+		assertTrue(chipsy.map(Category::getId).isPresent());
+		assertTrue(chipsy.map(Category::getId).get().equals(1));
+		assertThat(children, hasSize(2));
+		assertThat(children, hasItems(
+				Matchers.<Child>hasProperty("categoryId", equalTo(300114929)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300114931))															
+				));	
+		
+		logger.info("Test n. 6 finished");
+		}
 	public void clearDatabase() throws SQLException {
 	    Connection c = dataSource.getConnection();
 	    Statement s = c.createStatement();

@@ -76,14 +76,14 @@ private Consumer<Category> saveAndAddToList(List<Category> categories) {
 
 	@Override
 	public Optional<Category> saveCategory(Integer categoryId) {
-		// TODO Auto-generated method stub
-		return null;
+		Optional<Category> toSave =buildService.buildCategory(categoryId);
+		return saveCategory(toSave);
 	}
 
 	@Override
 	public Optional<Category> saveCategoryWithChildren(Integer categoryId) {
-		// TODO Auto-generated method stub
-		return null;
+		Optional<Category> toSave =buildService.buildCategoryWithChildren(categoryId);
+		return saveCategory(toSave);
 	}
 	
 	@Override
