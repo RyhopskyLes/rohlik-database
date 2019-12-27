@@ -1,8 +1,10 @@
 package com.rohlik.data;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
@@ -10,12 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -59,7 +63,7 @@ public class CategorySaveServiceTest {
 	public void tearDown() {
 	    try {
 	        clearDatabase();
-	        logger.info("In memory database cleared!");
+	        logger.info("Inmemory database cleared!");
 	    } catch (Exception e) {
 	       logger.info(e.getMessage());
 	    }
@@ -111,6 +115,96 @@ public class CategorySaveServiceTest {
 				));	
 		logger.info("Test n. 2 finished");
 	}
+	
+	@Test
+	@Order(3) 
+	@DisplayName("should save 14 categories")
+	public void saveAllMainCategories() {
+		List<Category> all = saveService.saveAllMainCategories();
+		assertThat(all, hasSize(14));
+		assertThat(all, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300101000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300102000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300103000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300104000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300105000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300106000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300107000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300108000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300109000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300110000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300111000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112393)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112985)),
+				Matchers.<Category>hasProperty("id", equalTo(1)),
+				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("id", equalTo(3)),
+				Matchers.<Category>hasProperty("id", equalTo(4)),
+				Matchers.<Category>hasProperty("id", equalTo(5)),
+				Matchers.<Category>hasProperty("id", equalTo(6)),
+				Matchers.<Category>hasProperty("id", equalTo(7)),
+				Matchers.<Category>hasProperty("id", equalTo(8)),
+				Matchers.<Category>hasProperty("id", equalTo(9)),
+				Matchers.<Category>hasProperty("id", equalTo(10)),
+				Matchers.<Category>hasProperty("id", equalTo(11)),
+				Matchers.<Category>hasProperty("id", equalTo(12)),
+				Matchers.<Category>hasProperty("id", equalTo(13)),
+				Matchers.<Category>hasProperty("id", equalTo(14))				
+				));	
+		all.forEach(category->assertThat(category.getChildren(), hasSize(0)));
+		logger.info("Test n. 3 finished");
+		}
+	@Test
+	@Order(4) 
+	@DisplayName("should save 14 categories with children")
+	public void saveAllMainCategoriesWithChildren() {
+		List<Category> all = saveService.saveAllMainCategoriesWithChildren();
+		Category pekarna = all.stream().filter(category->category.getCategoryId().equals(PEKARNA)).findFirst().orElseGet(Category::new);
+		assertThat(all, hasSize(14));
+		assertThat(all, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300101000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300102000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300103000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300104000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300105000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300106000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300107000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300108000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300109000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300110000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300111000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112393)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112985)),
+				Matchers.<Category>hasProperty("id", equalTo(1)),
+				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("id", equalTo(3)),
+				Matchers.<Category>hasProperty("id", equalTo(4)),
+				Matchers.<Category>hasProperty("id", equalTo(5)),
+				Matchers.<Category>hasProperty("id", equalTo(6)),
+				Matchers.<Category>hasProperty("id", equalTo(7)),
+				Matchers.<Category>hasProperty("id", equalTo(8)),
+				Matchers.<Category>hasProperty("id", equalTo(9)),
+				Matchers.<Category>hasProperty("id", equalTo(10)),
+				Matchers.<Category>hasProperty("id", equalTo(11)),
+				Matchers.<Category>hasProperty("id", equalTo(12)),
+				Matchers.<Category>hasProperty("id", equalTo(13)),
+				Matchers.<Category>hasProperty("id", equalTo(14))				
+				));	
+		all.forEach(category->assertThat(category.getChildren(), not(IsEmptyCollection.empty())));
+		assertTrue(pekarna.getChildren().size()==7);
+		assertThat(pekarna.getChildren(), hasItems(
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101024)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101012)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101007)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101049)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101043)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101033)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300101019))											
+				));	
+		logger.info("Test n. 4 finished");
+		}
 	
 	public void clearDatabase() throws SQLException {
 	    Connection c = dataSource.getConnection();

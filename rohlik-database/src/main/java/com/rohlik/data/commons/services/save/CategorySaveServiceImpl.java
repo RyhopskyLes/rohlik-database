@@ -1,9 +1,12 @@
 package com.rohlik.data.commons.services.save;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,16 +48,30 @@ public class CategorySaveServiceImpl implements CategorySaveService{
 		return saved;	
 	}
 
+	private Category saveCategory(Category toSave) {
+		Category saved=null;
+		if(toSave!= null) {
+			saved = categoryDao.save(toSave);	
+		}		
+		return saved;	
+	}
+	
 	@Override
 	public List<Category> saveAllMainCategories() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Category> categories = new ArrayList<>();
+		buildService.buildAllMainCategories().forEach(saveAndAddToList(categories)::accept);
+		return categories;
 	}
-
+private Consumer<Category> saveAndAddToList(List<Category> categories) {
+	return category-> {Category saved =saveCategory(category);
+	if(saved!=null) categories.add(saved);};
+}
+	
 	@Override
 	public List<Category> saveAllMainCategoriesWithChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Category> categories = new ArrayList<>();
+		buildService.buildAllMainCategoriesWithChildren().forEach(saveAndAddToList(categories)::accept);
+		return categories;
 	}
 
 	@Override
