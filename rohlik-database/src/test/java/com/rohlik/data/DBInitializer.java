@@ -48,17 +48,8 @@ public void initDB() {
 	} catch (IOException e) {
 		e.printStackTrace();
 	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	/*CategoryKosik category = new CategoryKosik();
-	category.setCategoryName("Pekárna a cukrárna");
-	category.setUri("/pekarna-a-cukrarna");
-	category.setEquiId(300101000);
-	category.setEquiCategoryName("Pekárna a cukrárna");
-	category.setParentName("root");
-	category.setEquiParentId(0);
-	catKosikDao.save(category);*/
 	logger.info("Database initialization finished.");
 }
 }

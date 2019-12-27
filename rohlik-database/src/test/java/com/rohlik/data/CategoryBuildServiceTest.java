@@ -34,17 +34,19 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import com.rohlik.data.commons.services.build.CategoryBuildService;
 import com.rohlik.data.config.AppConfigTest;
+import com.rohlik.data.config.AppEmptyDBConfig;
 import com.rohlik.data.config.DataTestConfig;
+import com.rohlik.data.config.EmptyDBConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.objects.NavSections;
 import com.rohlik.data.objects.NavSectionsCategoryData;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.NavigationCategoryInfo;
 
-@SpringJUnitConfig(classes = {AppConfigTest.class, DataTestConfig.class})
+@SpringJUnitConfig(classes = {AppEmptyDBConfig.class, EmptyDBConfig.class})
 @DisplayName("Unit CategoryBuildService Test")
 @TestInstance(Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
+@ActiveProfiles("emptyDB")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CategoryBuildServiceTest {
 private static Logger logger = LoggerFactory.getLogger(CategoryBuildServiceTest.class);		
