@@ -1,8 +1,12 @@
 package com.rohlik.data.commons.services.save;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -59,18 +63,18 @@ public class CategorySaveServiceImpl implements CategorySaveService{
 	@Override
 	public List<Category> saveAllMainCategories() {
 		List<Category> categories = new ArrayList<>();
-		buildService.buildAllMainCategories().forEach(saveAndAddToList(categories)::accept);
+		buildService.buildAllMainCategories().forEach(saveAndAddToCollection(categories)::accept);
 		return categories;
 	}
-private Consumer<Category> saveAndAddToList(List<Category> categories) {
+
+private Consumer<Category> saveAndAddToCollection(Collection<Category> categories) {
 	return category-> {Category saved =saveCategory(category);
 	if(saved!=null) categories.add(saved);};
 }
-	
 	@Override
 	public List<Category> saveAllMainCategoriesWithChildren() {
 		List<Category> categories = new ArrayList<>();
-		buildService.buildAllMainCategoriesWithChildren().forEach(saveAndAddToList(categories)::accept);
+		buildService.buildAllMainCategoriesWithChildren().forEach(saveAndAddToCollection(categories)::accept);
 		return categories;
 	}
 
@@ -88,14 +92,27 @@ private Consumer<Category> saveAndAddToList(List<Category> categories) {
 	
 	@Override
 	public Map<Integer, Set<Category>> saveCompleteTreeOfMainCategory(Integer categoryId) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		Map<Integer, Set<Category>> completeTree = buildService.buildCompleteTreeOfMainCategory(categoryId);
+		completeTree.entrySet().stream().forEach(saveLevelAndAddItToResult(result)::accept);		
+		return result;
+	}
+	
+	private Consumer<Entry<Integer, Set<Category>>> saveLevelAndAddItToResult(Map<Integer, Set<Category>> result) {
+		return entry->{
+			Set<Category>	temp = new HashSet<>();
+			entry.getValue().stream().forEach(saveAndAddToCollection(temp)::accept);
+			result.put(entry.getKey(), temp);			
+		};		
+		
 	}
 
 	@Override
 	public Map<Integer, Set<Category>> saveCompleteTreeOfMainCategoryDownToLevel(Integer categoryId, int toLevel) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		Map<Integer, Set<Category>> treeDownToLevel = buildService.buildCompleteTreeOfMainCategoryDownToLevel(categoryId, toLevel);
+		treeDownToLevel.entrySet().stream().forEach(saveLevelAndAddItToResult(result)::accept);
+		return result;
 	}
 
 	@Override

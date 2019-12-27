@@ -13,8 +13,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -42,6 +44,8 @@ import com.rohlik.data.config.AppEmptyDBConfig;
 import com.rohlik.data.config.EmptyDBConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
+import com.rohlik.data.objects.NavSections;
+import com.rohlik.data.objects.NavSectionsCategoryData;
 
 @SpringJUnitConfig(classes = {AppEmptyDBConfig.class, EmptyDBConfig.class})
 @DisplayName("Unit CategorySaveService Test")
@@ -56,6 +60,8 @@ public class CategorySaveServiceTest {
 	CategoryDao categoryDao;
 	@Autowired
 	DataSource dataSource;
+	@Autowired	
+	private NavSections navSections;
 	
 	private final Integer PEKARNA=300101000;
 	private final Integer CHIPSY_A_BRAMBURKY=300106154;
@@ -251,6 +257,196 @@ public class CategorySaveServiceTest {
 		
 		logger.info("Test n. 6 finished");
 		}
+	
+	@Test
+	@Order(7) 
+	@DisplayName("should save category 300112000")
+	public void saveCompleteTreeOfMainCategoryZvire() {
+		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategory(ZVIRE);
+		zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+		Set<Category> levelZero = zvire.get(0);
+		Set<Category> levelOne = zvire.get(1);
+		Set<Category> levelTwo = zvire.get(2);
+		Category zero = levelZero.iterator().next();
+		assertThat(levelZero, hasSize(1));
+		assertThat(levelZero, hasItems(
+				Matchers.<Category>hasProperty("id", equalTo(1)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Zvíře")),
+				Matchers.<Category>hasProperty("parentId", equalTo(0))
+				));
+		assertThat(zero.getChildren(), hasSize(4));
+		assertThat(zero.getChildren(), hasItems(
+				Matchers.<Child>hasProperty("id", equalTo(1)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112001)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Pes")),				
+				Matchers.<Child>hasProperty("id", equalTo(2)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112018)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Malá zvířata")),
+				Matchers.<Child>hasProperty("id", equalTo(3)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112010)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Kočka")),
+				Matchers.<Child>hasProperty("id", equalTo(4)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112021)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Ptactvo"))				
+				));	
+		assertThat(levelOne, hasSize(4));
+		assertThat(levelOne, hasItems(
+				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112001)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pes")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(3)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112018)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Malá zvířata")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(4)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112010)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kočka")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(5)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112021)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Ptactvo")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000))
+				));	
+		assertThat(levelTwo, hasSize(17));
+		assertThat(levelTwo, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112003)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Konzervy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112004)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112002)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115115)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Štěňata")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112008)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Psí hygiena a zdraví")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112014)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Podestýlky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114373)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112009)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112012)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky, konzervy a vaničky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112011)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112013)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112875)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky a paštiky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112019)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114103)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112022)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112020)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Steliva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112017)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní"))						
+				));	
+		zvire.remove(0);
+		Set<NavSectionsCategoryData> categories = navSections.completeTreeOfCategory(ZVIRE);
+		Set<Integer> names =categories.stream().map(NavSectionsCategoryData::getCategoryId).collect(Collectors.toCollection(HashSet::new));
+		Set<Integer> namesTree = zvire.values().stream().flatMap(Set::stream).map(Category::getCategoryId).collect(Collectors.toCollection(HashSet::new));
+	namesTree.removeAll(names);
+
+	int count =zvire.values().stream().map(Set::size).reduce(0, Integer::sum);
+		assertEquals(categories.size()+namesTree.size(), count);
+	}
+	
+	@Test
+	@Order(8) 
+	@DisplayName("should save category 300112000 to level 2")
+	public void saveCompleteTreeOfMainCategoryZvireToLevel2() {
+		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategoryDownToLevel(ZVIRE, 2);
+		zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+		Set<Category> levelZero = zvire.get(0);
+		Set<Category> levelOne = zvire.get(1);
+		Set<Category> levelTwo = zvire.get(2);
+		Category zero = levelZero.iterator().next();
+		assertThat(levelZero, hasSize(1));
+		assertThat(levelZero, hasItems(
+				Matchers.<Category>hasProperty("id", equalTo(1)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Zvíře")),
+				Matchers.<Category>hasProperty("parentId", equalTo(0))
+				));
+		assertThat(zero.getChildren(), hasSize(4));
+		assertThat(zero.getChildren(), hasItems(
+				Matchers.<Child>hasProperty("id", equalTo(1)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112001)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Pes")),				
+				Matchers.<Child>hasProperty("id", equalTo(2)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112018)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Malá zvířata")),
+				Matchers.<Child>hasProperty("id", equalTo(3)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112010)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Kočka")),
+				Matchers.<Child>hasProperty("id", equalTo(4)),
+				Matchers.<Child>hasProperty("categoryId", equalTo(300112021)),
+				Matchers.<Child>hasProperty("categoryName", equalTo("Ptactvo"))				
+				));	
+		assertThat(levelOne, hasSize(4));
+		assertThat(levelOne, hasItems(
+				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112001)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pes")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(3)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112018)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Malá zvířata")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(4)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112010)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kočka")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
+				Matchers.<Category>hasProperty("id", equalTo(5)),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112021)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Ptactvo")),
+				Matchers.<Category>hasProperty("parentId", equalTo(300112000))
+				));	
+		assertThat(levelTwo, hasSize(17));
+		assertThat(levelTwo, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112003)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Konzervy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112004)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112002)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115115)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Štěňata")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112008)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Psí hygiena a zdraví")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112014)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Podestýlky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114373)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112009)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112012)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky, konzervy a vaničky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112011)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112013)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112875)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky a paštiky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112019)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114103)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112022)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112020)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Steliva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112017)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní"))						
+				));		
+		assertThat(zvire.keySet(), hasSize(3));
+		assertThat(zvire.keySet(), hasItems(0, 1, 2));	
+	}
 	public void clearDatabase() throws SQLException {
 	    Connection c = dataSource.getConnection();
 	    Statement s = c.createStatement();
