@@ -326,8 +326,8 @@ public void buildLowestLevelOfEachBranchOfCategoryZvire() {
 			Matchers.<Category>hasProperty("categoryId", equalTo(300115115)),
 			Matchers.<Category>hasProperty("categoryId", equalTo(300112019)),
 			Matchers.<Category>hasProperty("categoryId", equalTo(300112020)),
-			Matchers.<Category>hasProperty("categoryId", equalTo(300112022))						
-			));	
-	
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112022)),
+			Matchers.<Category>hasProperty("categoryId", equalTo(300112017))
+			));		
 }
 }

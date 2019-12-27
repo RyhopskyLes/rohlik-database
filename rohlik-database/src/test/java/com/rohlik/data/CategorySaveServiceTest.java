@@ -1,6 +1,7 @@
 package com.rohlik.data;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
@@ -267,6 +268,7 @@ public class CategorySaveServiceTest {
 		Set<Category> levelZero = zvire.get(0);
 		Set<Category> levelOne = zvire.get(1);
 		Set<Category> levelTwo = zvire.get(2);
+		Set<Category> levelThree = zvire.get(3);
 		Category zero = levelZero.iterator().next();
 		assertThat(levelZero, hasSize(1));
 		assertThat(levelZero, hasItems(
@@ -346,14 +348,26 @@ public class CategorySaveServiceTest {
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112017)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní"))						
 				));	
-		zvire.remove(0);
-		Set<NavSectionsCategoryData> categories = navSections.completeTreeOfCategory(ZVIRE);
-		Set<Integer> names =categories.stream().map(NavSectionsCategoryData::getCategoryId).collect(Collectors.toCollection(HashSet::new));
-		Set<Integer> namesTree = zvire.values().stream().flatMap(Set::stream).map(Category::getCategoryId).collect(Collectors.toCollection(HashSet::new));
-	namesTree.removeAll(names);
-
-	int count =zvire.values().stream().map(Set::size).reduce(0, Integer::sum);
-		assertEquals(categories.size()+namesTree.size(), count);
+		assertThat(levelThree, hasSize(8));
+		assertThat(levelThree, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114067)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Vzorky - vyzkoušejte")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115111)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Konzervy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115113)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Vaničky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112881)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Velká plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112879)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Střední plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114369)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Mražené")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112877)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Malá plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115109)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky"))									
+				));	
+		logger.info("Test n. 7 finished");
 	}
 	
 	@Test
@@ -446,7 +460,97 @@ public class CategorySaveServiceTest {
 				));		
 		assertThat(zvire.keySet(), hasSize(3));
 		assertThat(zvire.keySet(), hasItems(0, 1, 2));	
+		logger.info("Test n. 8 finished");
 	}
+	
+	@Test
+	@Order(9) 
+	@DisplayName("should build category 300112000 from level 2 to level 3")
+	public void saveCompleteTreeOfMainCategoryZvireFromLevel2ToLevel3() {
+		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategoryFromLevelToLevel(ZVIRE, 2, 3);
+		zvire.forEach((k, v)->System.out.println(k+"\t"+ v));
+		Set<Category> levelThree = zvire.get(3);
+		assertThat(zvire.keySet(), hasSize(2));
+		assertThat(zvire.keySet(), hasItems(2, 3));	
+		assertThat(levelThree, hasSize(8));
+		assertThat(levelThree, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114067)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Vzorky - vyzkoušejte")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115111)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Konzervy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115113)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Vaničky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112881)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Velká plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112879)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Střední plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114369)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Mražené")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112877)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Malá plemena")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115109)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky"))									
+				));	
+		logger.info("Test n. 9 finished");
+	}
+	
+	@Test
+	@Order(10) 
+	@DisplayName("should build level 2 of category 300112000")
+	public void saveLevel2ofCategoryZvire() {
+		 Set<Category> zvire = saveService.saveLevelFromCompleteTreeOfMainCategory(ZVIRE, 2);
+		assertThat(zvire, hasSize(17));
+		assertThat(zvire, hasItems(
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112003)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Konzervy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112004)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112002)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300115115)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Štěňata")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112008)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Psí hygiena a zdraví")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112014)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Podestýlky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114373)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112009)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112012)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky, konzervy a vaničky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112011)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Granulovaná krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112013)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Pamlsky a doplňky stravy")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112875)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Kapsičky a paštiky")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112019)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300114103)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("BARF")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112022)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Krmiva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112020)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Steliva")),
+				Matchers.<Category>hasProperty("categoryId", equalTo(300112017)),
+				Matchers.<Category>hasProperty("categoryName", equalTo("Hračky, misky a ostatní"))						
+				));	
+		logger.info("Test n. 10 finished");
+	}
+	
+	@Test
+	@Order(11) 
+	@DisplayName("should build lowest levels of category 300112000")
+	public void saveLowestLevelOfEachBranchOfCategoryZvire() {
+		Map<Integer, Set<Category>> zvire = saveService.saveLowestLevelOfEachBranchOfMainCategoryTree(ZVIRE);
+		assertThat(zvire.get(2), hasSize(14));	
+		assertThat(zvire.get(3), hasSize(8));
+		zvire.get(2).stream().map(Category::getChildren).forEach(children->is(IsEmptyCollection.empty()));
+		zvire.get(3).stream().map(Category::getChildren).forEach(children->is(IsEmptyCollection.empty()));
+		logger.info("Test n. 11 finished");
+	}
+	
 	public void clearDatabase() throws SQLException {
 	    Connection c = dataSource.getConnection();
 	    Statement s = c.createStatement();

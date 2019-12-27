@@ -118,20 +118,27 @@ private Consumer<Category> saveAndAddToCollection(Collection<Category> categorie
 	@Override
 	public Map<Integer, Set<Category>> saveCompleteTreeOfMainCategoryFromLevelToLevel(Integer categoryId, int fromLevel,
 			int toLevel) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		Map<Integer, Set<Category>> treeFromLevelToLevel = buildService.buildCompleteTreeOfMainCategoryFromLevelToLevel(categoryId, fromLevel, toLevel);
+		treeFromLevelToLevel.entrySet().stream().forEach(saveLevelAndAddItToResult(result)::accept);
+		return result;
 	}
 
 	@Override
 	public Set<Category> saveLevelFromCompleteTreeOfMainCategory(Integer categoryId, int level) {
-		// TODO Auto-generated method stub
-		return null;
+		Set<Category>	result = new HashSet<>();
+		Set<Category> toSave = buildService.buildLevelFromCompleteTreeOfMainCategory(categoryId, level);
+		toSave.forEach(saveAndAddToCollection(result)::accept);
+		return result;
 	}
 
 	@Override
 	public Map<Integer, Set<Category>> saveLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<Integer, Set<Category>> result = new HashMap<>();
+		Map<Integer, Set<Category>> lowestLevel = buildService.buildLowestLevelOfEachBranchOfMainCategoryTree(categoryId);
+		lowestLevel.entrySet().stream().forEach(saveLevelAndAddItToResult(result)::accept);
+		return result;
+		
 	}
 
 }
