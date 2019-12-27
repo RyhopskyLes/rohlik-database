@@ -30,7 +30,6 @@ import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.NavigationCategoryInfo;
 
 @Service("CategoryBuildService")
-@Transactional
 public class CategoryBuildServiceImpl implements CategoryBuildService {
 	private static Logger logger = LoggerFactory.getLogger(CategoryBuildServiceImpl.class);
 	private Navigation navigation;
