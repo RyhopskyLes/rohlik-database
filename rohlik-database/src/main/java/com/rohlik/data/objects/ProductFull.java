@@ -1,137 +1,42 @@
 package com.rohlik.data.objects;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.rohlik.data.entities.Category;
+import com.rohlik.data.entities.Product;
 import com.rohlik.data.objects.productparts.CategoryByProduct;
-import com.rohlik.data.objects.productparts.Composition;
-import com.rohlik.data.objects.productparts.Country;
 import com.rohlik.data.objects.productparts.Nutrients;
-import com.rohlik.data.objects.productparts.OriginalPrice;
-import com.rohlik.data.objects.productparts.Price;
-import com.rohlik.data.objects.productparts.PricePerUnit;
-import com.rohlik.data.objects.productparts.RecommendedPricePerUnit;
 import com.rohlik.data.objects.productparts.Sale;
-import com.rohlik.data.objects.productparts.Badge;
+import com.rohlik.data.patterns.ProductPattern;
 
-import lombok.Data;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "productId", "productName", "mainCategoryId", "imgPath", "baseLink", "link",
-		"expectedAvailability", "unavailabilityReason", "preorderEnabled", "unit", "textualAmount", "semicaliber",
-		"currency", "price", "pricePerUnit", "recommendedPricePerUnit", "originalPrice", "goodPrice",
-		"goodPriceSalePercentage", "sales", "maxBasketAmount", "maxBasketAmountReason", "tags", "badge", "stars",
-		"country", "countries", "imageScaleRatio", "imagesCount", "immediateConsumption", "watchDog", "composition",
-		"companyId", "productStory", "vivino", "description", "ingredients", "nutrients", "allowedAllergens", "images",
-		"producerHtml", "categories", "shelfLifeAvg", "shelfLifeMin", "leaflet", "informationBlocks", "favourite",
-		"inStock" })
-@Data
-public class ProductFull {
-
-	@JsonProperty("productId")
-	private Integer productId;
-	@JsonProperty("productName")
-	private String productName;
-	@JsonProperty("mainCategoryId")
-	private Integer mainCategoryId;
-	@JsonProperty("imgPath")
-	private String imgPath;
-	@JsonProperty("baseLink")
-	private String baseLink;
-	@JsonProperty("link")
-	private String link;
-	@JsonProperty("expectedAvailability")
-	private Object expectedAvailability;
-	@JsonProperty("unavailabilityReason")
-	private Object unavailabilityReason;
-	@JsonProperty("preorderEnabled")
-	private Boolean preorderEnabled;
-	@JsonProperty("unit")
-	private String unit;
-	@JsonProperty("textualAmount")
-	private String textualAmount;
-	@JsonProperty("semicaliber")
-	private Boolean semicaliber;
-	@JsonProperty("currency")
-	private String currency;
-	@JsonProperty("price")
-	private Price price;
-	@JsonProperty("pricePerUnit")
-	private PricePerUnit pricePerUnit;
-	@JsonProperty("recommendedPricePerUnit")
-	private RecommendedPricePerUnit recommendedPricePerUnit;
-	@JsonProperty("originalPrice")
-	private OriginalPrice originalPrice;
-	@JsonProperty("goodPrice")
-	private Boolean goodPrice;
-	@JsonProperty("goodPriceSalePercentage")
-	private Integer goodPriceSalePercentage;
-	@JsonProperty("sales")
-	private List<Sale> sales = new ArrayList<>();
-	@JsonProperty("maxBasketAmount")
-	private Integer maxBasketAmount;
-	@JsonProperty("maxBasketAmountReason")
-	private String maxBasketAmountReason;
-	@JsonProperty("tags")
-	private List<String> tags = new ArrayList<>();
-	@JsonProperty("badge")
-	private List<Badge> badge = new ArrayList<>();
-	@JsonProperty("stars")
-	private Object stars;
-	@JsonProperty("country")
-	private Country country;
-	@JsonProperty("countries")
-	private List<Country> countries = new ArrayList<>();
-	@JsonProperty("imageScaleRatio")
-	private Object imageScaleRatio;
-	@JsonProperty("imagesCount")
-	private Integer imagesCount;
-	@JsonProperty("immediateConsumption")
-	private Boolean immediateConsumption;
-	@JsonProperty("watchDog")
-	private Boolean watchDog;
-	@JsonProperty("composition")
-	private Composition composition;
-	@JsonProperty("companyId")
-	private Integer companyId;
-	@JsonProperty("productStory")
-	private Object productStory;
-	@JsonProperty("vivino")
-	private Object vivino;
-	@JsonProperty("description")
+public class ProductFull extends ProductPattern {	
+	
 	private String description;
-	@JsonProperty("ingredients")
 	private String ingredients;
-	@JsonProperty("nutrients")
 	private Nutrients nutrients;
-	@JsonProperty("allowedAllergens")
 	private Boolean allowedAllergens;
-	@JsonProperty("images")
 	private List<String> images = new ArrayList<>();
-	@JsonProperty("producerHtml")
-	private Object producerHtml;
-	@JsonProperty("categories")
 	private Set<CategoryByProduct> categories = new LinkedHashSet<>();
-	@JsonProperty("shelfLifeAvg")
 	private Integer shelfLifeAvg;
-	@JsonProperty("shelfLifeMin")
 	private Integer shelfLifeMin;
-	@JsonProperty("leaflet")
 	private Object leaflet;
-	@JsonProperty("informationBlocks")
-	private List<Object> informationBlocks = new ArrayList<Object>();
-	@JsonProperty("favourite")
-	private Boolean favourite;
-	@JsonProperty("inStock")
-	private Boolean inStock;
+	private List<Object> informationBlocks = new ArrayList<>();
+	
+	public ProductFull() {
+		super();		
+	}
 
+	public ProductFull(Integer productId, String productName, Integer mainCategoryId) {
+		super(productId, productName, mainCategoryId);		
+	}
+	
 	public Set<Category> getCategoriesConverted() {
 		return categories.stream().map(this::toCategory).collect(Collectors.toCollection(LinkedHashSet::new));
 	}
@@ -146,4 +51,168 @@ public class ProductFull {
 		}
 		return category;
 	}
+	
+	
+
+	@Override
+	public Product toProduct() {
+		Product product = new Product();
+		product.setProductId(this.productId);
+		product.setProductName(this.productName);
+		if(this.imgPath!=null) {product.setImgPath(this.imgPath);} else {product.setImgPath("");}
+		product.setBaseLink(this.baseLink);
+		product.setInStock(this.inStock);
+		product.setFromRohlik(true);
+		product.setHasSales(!this.getSales().isEmpty());
+		product.setLink(this.link);
+		product.setOriginalPrice(this.getFullOriginalPrice());
+		product.setPrice(this.getFullPrice());
+		product.setPricePerUnit(this.getFullPricePerUnit());
+		product.setTextualAmount(this.textualAmount);
+		product.setMainCategoryId(this.mainCategoryId);
+		product.setMainCategoryName(this.getMainCategoryName());
+		product.setUnit(this.unit);
+		product.setActive(true);		
+		return product;
+		}
+	
+	public String getMainCategoryName() {
+	return this.getCategoriesConverted().stream().limit(1).findFirst().map(Category::getCategoryName).orElseGet(()->"");	
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getIngredients() {
+		return ingredients;
+	}
+
+	public void setIngredients(String ingredients) {
+		this.ingredients = ingredients;
+	}
+
+	public Nutrients getNutrients() {
+		return nutrients;
+	}
+
+	public void setNutrients(Nutrients nutrients) {
+		this.nutrients = nutrients;
+	}
+
+	public Boolean getAllowedAllergens() {
+		return allowedAllergens;
+	}
+
+	public void setAllowedAllergens(Boolean allowedAllergens) {
+		this.allowedAllergens = allowedAllergens;
+	}
+
+	public List<String> getImages() {
+		return images;
+	}
+
+	public void setImages(List<String> images) {
+		this.images = images;
+	}
+
+	public Set<CategoryByProduct> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(Set<CategoryByProduct> categories) {
+		this.categories = categories;
+	}
+
+	public Integer getShelfLifeAvg() {
+		return shelfLifeAvg;
+	}
+
+	public void setShelfLifeAvg(Integer shelfLifeAvg) {
+		this.shelfLifeAvg = shelfLifeAvg;
+	}
+
+	public Integer getShelfLifeMin() {
+		return shelfLifeMin;
+	}
+
+	public void setShelfLifeMin(Integer shelfLifeMin) {
+		this.shelfLifeMin = shelfLifeMin;
+	}
+
+	public Object getLeaflet() {
+		return leaflet;
+	}
+
+	public void setLeaflet(Object leaflet) {
+		this.leaflet = leaflet;
+	}
+
+	public List<Object> getInformationBlocks() {
+		return informationBlocks;
+	}
+
+	public void setInformationBlocks(List<Object> informationBlocks) {
+		this.informationBlocks = informationBlocks;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(allowedAllergens, categories, description, images, informationBlocks, ingredients, leaflet,
+				nutrients, shelfLifeAvg, shelfLifeMin, super.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProductFull other = (ProductFull) obj;
+		return Objects.equals(allowedAllergens, other.allowedAllergens) && Objects.equals(categories, other.categories)
+				&& Objects.equals(description, other.description) && Objects.equals(images, other.images)
+				&& Objects.equals(informationBlocks, other.informationBlocks)
+				&& Objects.equals(ingredients, other.ingredients) && Objects.equals(leaflet, other.leaflet)
+				&& Objects.equals(nutrients, other.nutrients) && Objects.equals(shelfLifeAvg, other.shelfLifeAvg)
+				&& Objects.equals(shelfLifeMin, other.shelfLifeMin);
+	}
+
+	@Override
+	public Product toProductWithSales() {
+		Product product = this.toProduct();
+		Set<com.rohlik.data.entities.Sale> salesConverted = this.sales.stream().map(Sale::toSale).collect(Collectors.toCollection(HashSet::new));
+    	salesConverted.forEach(product::addSales);
+		return product;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductFull [productId=" + productId + ", productName="
+				+ productName + ", mainCategoryId=" + mainCategoryId + ", imgPath=" + imgPath + ", baseLink=" + baseLink
+				+ ", link=" + link + ", expectedAvailability=" + expectedAvailability + ", unavailabilityReason="
+				+ unavailabilityReason + ", preorderEnabled=" + preorderEnabled + ", unit=" + unit + ", textualAmount="
+				+ textualAmount + ", semicaliber=" + semicaliber + ", currency=" + currency + ", price=" + price
+				+ ", pricePerUnit=" + pricePerUnit + ", recommendedPricePerUnit=" + recommendedPricePerUnit
+				+ ", originalPrice=" + originalPrice + ", goodPrice=" + goodPrice + ", goodPriceSalePercentage="
+				+ goodPriceSalePercentage + ", sales=" + sales + ", maxBasketAmount=" + maxBasketAmount
+				+ ", maxBasketAmountReason=" + maxBasketAmountReason + ", tags=" + tags + ", badge=" + badge
+				+ ", stars=" + stars + ", country=" + country + ", countries=" + countries + ", imageScaleRatio="
+				+ imageScaleRatio + ", imagesCount=" + imagesCount + ", immediateConsumption=" + immediateConsumption
+				+ ", babyClubUser=" + babyClubUser + ", watchDog=" + watchDog + ", composition=" + composition
+				+ ", companyId=" + companyId + ", producerHtml=" + producerHtml + ", productStory=" + productStory
+				+ ", vivino=" + vivino + ", inStock=" + inStock + ", favourite=" + favourite +", description=" + description + ", ingredients=" + ingredients + ", nutrients=" + nutrients
+				+ ", allowedAllergens=" + allowedAllergens + ", images=" + images + ", categories=" + categories
+				+ ", shelfLifeAvg=" + shelfLifeAvg + ", shelfLifeMin=" + shelfLifeMin + ", leaflet=" + leaflet
+				+ ", informationBlocks=" + informationBlocks + "]";
+	}
+
+	
+	
+	
 }

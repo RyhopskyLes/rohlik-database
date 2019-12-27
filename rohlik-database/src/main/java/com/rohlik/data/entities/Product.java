@@ -196,9 +196,11 @@ public class Product implements Serializable, IdMediator {
 	public String toString() {
 		return "Product [id=" + id + ", productId=" + productId + ", productName=" + productName + ", producer="
 				+ producer + ", originalPrice=" + originalPrice + ", price=" + price + ", textualAmount="
-				+ textualAmount + ", unit=" + unit + ", imgPath=" + imgPath + ", inStock=" + inStock + ", active="
-				+ active + ", hasSales=" + hasSales + ", link=" + link + ", pricePerUnit=" + pricePerUnit
-				+ ", isFromRohlik=" + isFromRohlik + "]";
+				+ textualAmount + ", unit=" + unit + ", baseLink=" + baseLink + ", imgPath=" + imgPath + ", inStock="
+				+ inStock + ", active=" + active + ", hasSales=" + hasSales + ", link=" + link + ", pricePerUnit="
+				+ pricePerUnit + ", mainCategoryId=" + mainCategoryId + ", mainCategoryName=" + mainCategoryName
+				+ ", isFromRohlik=" + isFromRohlik + ", sales=" + sales + ", categories=" + categories
+				+ ", productKosik=" + productKosik + "]";
 	}
 	public String getProducer() {
 		return producer;

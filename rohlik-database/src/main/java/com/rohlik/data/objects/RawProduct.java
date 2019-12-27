@@ -1,118 +1,126 @@
 
 package com.rohlik.data.objects;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.rohlik.data.entities.Product;
-import com.rohlik.data.objects.productparts.Badge;
-import com.rohlik.data.objects.productparts.Composition;
-import com.rohlik.data.objects.productparts.Country;
 import com.rohlik.data.objects.productparts.FirstActiveSale;
-import com.rohlik.data.objects.productparts.OriginalPrice;
-import com.rohlik.data.objects.productparts.Price;
-import com.rohlik.data.objects.productparts.PricePerUnit;
-import com.rohlik.data.objects.productparts.RecommendedPricePerUnit;
 import com.rohlik.data.objects.productparts.Sale;
+import com.rohlik.data.patterns.ProductPattern;
 
-import lombok.Data;
+public class RawProduct extends ProductPattern {
 
-@Data
-public class RawProduct {
-
-	private Integer productId;
-	private String productName;
-	private Integer mainCategoryId;
-	private String imgPath;
-	private String baseLink;
-	private String link;
-	private Integer expectedAvailability;
-	private Boolean expectedAvailabilityHasTime;
-	private Object unavailabilityReason;
-	private Boolean preorderEnabled;
-	private String unit;
-	private String textualAmount;
-	private Boolean semicaliber;
-	private String currency;
-	private Price price;
-	private PricePerUnit pricePerUnit;
-	private RecommendedPricePerUnit recommendedPricePerUnit;
-	private OriginalPrice originalPrice;
-	private Boolean goodPrice;
-	private Integer goodPriceSalePercentage;
-	private List<Sale> sales = new ArrayList<>();
-	private Integer maxBasketAmount;
-	private String maxBasketAmountReason;
-	private List<String> tags = new ArrayList<>();
-	private List<Badge> badge = new ArrayList<>();
+	private Boolean expectedAvailabilityHasTime;	
 	private Integer favouriteCount;
-	private Object stars;
-	private Country country;
-	private List<Country> countries = new ArrayList<>();
 	private Integer orderCount;
-	private Integer imageScaleRatio;
-	private Integer imagesCount;
-	private Boolean immediateConsumption;
-	private Boolean babyClubUser;
-	private Boolean watchDog;
-	private Composition composition;
-	private Integer companyId;
-	private String producerHtml;
-	private Object productStory;
-	private Object vivino;
-	private Boolean inStock;
 	private FirstActiveSale firstActiveSale;
-	private Boolean favourite;
+	
 
-	Product toProduct() {
+	public Boolean getExpectedAvailabilityHasTime() {
+		return expectedAvailabilityHasTime;
+	}
+
+	public void setExpectedAvailabilityHasTime(Boolean expectedAvailabilityHasTime) {
+		this.expectedAvailabilityHasTime = expectedAvailabilityHasTime;
+	}
+
+	public Integer getFavouriteCount() {
+		return favouriteCount;
+	}
+
+	public void setFavouriteCount(Integer favouriteCount) {
+		this.favouriteCount = favouriteCount;
+	}
+
+	public Integer getOrderCount() {
+		return orderCount;
+	}
+
+	public void setOrderCount(Integer orderCount) {
+		this.orderCount = orderCount;
+	}
+
+	public FirstActiveSale getFirstActiveSale() {
+		return firstActiveSale;
+	}
+
+	public void setFirstActiveSale(FirstActiveSale firstActiveSale) {
+		this.firstActiveSale = firstActiveSale;
+	}
+
+	public Product toProduct() {
     	Product product = new Product();
-		product.setProductId(this.getProductId());
-		product.setProductName(this.getProductName());
+		product.setProductId(this.productId);
+		product.setProductName(this.productName);
 		product.setOriginalPrice(this.getFullOriginalPrice());
 		product.setPrice(this.getFullPrice());
-		product.setTextualAmount(this.getTextualAmount());
-		product.setUnit(this.getUnit());
-		product.setBaseLink(this.getBaseLink());
-		if(this.getImgPath()!=null) {product.setImgPath(this.getImgPath());} else {product.setImgPath("");}
-		product.setInStock(this.getInStock());
-		product.setLink(this.getLink());
+		product.setTextualAmount(this.textualAmount);
+		product.setUnit(this.unit);
+		product.setBaseLink(this.baseLink);
+		if(this.imgPath!=null) {product.setImgPath(this.imgPath);} else {product.setImgPath("");}
+		product.setInStock(this.inStock);
+		product.setLink(this.link);
 		product.setPricePerUnit(this.getFullPricePerUnit());
-		product.setMainCategoryId(this.getMainCategoryId());
+		product.setMainCategoryId(this.mainCategoryId);
 		product.setActive(true);
-		if(!this.getSales().isEmpty()) product.setHasSales(true);
+		product.setHasSales(!this.sales.isEmpty());
 		product.setFromRohlik(true);    	
 		return product;    	
     }
 
-	Product toProductWithSales() {
+	public Product toProductWithSales() {
 		Product product = this.toProduct();
-		Set<com.rohlik.data.entities.Sale> salesConverted = this.getSales().stream().map(Sale::toSale).collect(Collectors.toCollection(HashSet::new));
+		Set<com.rohlik.data.entities.Sale> salesConverted = this.sales.stream().map(Sale::toSale).collect(Collectors.toCollection(HashSet::new));
     	salesConverted.forEach(product::addSales);
 		return product;
 		   	
     }
 
-	public Double getFullOriginalPrice() {
-		if (this.getOriginalPrice() != null && this.getOriginalPrice().getFull() != null ) {
-			return this.getOriginalPrice().getFull().doubleValue();
-		}
-		return 0.0;
+	@Override
+	public int hashCode() {
+		return Objects.hash(expectedAvailabilityHasTime, favouriteCount, firstActiveSale, orderCount, super.hashCode());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RawProduct other = (RawProduct) obj;
+		return Objects.equals(expectedAvailabilityHasTime, other.expectedAvailabilityHasTime)
+				&& Objects.equals(favouriteCount, other.favouriteCount)
+				&& Objects.equals(firstActiveSale, other.firstActiveSale)
+				&& Objects.equals(orderCount, other.orderCount);
+	}
+
+	@Override
+	public String toString() {
+		return "RawProduct [productId=" + productId +", productName=" + productName + ", mainCategoryId=" + mainCategoryId
+				+ ", imgPath=" + imgPath + ", baseLink=" + baseLink + ", link=" + link + ", expectedAvailability="
+				+ expectedAvailability + ", unavailabilityReason=" + unavailabilityReason + ", preorderEnabled="
+				+ preorderEnabled + ", unit=" + unit + ", textualAmount=" + textualAmount + ", semicaliber="
+				+ semicaliber + ", currency=" + currency + ", price=" + price + ", pricePerUnit=" + pricePerUnit
+				+ ", recommendedPricePerUnit=" + recommendedPricePerUnit + ", originalPrice=" + originalPrice
+				+ ", goodPrice=" + goodPrice + ", goodPriceSalePercentage=" + goodPriceSalePercentage + ", sales="
+				+ sales + ", maxBasketAmount=" + maxBasketAmount + ", maxBasketAmountReason=" + maxBasketAmountReason
+				+ ", tags=" + tags + ", badge=" + badge + ", stars=" + stars + ", country=" + country + ", countries="
+				+ countries + ", imageScaleRatio=" + imageScaleRatio + ", imagesCount=" + imagesCount
+				+ ", immediateConsumption=" + immediateConsumption + ", babyClubUser=" + babyClubUser + ", watchDog="
+				+ watchDog + ", composition=" + composition + ", companyId=" + companyId + ", producerHtml="
+				+ producerHtml + ", productStory=" + productStory + ", vivino=" + vivino + ", inStock=" + inStock
+				+ ", favourite=" + favourite+",expectedAvailabilityHasTime=" + expectedAvailabilityHasTime + ", favouriteCount="
+				+ favouriteCount + ", orderCount=" + orderCount + ", firstActiveSale=" + firstActiveSale
+				+  "]";
+	}
+
 	
-	public Double getFullPrice() {
-		if (this.getPrice() != null && this.getPrice().getFull() != null) {
-				return this.getPrice().getFull().doubleValue();
-		}
-		return 0.0;
-	}
 	
-	public Double getFullPricePerUnit() {
-		if (this.getPricePerUnit() != null && this.getPricePerUnit().getFull() != null) {
-				return this.getPricePerUnit().getFull().doubleValue();
-		}
-		return 0.0;
-	}
+	
+	
 }
