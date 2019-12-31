@@ -68,6 +68,11 @@ public String toString() {
 	return "SlugAndName [slug=" + slug + ", name=" + name + ", amount=" + amount + "]";
 }
 
-
+public ProducerWithProducts toProducerWithoutProductsAndCategoryId() {
+	ProducerWithProducts producer = new ProducerWithProducts();
+	producer.setName(this.name);
+	producer.setProductCount(this.amount);
+	return producer;
+	}
 
 }
