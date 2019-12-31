@@ -205,7 +205,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void updateAllProductsInCategoryInDatabase(Integer categoryId, Set<Integer> productIdSet) {
 		Instant earlier = Instant.now();
-		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryId);
+		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductIdsForCategory(categoryId);
 			buildAllProductsInCategoryForUpdate(categoryId).stream().forEach(
 				product->{
 				if(!productIdSet.contains(product.getProductId()))	
@@ -242,7 +242,7 @@ public class ProductServiceImpl implements ProductService {
 	private Optional<String> findProducerForProduct(Product product, Integer categoryId) {
 		Integer productId = product.getProductId();
 		Optional<String> producer = Optional.empty();
-		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductsForCategory(categoryId);
+		Map<String, Set<Integer>> producersWithProductIds = productsInCategory.producersWithProductIdsForCategory(categoryId);
 		for (Map.Entry<String, Set<Integer>> producerEntry : producersWithProductIds.entrySet()) {
 			Set<Integer> idSet = producerEntry.getValue();
 			if (idSet.contains(productId)) {

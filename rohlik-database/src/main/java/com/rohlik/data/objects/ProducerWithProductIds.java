@@ -4,27 +4,27 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class ProducerWithProducts {
+public class ProducerWithProductIds {
 	private String name;
 	private Integer categoryId;
 	private Set<Integer> productIds = new HashSet<>();
 	private int productCount;		
 	
-	public ProducerWithProducts() {
+	public ProducerWithProductIds() {
 		super();		
 	}
 
-	public ProducerWithProducts(String name, Integer categoryId) {
+	public ProducerWithProductIds(String name, Integer categoryId) {
 		this(name, categoryId, new HashSet<>(), 0);
 		this.name = name;
 		this.categoryId = categoryId;
 	}
 
-	public ProducerWithProducts(String name, Integer categoryId, Set<Integer> productIds) {
+	public ProducerWithProductIds(String name, Integer categoryId, Set<Integer> productIds) {
 		this(name, categoryId, productIds, productIds.size());		
 	}
 
-	public ProducerWithProducts(String name, Integer categoryId, Set<Integer> productIds, int productCount) {
+	public ProducerWithProductIds(String name, Integer categoryId, Set<Integer> productIds, int productCount) {
 		super();
 		this.name = name;
 		this.categoryId = categoryId;
@@ -77,14 +77,14 @@ public class ProducerWithProducts {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ProducerWithProducts other = (ProducerWithProducts) obj;
+		ProducerWithProductIds other = (ProducerWithProductIds) obj;
 		return Objects.equals(categoryId, other.categoryId) && Objects.equals(name, other.name)
 				&& productCount == other.productCount && Objects.equals(productIds, other.productIds);
 	}
 
 	@Override
 	public String toString() {
-		return "ProducerWithProducts [name=" + name + ", categoryId=" + categoryId + ", productIds=" + productIds
+		return "ProducerWithProductIds [name=" + name + ", categoryId=" + categoryId + ", productIds=" + productIds
 				+ ", productCount=" + productCount + "]";
 	}	
 

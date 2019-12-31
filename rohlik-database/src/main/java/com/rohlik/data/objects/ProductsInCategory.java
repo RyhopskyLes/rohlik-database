@@ -75,7 +75,7 @@ public class ProductsInCategory {
 	public List<Product> getProductListForCategoryWithProducers(Integer categoryId, Integer limitResults) {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
-		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Map<String, Set<Integer>> producers = producersWithProductIdsForCategory(categoryId);
 		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
@@ -112,7 +112,7 @@ public class ProductsInCategory {
 	public List<Product> getProductListForCategoryWithSalesAndProducers(Integer categoryId, Integer limitResults) {
 		Gson gson = new Gson();
 		List<Product> products = new ArrayList<>();
-		Map<String, Set<Integer>> producers = producersWithProductsForCategory(categoryId);
+		Map<String, Set<Integer>> producers = producersWithProductIdsForCategory(categoryId);
 		Map<Integer, String> categories = navigation.getAllCategoriesIdandName();
 		Optional<JsonObject> data = getJsonDataObject(categoryId, limitResults);
 		Optional<JsonArray> productList = data.map(theData -> theData.getAsJsonArray(PRODUCT_LIST));
@@ -171,12 +171,17 @@ public class ProductsInCategory {
 				.map(object -> object.getAsJsonObject(DATA).get(TOTAL_HITS).getAsString());
 	}
 
-	public Map<String, Set<Integer>> producersWithProductsForCategory(Integer categoryId) {
+	public Map<String, Set<Integer>> producersWithProductIdsForCategory(Integer categoryId) {
+		List<SlugAndName> slugMap = filters.forCategoryAndSlug(categoryId, "znacka");
+		return producersWithProductIds(slugMap, categoryId);
+	}
+
+	public Map<String, Set<RawProduct>> producersWithProductsForCategory(Integer categoryId) {
 		List<SlugAndName> slugMap = filters.forCategoryAndSlug(categoryId, "znacka");
 		return producersWithProducts(slugMap, categoryId);
 	}
-
-	private Map<String, Set<Integer>> producersWithProducts(List<SlugAndName> slugsAndNames, Integer categoryId) {
+	
+	private Map<String, Set<Integer>> producersWithProductIds(List<SlugAndName> slugsAndNames, Integer categoryId) {
 		Map<String, Set<Integer>> productMap = new HashMap<>();
 		String producer = "";
 		for (SlugAndName slugAndName : slugsAndNames) {
@@ -196,6 +201,26 @@ public class ProductsInCategory {
 		return productMap;
 	}
 
+	private Map<String, Set<RawProduct>> producersWithProducts(List<SlugAndName> slugsAndNames, Integer categoryId) {
+		Map<String, Set<RawProduct>> productMap = new HashMap<>();
+		String producer = "";
+		for (SlugAndName slugAndName : slugsAndNames) {
+			Optional<JsonObject> data =getJsonDataObjectForCategoryAndProducer(categoryId, slugAndName.getSlug());
+			Optional<JsonArray> productList = data.map(object -> object.get(PRODUCT_LIST).getAsJsonArray());
+			producer = slugAndName.getName();
+			if (productList.isPresent()) {
+				Set<RawProduct> products = new HashSet<>();
+				for (int i = 0; i < productList.get().size(); i++) {
+					Gson gson = new Gson();
+					JsonObject descriptionData = productList.get().get(i).getAsJsonObject();
+					RawProduct converted = gson.fromJson(descriptionData, RawProduct.class);					
+					products.add(converted);
+				}
+				productMap.put(producer, products);
+			}
+		}
+		return productMap;
+	}
 	private void setProducerName(Product product, Map<String, Set<Integer>> producers) {
 		Integer productId = product.getProductId();
 		product.setProducer("");
