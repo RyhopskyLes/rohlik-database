@@ -59,8 +59,7 @@ public List<SlugAndName> forCategoryAndSlug(Integer categoryId, String slug) {
 }
 
 private Optional<JsonObject> getJsonDataObject(Integer categoryId) {
-	return Objects.equals(rootObject.getCategoryId(), categoryId) && Objects.equals(rootObject.getFrom(), RootObject.CalledFrom.PRODUCER) ? rootObject.getJsonObject().map(object -> object.getAsJsonObject("data"))
-			:rootObject.metadataForCategory(categoryId).map(object -> object.getAsJsonObject("data"));
+	return rootObject.metadataForCategory(categoryId).map(object -> object.getAsJsonObject("data"));
 }
 
 private String getFilterName(JsonElement filter) {
