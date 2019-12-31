@@ -48,7 +48,7 @@ public class NavSections {
 		return new ArrayList<>();
 	}
 
-	public LinkedList<Breadcrumb> breadcrumbsOfCategory(Integer categoryId) {
+	public List<Breadcrumb> breadcrumbsOfCategory(Integer categoryId) {
 		Optional<JsonObject> data = getJsonDataObject(categoryId);
 		Gson gson = new Gson();
 		Optional<JsonArray> breadcrumbs = data.map(content -> content.getAsJsonArray("breadcrumbs"));
@@ -60,7 +60,7 @@ public class NavSections {
 	}
 	
 	public Optional<Category> getAsCategoryFromBreadCrumbs(Integer categoryId) {
-		LinkedList<Breadcrumb> breadcrumbs = breadcrumbsOfCategory(categoryId);
+		LinkedList<Breadcrumb> breadcrumbs = (LinkedList<Breadcrumb>) breadcrumbsOfCategory(categoryId);
 		Category category = null;
 		if(!breadcrumbs.isEmpty()) {
 		Breadcrumb last = breadcrumbs.getLast();
@@ -77,7 +77,7 @@ public class NavSections {
 	}
 	
 	public Optional<Child> getAsChildFromBreadcrumbs(Integer categoryId) {
-		LinkedList<Breadcrumb> breadcrumbs = breadcrumbsOfCategory(categoryId);
+		LinkedList<Breadcrumb> breadcrumbs = (LinkedList<Breadcrumb>) breadcrumbsOfCategory(categoryId);
 		Child child = null;
 		if(!breadcrumbs.isEmpty()) {
 			Breadcrumb last = breadcrumbs.getLast();

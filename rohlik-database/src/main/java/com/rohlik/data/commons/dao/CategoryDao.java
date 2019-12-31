@@ -1,7 +1,9 @@
 package com.rohlik.data.commons.dao;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.rohlik.data.entities.Category;
 
@@ -24,5 +26,8 @@ public interface CategoryDao {
 	public Category findByCategoryIdWithChildrenAndCategoriesKosik(Integer id);
 	public Category findByCategoryIdWithCategoriesKosik(Integer id);
 	public List<Category> findSubcategoriesOfCategoryOnAllLevels(Integer categoryId);
+	public Map<Integer, Set<Category>> findSubcategoriesOfMainCategoryOnAllLevelsGroupedByLevels(Integer categoryId);
 	public List<Category> findCompleteParentChainOfCategory(Integer categoryId);
+	
+	
 }

@@ -3,6 +3,7 @@ package com.rohlik.data.entities;
 import java.io.Serializable;
 import java.util.Objects;
 
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -11,15 +12,24 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
-
-
 @Entity(name = "Child")
 @Table(name = "child")
+@SqlResultSetMapping(
+        name = "BasicChildMapping",
+        entities = @EntityResult(
+                entityClass = Child.class,
+                fields = {
+                    @FieldResult(name = "id", column = "id"),
+                    @FieldResult(name = "categoryId", column = "categoryId"),
+                    @FieldResult(name = "categoryName", column = "categoryName"),
+                    @FieldResult(name = "active", column = "active")}))
 public class Child implements Serializable {
 	private static final long serialVersionUID = 1097414407215795301L;
 	@Id

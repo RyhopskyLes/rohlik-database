@@ -5,29 +5,19 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
 import com.rohlik.data.commons.interfaces.IdMediator;
-import com.rohlik.data.entities.Category;
-import com.rohlik.data.entities.Child;
-import com.rohlik.data.entities.Product;
+import com.rohlik.data.dtos.ChildDTO;
 import com.rohlik.data.kosik.entities.CategoryKosik;
 
 
 @Entity(name = "Category")
 @Table(name = "category")
 public class Category implements Serializable, IdMediator {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1262870598664693503L;
 	@Id
 	@GenericGenerator(name = "UseIdOrGenerate", strategy = "com.rohlik.data.commons.objects.UseIdOrGenerate")
@@ -85,6 +75,19 @@ public class Category implements Serializable, IdMediator {
 	public void setParentId(Integer parentId) {
 		this.parentId = parentId;
 	}
+	
+	public Boolean getActive() {
+		return active;
+	}
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+	public Set<CategoryKosik> getCategoriesKosik() {
+		return categoriesKosik;
+	}
+	public void setCategoriesKosik(Set<CategoryKosik> categoriesKosik) {
+		this.categoriesKosik = categoriesKosik;
+	}
 	public Set<Product> getProducts() {
 		return products;
 	}
@@ -104,6 +107,19 @@ public class Category implements Serializable, IdMediator {
 	public void removeChild(Child child) {
 		children.remove(child);
 		child.setParent(null);		
+	}
+	
+	public Child toChild() {
+		Child child = new Child();
+		child.setCategoryId(categoryId);
+		child.setCategoryName(categoryName);
+		child.setActive(active);
+		return child;
+	}
+	
+	@Override
+	public Integer provideId() {
+		return this.id;
 	}
 	@Override
 	public int hashCode() {
@@ -128,50 +144,9 @@ public class Category implements Serializable, IdMediator {
 		return "Category [id=" + id + ", categoryId=" + categoryId + ", categoryName=" + categoryName + ", parentId="
 				+ parentId + ", active=" + active + "]";
 	}
-	public static CategoryBuilder builder() {
-        return new CategoryBuilder();
-    }
-public static class CategoryBuilder {
-	private Integer categoryId;
-	private String categoryName;
-	private Integer parentId;
-	
-public	CategoryBuilder categoryId(final Integer categoryId) {
-		this.categoryId=categoryId;
-		return this;
-	}
-public	CategoryBuilder categoryName(final String categoryName) {
-		this.categoryName=categoryName;
-		return this;
-	}
-	
-public	CategoryBuilder parentId(final Integer parentId) {
-		this.parentId=parentId;
-		return this;
-	}
-	
-	 public Category build() {
-         return new Category(categoryId, categoryName, parentId);
-     }
-	 
-	 
-}
-public Boolean getActive() {
-	return active;
-}
-public void setActive(Boolean active) {
-	this.active = active;
-}
-public Set<CategoryKosik> getCategoriesKosik() {
-	return categoriesKosik;
-}
-public void setCategoriesKosik(Set<CategoryKosik> categoriesKosik) {
-	this.categoriesKosik = categoriesKosik;
-}
-@Override
-public Integer provideId() {
-	return this.id;
-}
+
+
+
 
 
 

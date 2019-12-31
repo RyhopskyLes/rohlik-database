@@ -241,6 +241,6 @@ public class CategoryServiceImpl implements CategoryService {
 		};		
 		children.stream().forEach(setActive::accept);
 		
-	}
+	}	
 
 }

@@ -53,6 +53,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 			"JOIN category T2 ON T1._id = T2.categoryId " + 
 			"WHERE T1._id <> @cid " + 
 			"ORDER BY T1.lvl DESC;", nativeQuery = true)
-    public List<Category> findCompleteParentChainOfCategory(Integer categoryId);
-	
+    public List<Category> findCompleteParentChainOfCategory(Integer categoryId);	
 }

@@ -61,10 +61,10 @@ public class CategoryBuilder {
 	
 	@PostConstruct
 	public void init() {
-		all = catDao.findAllWithChildrenAndCategoriesKosikAndProducts().stream()
+	/*	all = catDao.findAllWithChildrenAndCategoriesKosikAndProducts().stream()
 				.filter(cat -> cat.getActive().equals(true)).collect(Collectors.toCollection(ArrayList::new));
 		main = all.stream().filter(cat -> cat.getParentId() == 0 && cat.getActive().equals(true))
-				.collect(Collectors.toCollection(ArrayList::new));
+				.collect(Collectors.toCollection(ArrayList::new));*/
 	}
 
 	public CategoryKosik buildMainCategory(String categoryURI) {

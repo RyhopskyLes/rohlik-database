@@ -89,7 +89,7 @@ public class DataConfig {
 	@Bean
 	public EntityManagerFactory entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
-		factoryBean.setPackagesToScan("com.rohlik.data.entities", "com.rohlik.data.kosik.entities");
+		factoryBean.setPackagesToScan("com.rohlik.data.entities", "com.rohlik.data.kosik.entities", "com.rohlik.data.dtos");
 		factoryBean.setDataSource(dataSource());
 		factoryBean.setJpaProperties(hibernateProperties());
 		factoryBean.setJpaVendorAdapter(jpaVendorAdapter());
