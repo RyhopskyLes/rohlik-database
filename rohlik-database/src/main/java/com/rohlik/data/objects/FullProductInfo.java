@@ -12,13 +12,13 @@ import com.google.gson.JsonObject;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@Component("full")
-public class Full {
+@Component("fullProductInfo")
+public class FullProductInfo {
 	private RootObject rootObject;
 	private Gson gson;
 	
 	@Autowired
-	public Full(RootObject rootObject) {
+	public FullProductInfo(RootObject rootObject) {
 		this.rootObject = rootObject;
 		this.gson= new Gson();
 	}

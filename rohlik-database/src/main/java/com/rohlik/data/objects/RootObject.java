@@ -22,7 +22,7 @@ public class RootObject {
 	public static final String OFFSET_LIMIT = "?offset=0&limit=";
 	public static final String BASIC_LIMIT = "25";
 	public static final String PRODUCT_URL_START = "https://www.rohlik.cz/services/frontend-service/product/";
-	public static final String PRODUCT_URL_END = "/full";
+	public static final String PRODUCT_URL_END = "/fullProductInfo";
 	public static final String NAVIGATION_URL = "https://www.rohlik.cz/services/frontend-service/renderer/navigation/flat.json";
 	private static Logger log = LoggerFactory.getLogger(RootObject.class);
 	private Integer categoryId;

@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.rohlik.data.objects.Full;
+import com.rohlik.data.objects.FullProductInfo;
 import com.rohlik.data.objects.Navigation;
 import com.rohlik.data.objects.ProductsInCategory;
 import com.rohlik.data.objects.RawProduct;
@@ -73,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
 	private CategoryService categoryService;
 	private ProductsInCategory productsInCategory;
 	private Navigation navigation;
-	private Full full;
+	private FullProductInfo fullProductInfo;
 	
 	private static Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 	private long countUpdated = 0;
@@ -82,14 +82,14 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	public ProductServiceImpl(ProductDao productDao, CategoryDao categoryDao,
 			CategoryService categoryService, ProductsInCategory productsInCategory, Navigation navigation,
-			Full full) {
+			FullProductInfo fullProductInfo) {
 		super();
 		this.productDao = productDao;
 		this.categoryDao = categoryDao;
 		this.categoryService = categoryService;
 		this.productsInCategory = productsInCategory;
 		this.navigation = navigation;
-		this.full = full;
+		this.fullProductInfo = fullProductInfo;
 	}
 
 	
@@ -363,7 +363,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Integer addMissingImgPathToProducts() {
-		Function<Product, String> getImgPath = prod -> full.getProductFull(prod.getProductId()).getImgPath();
+		Function<Product, String> getImgPath = prod -> fullProductInfo.getProductFull(prod.getProductId()).getImgPath();
 
 		
 		List<Product> products = productDao.findAllWithoutImgPath();
@@ -375,7 +375,7 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public Integer addMissingMainCategoryNameToProducts() {
-		Function<Product, Optional<Category>> getCategory = prod -> full.getProductFull(prod.getProductId())
+		Function<Product, Optional<Category>> getCategory = prod -> fullProductInfo.getProductFull(prod.getProductId())
 				.getCategoriesConverted().stream().limit(1).findFirst();
 
 		Consumer<Product> setMainCategoryName = product -> {

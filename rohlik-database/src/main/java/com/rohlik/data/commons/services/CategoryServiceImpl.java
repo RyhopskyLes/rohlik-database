@@ -25,7 +25,7 @@ import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.entities.Product;
 import com.rohlik.data.objects.NavSectionsCategoryData;
-import com.rohlik.data.objects.Full;
+import com.rohlik.data.objects.FullProductInfo;
 import com.rohlik.data.objects.NavSections;
 import com.rohlik.data.objects.ProductsInCategory;
 
@@ -34,7 +34,7 @@ import com.rohlik.data.objects.ProductsInCategory;
 
 public class CategoryServiceImpl implements CategoryService {
 	CategoryDao catDao;
-	Full full;
+	FullProductInfo fullProductInfo;
 	ProductDao productDao;
 	DataRohlik dataRohlik;
 	NavSections nav;
@@ -44,11 +44,11 @@ public class CategoryServiceImpl implements CategoryService {
 	private static Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
 	
 	@Autowired
-	public CategoryServiceImpl(CategoryDao catDao, Full full, ProductDao productDao, DataRohlik dataRohlik,
+	public CategoryServiceImpl(CategoryDao catDao, FullProductInfo fullProductInfo, ProductDao productDao, DataRohlik dataRohlik,
 			NavSections nav, ProductsInCategory productsInCategory, ChildDao childDao) {
 		super();
 		this.catDao = catDao;
-		this.full = full;
+		this.fullProductInfo = fullProductInfo;
 		this.productDao = productDao;
 		this.dataRohlik = dataRohlik;
 		this.nav = nav;
@@ -59,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public Set<Category> saveUnsavedCategories(Product product) {
 		Set<Category> categoriesByProduct = product == null ? new HashSet<>()
-				: full.getProductFull(product.getProductId()).getCategoriesConverted();
+				: fullProductInfo.getProductFull(product.getProductId()).getCategoriesConverted();
 		for (Category category : categoriesByProduct) {
 			Optional<Category> saved = catDao.findByCategoryId(category.getCategoryId());
 			if(!saved.isPresent()) {catDao.save(category);}

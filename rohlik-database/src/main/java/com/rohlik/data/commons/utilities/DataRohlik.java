@@ -43,10 +43,10 @@ public class DataRohlik {
 		String productName = productData.get("productName").getAsString();
 		product.setProductName(productName);
 		Double originalPrice = !productData.get("originalPrice").isJsonNull()
-				? productData.get("originalPrice").getAsJsonObject().get("full").getAsDouble()
+				? productData.get("originalPrice").getAsJsonObject().get("fullProductInfo").getAsDouble()
 				: null;
 		product.setOriginalPrice(originalPrice);
-		Double price = productData.get("price").getAsJsonObject().get("full").getAsDouble();
+		Double price = productData.get("price").getAsJsonObject().get("fullProductInfo").getAsDouble();
 		product.setPrice(price);
 		String textualAmount = productData.get("textualAmount").getAsString();
 		product.setTextualAmount(textualAmount);
@@ -60,7 +60,7 @@ public class DataRohlik {
 		product.setInStock(inStock);
 		String link = productData.get("link").getAsString();
 		product.setLink(link);
-		Double pricePerUnit = productData.get("pricePerUnit").getAsJsonObject().get("full").getAsDouble();
+		Double pricePerUnit = productData.get("pricePerUnit").getAsJsonObject().get("fullProductInfo").getAsDouble();
 		product.setPricePerUnit(pricePerUnit);
 		Integer mainCategoryId = productData.get("mainCategoryId").getAsInt();
 		product.setMainCategoryId(mainCategoryId);
@@ -78,13 +78,13 @@ public class DataRohlik {
 		sale.setType(typeSales);
 		Double discountPercentageSales = dataFromArray.get("discountPercentage").getAsDouble();
 		sale.setDiscountPercentage(discountPercentageSales);
-		Double discountPriceSales = dataFromArray.get("discountPrice").getAsJsonObject().get("full").getAsDouble();
+		Double discountPriceSales = dataFromArray.get("discountPrice").getAsJsonObject().get("fullProductInfo").getAsDouble();
 		sale.setDiscountPrice(discountPriceSales);
-		Double originalPriceSales = dataFromArray.get("originalPrice").getAsJsonObject().get("full").getAsDouble();
+		Double originalPriceSales = dataFromArray.get("originalPrice").getAsJsonObject().get("fullProductInfo").getAsDouble();
 		sale.setOriginalPrice(originalPriceSales);
-		Double priceSales = dataFromArray.get("price").getAsJsonObject().get("full").getAsDouble();
+		Double priceSales = dataFromArray.get("price").getAsJsonObject().get("fullProductInfo").getAsDouble();
 		sale.setPrice(priceSales);
-		Double pricePerUnitSales = dataFromArray.getAsJsonObject().get("priceForUnit").getAsJsonObject().get("full")
+		Double pricePerUnitSales = dataFromArray.getAsJsonObject().get("priceForUnit").getAsJsonObject().get("fullProductInfo")
 				.getAsDouble();
 		sale.setPricePerUnit(pricePerUnitSales);
 		Integer idSales = dataFromArray.get("id").getAsInt();

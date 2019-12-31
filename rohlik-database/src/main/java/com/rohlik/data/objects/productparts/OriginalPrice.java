@@ -9,7 +9,7 @@ import lombok.Data;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "full",
+    "fullProductInfo",
     "whole",
     "fraction",
     "currency"
@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class OriginalPrice {
 
-    @JsonProperty("full")
+    @JsonProperty("fullProductInfo")
     private Integer full;
     @JsonProperty("whole")
     private Integer whole;
