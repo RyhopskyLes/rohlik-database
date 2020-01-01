@@ -47,14 +47,23 @@ public class Child implements Serializable {
 	            inverseJoinColumns = @JoinColumn( name="id_category", referencedColumnName="id")
 	        )
 		public Category parent;
+	
+	public Child() {
+		super();
+		}
 	public Child(Integer categoryId, String categoryName) {
 		super();
 		this.categoryId = categoryId;
 		this.categoryName = categoryName;
-	}
-	public Child() {
+	}	
+	
+	public Child(Integer categoryId, String categoryName, Boolean active) {
 		super();
-		}
+		this.categoryId = categoryId;
+		this.categoryName = categoryName;
+		this.active = active;
+	}
+	
 	public Integer getId() {
 		return id;
 	}
@@ -79,6 +88,11 @@ public class Child implements Serializable {
 	public void setParent(Category parent) {
 		this.parent = parent;
 	}
+	
+	public Integer getParentId() {
+		return parent.getCategoryId();
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(categoryId, categoryName, active);

@@ -37,6 +37,7 @@ public class Category implements Serializable, IdMediator {
 	        orphanRemoval = true, mappedBy="parent"
 	    )
 	private Set<Child> children = new HashSet<>();
+	
 	public Category() {
 		super();		
 	}
@@ -50,6 +51,15 @@ public class Category implements Serializable, IdMediator {
 		this.categoryId = categoryId;
 		this.categoryName = categoryName;
 		this.parentId = parentId;
+	}
+	
+	
+	public Category(Integer categoryId, String categoryName, Integer parentId, Boolean active) {
+		super();
+		this.categoryId = categoryId;
+		this.categoryName = categoryName;
+		this.parentId = parentId;
+		this.active = active;
 	}
 	public Integer getId() {
 		return id;
