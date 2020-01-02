@@ -44,7 +44,6 @@ public class CategoryUpdateServiceImpl implements CategoryUpdateService {
 				.findSubcategoriesOfMainCategoryOnAllLevelsGroupedByLevels(categoryId);
 
 		freshState.entrySet().forEach(entry -> {
-			log.info("entry {}", entry);
 			Map<Integer, List<Category>> levelMap = entry.getValue().stream()
 					.collect(Collectors.groupingBy(Category::getCategoryId));
 			Set<Category> persistedSet = persistedState.get(entry.getKey());
@@ -53,10 +52,10 @@ public class CategoryUpdateServiceImpl implements CategoryUpdateService {
 					: new HashMap<>();
 			log.info("Web level: {}", entry.getKey());
 			checkIfNewCategoriesWereAddedToLevel(levelMap, persistedLevelMap).stream().map(levelMap::get)
-			.flatMap(List::stream).forEach(this::addNewCategoryToParentAndSaveIt);
+					.flatMap(List::stream).forEach(this::addNewCategoryToParentAndSaveIt);
 			log.info("Persited level: {}", entry.getKey());
 			checkIfOldCategoriesWereRemovedFromLevel(levelMap, persistedLevelMap).stream().map(persistedLevelMap::get)
-			.flatMap(List::stream).forEach(this::deactivateOldCategory);
+					.flatMap(List::stream).forEach(this::deactivateOldCategory);
 			levelMap.entrySet().forEach(checkAndUpdateFields(persistedLevelMap)::accept);
 		});
 
@@ -98,7 +97,7 @@ public class CategoryUpdateServiceImpl implements CategoryUpdateService {
 		Set<Integer> persistedLevelIds = persistedLevelMap.keySet().stream()
 				.collect(Collectors.toCollection(HashSet::new));
 		levelIds.removeAll(persistedLevelIds);
-		levelIds.forEach(id->log.info("not persisted {}", id));
+		levelIds.forEach(id -> log.info("not persisted {}", id));
 		return levelIds;
 	}
 
@@ -108,7 +107,7 @@ public class CategoryUpdateServiceImpl implements CategoryUpdateService {
 		Set<Integer> persistedLevelIds = persistedLevelMap.keySet().stream()
 				.collect(Collectors.toCollection(HashSet::new));
 		persistedLevelIds.removeAll(levelIds);
-		persistedLevelIds.forEach(id->log.info("not deactivated {}", id));
+		persistedLevelIds.forEach(id -> log.info("not deactivated {}", id));
 		return persistedLevelIds;
 	}
 
@@ -117,40 +116,50 @@ public class CategoryUpdateServiceImpl implements CategoryUpdateService {
 			Category parent = categoryDao.findByCategoryIdWithChildren(category.getParentId());
 			if (parent != null) {
 				Child child = category.toChild();
-				Set<Integer> childIds = parent.getChildren().stream().map(Child::getCategoryId).collect(Collectors.toCollection(HashSet::new));
-				if (!childIds.contains(child.getCategoryId()))
-				{child.setActive(true);
+				Child byParent = parent.getChildren().stream()
+						.filter(ch -> ch.getCategoryId().equals(child.getCategoryId())).findFirst()
+						.orElseGet(() -> null);
+				if (byParent == null) {
+					child.setActive(true);
 					parent.addChild(child);
-				categoryDao.save(parent);}
-				Optional<Child> added = parent.getChildren().stream().filter(item->item.getCategoryId().equals(child.getCategoryId())).findFirst();
-				log.info("{} added to {}", added, parent);
-			
+				} else {
+					byParent.setActive(true);
+					log.info("{} activated by {}", byParent, parent);
+				}
+				Category saved = categoryDao.save(parent);
+				Optional<Child> added = saved.getChildren().stream()
+						.filter(item -> item.getCategoryId().equals(child.getCategoryId())).findFirst();
+				log.info("{} added or activated for {}", added, parent);
+
 			}
 			Optional<Category> persisted = categoryDao.findByCategoryId(category.getCategoryId());
-			if(persisted.isPresent())
-			{persisted.get().setActive(true);
-			Category saved =categoryDao.save(persisted.get());
-			log.info("{} updated", saved);
-			}	else {
-			Category saved =categoryDao.save(category);
-			log.info("{} added", saved);}
+			if (persisted.isPresent()) {
+				persisted.get().setActive(true);
+				Category saved = categoryDao.save(persisted.get());
+				log.info("{} updated", saved);
+			} else {
+				Category saved = categoryDao.save(category);
+				log.info("{} added", saved);
+			}
 		}
 	}
-	
+
 	private void deactivateOldCategory(Category category) {
 		if (category != null) {
 			Category parent = categoryDao.findByCategoryIdWithChildren(category.getParentId());
 			if (parent != null) {
 				Child child = category.toChild();
-				Set<Integer> childIds = parent.getChildren().stream().map(Child::getCategoryId).collect(Collectors.toCollection(HashSet::new));
+				Set<Integer> childIds = parent.getChildren().stream().map(Child::getCategoryId)
+						.collect(Collectors.toCollection(HashSet::new));
 				Set<Child> children = parent.getChildren();
 				if (childIds.contains(child.getCategoryId()))
-					children.stream().filter(item->item.getCategoryId().equals(child.getCategoryId())).forEach(item->item.setActive(false));
+					children.stream().filter(item -> item.getCategoryId().equals(child.getCategoryId()))
+							.forEach(item -> item.setActive(false));
 				log.info("{} deactivated in {}", child, parent);
-			
+
 			}
 			category.setActive(false);
-			Category saved =categoryDao.save(category);
+			Category saved = categoryDao.save(category);
 			log.info("{} deactivated", saved);
 		}
 	}
