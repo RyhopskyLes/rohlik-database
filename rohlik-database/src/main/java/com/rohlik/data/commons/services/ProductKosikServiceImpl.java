@@ -180,7 +180,7 @@ public class ProductKosikServiceImpl implements ProductKosikService {
 	private Consumer<ProductKosik> setEquivalentEmptyProductWithKosikData() {
 		return product -> {
 			Product productRohlik = new Product();
-			productRohlik.setFromRohlik(false);
+			productRohlik.setIsFromRohlik(false);
 			productRohlik.setActive(product.getActive());
 			productRohlik.setInStock(product.getInStock());
 			productRohlik.setProductName(product.getName());

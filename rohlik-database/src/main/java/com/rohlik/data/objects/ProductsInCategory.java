@@ -66,6 +66,7 @@ public class ProductsInCategory {
 			Product productConverted = converted.toProduct();
 			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
 			productConverted.setMainCategoryName(mainCategoryName);
+			productConverted.setIsFromRohlik(true);
 			products.add(productConverted);
 		});
 
@@ -85,6 +86,7 @@ public class ProductsInCategory {
 			Product productConverted = converted.toProduct();
 			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
 			productConverted.setMainCategoryName(mainCategoryName);
+			productConverted.setIsFromRohlik(true);
 			setProducerName(productConverted, producers);
 			products.add(productConverted);
 		});
@@ -104,6 +106,7 @@ public class ProductsInCategory {
 			Product productConverted = converted.toProductWithSales();
 			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
 			productConverted.setMainCategoryName(mainCategoryName);
+			productConverted.setIsFromRohlik(true);
 			products.add(productConverted);
 		});
 		return products;
@@ -123,6 +126,7 @@ public class ProductsInCategory {
 			String mainCategoryName = getCategoryName(productConverted.getMainCategoryId(), categories);
 			productConverted.setMainCategoryName(mainCategoryName);
 			setProducerName(productConverted, producers);
+			productConverted.setIsFromRohlik(true);
 			products.add(productConverted);			
 		});
 		return products;

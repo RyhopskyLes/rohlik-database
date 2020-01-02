@@ -67,7 +67,7 @@ public class RawProduct extends ProductPattern {
 		product.setMainCategoryId(this.mainCategoryId);
 		product.setActive(true);
 		product.setHasSales(!this.sales.isEmpty());
-		product.setFromRohlik(true);    	
+		product.setIsFromRohlik(true);    	
 		return product;    	
     }
 

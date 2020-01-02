@@ -196,7 +196,7 @@ public class ProductServiceImpl implements ProductService {
 	public void setMainCategoryNameByAllProducts() {
 		List<Product> products = productDao.findAll();
 		Set<Category> categories = navigation.getAllCategories();
-		products.stream().filter(Product::isFromRohlik).forEach(product -> {
+		products.stream().filter(Product::getIsFromRohlik).forEach(product -> {
 			product.setMainCategoryName(navigation.getCategoryName(product.getMainCategoryId(), categories));
 			productDao.save(product);
 		});
@@ -255,7 +255,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void updateHasSalesByProductsInCategory(Integer number) {
 		List<Product> products = productDao.findByMainCategoryIdEagerly(number);
-		products.stream().filter(Product::isFromRohlik).filter(product->!product.getSales().isEmpty()).forEach(setHasSalesAndSave::accept);		
+		products.stream().filter(Product::getIsFromRohlik).filter(product->!product.getSales().isEmpty()).forEach(setHasSalesAndSave::accept);		
 	}
 	
 	private Consumer<Product> setHasSalesAndSave = product-> {
@@ -266,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void updateHasSalesByAllProductsInDatabase() {
-		productDao.findAll().stream().filter(Product::isFromRohlik).filter(Product::getActive).map(Product::getMainCategoryId)
+		productDao.findAll().stream().filter(Product::getIsFromRohlik).filter(Product::getActive).map(Product::getMainCategoryId)
 		.forEach(this::updateHasSalesByProductsInCategory);
 				
 	}
@@ -339,7 +339,7 @@ public class ProductServiceImpl implements ProductService {
 		.mapToObj(productDao::findByIdEagerlyWithCategories)
 		.filter(Optional::isPresent)
 		.map(Optional::get)
-		.filter(Product::isFromRohlik)
+		.filter(Product::getIsFromRohlik)
 		.forEach(product-> {
 				setCategoriesForProduct(product);
 				productDao.save(product);
@@ -367,7 +367,7 @@ public class ProductServiceImpl implements ProductService {
 
 		
 		List<Product> products = productDao.findAllWithoutImgPath();
-		products.stream().filter(Product::isFromRohlik).forEach(product -> 
+		products.stream().filter(Product::getIsFromRohlik).forEach(product -> 
 		product.setImgPath(getImgPath.apply(product)));
 		return products.size();
 	}
@@ -387,9 +387,9 @@ public class ProductServiceImpl implements ProductService {
 		};
 
 		List<Product> products = productDao.findAllWithoutMainCategoryName();
-		products.stream().filter(Product::isFromRohlik).forEach(setMainCategoryName::accept);
+		products.stream().filter(Product::getIsFromRohlik).forEach(setMainCategoryName::accept);
 
-		products = productDao.findAllWithoutMainCategoryName().stream().filter(Product::isFromRohlik).collect(Collectors.toCollection(ArrayList::new));		
+		products = productDao.findAllWithoutMainCategoryName().stream().filter(Product::getIsFromRohlik).collect(Collectors.toCollection(ArrayList::new));		
 		return products.size();
 	}
 
@@ -398,7 +398,7 @@ public class ProductServiceImpl implements ProductService {
 		List<Integer> activeIds = productsInCategory.getProductIdsForCategory(categoryId, 3000);
 
 		List<Product> allProducts = productDao.findAllProductsByCategoryId(categoryId);
-		Set<Product> active = allProducts.stream().filter(Product::isFromRohlik).filter(product -> activeIds.contains(product.getProductId()))
+		Set<Product> active = allProducts.stream().filter(Product::getIsFromRohlik).filter(product -> activeIds.contains(product.getProductId()))
 				.map(product -> {
 					product.setActive(true);
 					return product;
@@ -441,7 +441,7 @@ public class ProductServiceImpl implements ProductService {
 		};
 
 		List<RawProduct> rawProducts = productsInCategory.getRawProductListForCategory(categoryId, 3000);
-		List<Product> active = productDao.findAllProductsByCategoryId(categoryId).stream().filter(Product::isFromRohlik)
+		List<Product> active = productDao.findAllProductsByCategoryId(categoryId).stream().filter(Product::getIsFromRohlik)
 				.filter(Product::getActive).collect(Collectors.toCollection(ArrayList::new));
 		active.stream().map(product -> getEquivalentProducts.apply(rawProducts, product)).filter(Optional::isPresent)
 				.map(Optional::get).filter(mainCategoryIdIsNotEqual::test)
@@ -458,7 +458,7 @@ public class ProductServiceImpl implements ProductService {
 				.map(categoryId -> productsInCategory.getRawProductListForCategory(categoryId, 3000)).flatMap(List::stream)
 				.collect(Collectors.toCollection(HashSet::new));
 		Set<Product> allProducts = mainCategories.stream().map(Category::getCategoryId)
-				.map(productDao::findAllProductsByCategoryId).flatMap(List::stream).filter(Product::isFromRohlik)
+				.map(productDao::findAllProductsByCategoryId).flatMap(List::stream).filter(Product::getIsFromRohlik)
 				.collect(Collectors.toCollection(HashSet::new));
 		Set<Product> active = allProducts.stream().filter(product -> activeIds.contains(product.getProductId()))
 				.map(product -> {

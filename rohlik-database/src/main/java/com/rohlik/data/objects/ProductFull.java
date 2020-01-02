@@ -62,7 +62,7 @@ public class ProductFull extends ProductPattern {
 		if(this.imgPath!=null) {product.setImgPath(this.imgPath);} else {product.setImgPath("");}
 		product.setBaseLink(this.baseLink);
 		product.setInStock(this.inStock);
-		product.setFromRohlik(true);
+		product.setIsFromRohlik(true);
 		product.setHasSales(!this.getSales().isEmpty());
 		product.setLink(this.link);
 		product.setOriginalPrice(this.getFullOriginalPrice());

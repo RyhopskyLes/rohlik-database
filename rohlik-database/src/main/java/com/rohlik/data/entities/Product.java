@@ -267,10 +267,10 @@ public class Product implements Serializable, IdMediator {
 	public Integer provideId() {
 		return this.id;
 	}
-	public boolean isFromRohlik() {
+	public boolean getIsFromRohlik() {
 		return isFromRohlik;
 	}
-	public void setFromRohlik(boolean isFromRohlik) {
+	public void setIsFromRohlik(boolean isFromRohlik) {
 		this.isFromRohlik = isFromRohlik;
 	}
 	
