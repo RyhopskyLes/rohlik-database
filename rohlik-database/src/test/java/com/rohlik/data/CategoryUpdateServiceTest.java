@@ -1,21 +1,16 @@
 package com.rohlik.data;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.Duration;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -26,7 +21,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -36,11 +30,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.rohlik.data.commons.dao.CategoryDao;
+import com.rohlik.data.commons.dao.ChildDao;
 import com.rohlik.data.commons.services.save.CategorySaveService;
 import com.rohlik.data.commons.services.update.CategoryUpdateService;
 import com.rohlik.data.config.AppConfigTestContainer;
-import com.rohlik.data.config.AppEmptyDBConfig;
-import com.rohlik.data.config.EmptyDBConfig;
 import com.rohlik.data.config.TestContainerConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
@@ -61,6 +54,8 @@ public class CategoryUpdateServiceTest {
 	private CategoryUpdateService updateService;
 	@Autowired
 	private CategoryDao categoryDao;
+	@Autowired
+	private ChildDao childDao;
 	@Autowired	
 	private NavSections navSections;
 	@Autowired
@@ -68,15 +63,6 @@ public class CategoryUpdateServiceTest {
 	@Autowired
 	@Container
     public MySQLContainer mysqlContainer;
-	private final Integer PEKARNA=300101000;
-	private final Integer CHIPSY_A_BRAMBURKY=300106154;
-	private final Integer VOLNE_PRODEJNE_LEKY=300113171;
-	private final Integer LEKARNA=300112985;
-	private final Integer LUSTENINOVE_A_RYZOVE=300114931;
-	private final Integer SLANE_SNACKY_A_ORECHY =300106153;
-	private final Integer FRANCOUZSKA=300116325;
-	private final Integer CERVENA=300108066;
-	private final Integer BORDEAUX=300116331;
 	private final Integer ZVIRE=300112000;
 	 
 	
@@ -112,13 +98,38 @@ public class CategoryUpdateServiceTest {
 	}
 	@Test
 	@Order(2) 
-	@DisplayName("should test deactivation")
+	@DisplayName("should test adding new category")
 	@Transactional
 	public void addingNewCategory() {
-		logger.info("Starting loading data...");
-		categoryDao.findAll().forEach(System.out::println);
-		//to do
-		logger.info("Finished loading data...");
+		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
+		Category ptactvo = categoryDao.findByCategoryIdWithChildren(300112021);
+		categoryDao.remove(ptactvo);
+		assertTrue(categoryDao.findByCategoryIdWithChildren(300112021)==null);
+		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
+		Child toRemove = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst().get();
+		if(zvire!=null)zvire.removeChild(toRemove);
+		categoryDao.save(zvire);
+		Category krmiva = categoryDao.findByCategoryIdWithChildren(300112022);
+		logger.info("krmiva {}", krmiva);
+		zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
+		assertEquals(Optional.empty(), zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst());
+		updateService.updateCompleteTreeOfMainCategory(ZVIRE);
+		ptactvo = categoryDao.findByCategoryIdWithChildren(300112021);
+		assertTrue(ptactvo!=null);	
+		assertThat(ptactvo, hasProperty("categoryName", equalTo("Ptactvo")));
+		assertThat(ptactvo, hasProperty("categoryId", equalTo(300112021)));
+		assertThat(ptactvo, hasProperty("parentId", equalTo(ZVIRE)));
+		assertThat(ptactvo, hasProperty("active", equalTo(true)));
+		assertThat(ptactvo.getChildren(), hasSize(1));
+		assertTrue(childDao.findByCategoryId(300112022).isPresent());
+		zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
+		krmiva = categoryDao.findByCategoryIdWithChildren(300112022);
+		logger.info("krmiva {}", krmiva);
+		Optional<Child> restored = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst();
+		assertTrue(restored.isPresent());
+		assertThat(restored.get(), hasProperty("categoryName", equalTo("Ptactvo")));
+		assertThat(restored.get(), hasProperty("categoryId", equalTo(300112021)));
+		assertThat(restored.get(), hasProperty("active", equalTo(true)));
 	}
 	
 }
