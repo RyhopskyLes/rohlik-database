@@ -51,7 +51,6 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public void initDB() {
 		logger.info("Starting navigation loading...");
 		allCategoriesInfo = navigation.getAllCategoriesData();
-		// allCategoriesInfo.stream().filter(info->info.getCategoryName().equals("BARF")).forEach(System.out::println);
 		allCategoriesId = allCategoriesInfo.stream().map(NavigationCategoryInfo::getCategoryId)
 				.collect(Collectors.toCollection(ArrayList::new));
 		mainCategoriesInfo = allCategoriesInfo.stream().filter(cat -> cat.getParentId() != null)
