@@ -3,8 +3,10 @@ package com.rohlik.data;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,25 +36,34 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.rohlik.data.commons.dao.CategoryDao;
 import com.rohlik.data.commons.services.save.CategorySaveService;
+import com.rohlik.data.config.AppConfigTestContainer;
 import com.rohlik.data.config.AppEmptyDBConfig;
 import com.rohlik.data.config.EmptyDBConfig;
+import com.rohlik.data.config.TestContainerConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 import com.rohlik.data.objects.NavSections;
 import com.rohlik.data.objects.NavSectionsCategoryData;
 
-@SpringJUnitConfig(classes = {AppEmptyDBConfig.class, EmptyDBConfig.class})
-@DisplayName("Unit CategorySaveService Test")
+@SpringJUnitConfig(classes = {/*AppEmptyDBConfig.class, EmptyDBConfig.class*/AppConfigTestContainer.class, TestContainerConfig.class})
+@DisplayName("Integration CategorySaveService Test")
 @TestInstance(Lifecycle.PER_CLASS)
-@ActiveProfiles("emptyDB")
+@ActiveProfiles("testContainer")
+@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@PropertySource("classpath:application-test_container.properties")
 public class CategorySaveServiceTest {
 	private static Logger logger = LoggerFactory.getLogger(CategorySaveServiceTest.class);
 	@Autowired
@@ -61,32 +72,19 @@ public class CategorySaveServiceTest {
 	CategoryDao categoryDao;
 	@Autowired
 	DataSource dataSource;
-	@Autowired	
-	private NavSections navSections;
+	@Autowired
+	@Container
+    public MySQLContainer mysqlContainer;
 	
 	private final Integer PEKARNA=300101000;
 	private final Integer CHIPSY_A_BRAMBURKY=300106154;
-	private final Integer VOLNE_PRODEJNE_LEKY=300113171;
-	private final Integer LEKARNA=300112985;
-	private final Integer LUSTENINOVE_A_RYZOVE=300114931;
-	private final Integer SLANE_SNACKY_A_ORECHY =300106153;
-	private final Integer FRANCOUZSKA=300116325;
-	private final Integer CERVENA=300108066;
-	private final Integer BORDEAUX=300116331;
 	private final Integer ZVIRE=300112000;
 	
-	@AfterEach
-	public void tearDown() {
-	    try {
-	        clearDatabase();
-	        logger.info("Inmemory database cleared!");
-	    } catch (Exception e) {
-	       logger.info(e.getMessage());
-	    }
-	}
+	
 	
 	@Test
 	@Order(1) 
+	@Transactional
 	@DisplayName("should save category 300101000")
 	public void saveMainCategory() {
 		Optional<Category> pekarna = saveService.saveMainCategory(PEKARNA);
@@ -96,12 +94,13 @@ public class CategorySaveServiceTest {
 		assertEquals(Optional.ofNullable(0), pekarna.map(Category::getParentId));
 		assertEquals(Optional.ofNullable(true), pekarna.map(Category::getActive));	
 		assertTrue(pekarna.map(Category::getId).isPresent());
-		assertTrue(pekarna.map(Category::getId).get().equals(1));	
+		assertThat(pekarna.orElseGet(Category::new), hasProperty("id", notNullValue()));
 		logger.info("Test n. 1 finished");
 		}
 
 	@Test
 	@Order(2) 
+	@Transactional
 	@DisplayName("should save category 300101000 with Children")
 	public void saveMainCategoryWithChildren() {
 		assertTrue(categoryDao.findAll().isEmpty());
@@ -121,21 +120,17 @@ public class CategorySaveServiceTest {
 				Matchers.<Child>hasProperty("categoryId", equalTo(300101043)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300101033)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300101019)),
-				Matchers.<Child>hasProperty("id", equalTo(1)),
-				Matchers.<Child>hasProperty("id", equalTo(2)),
-				Matchers.<Child>hasProperty("id", equalTo(3)),
-				Matchers.<Child>hasProperty("id", equalTo(4)),
-				Matchers.<Child>hasProperty("id", equalTo(5)),
-				Matchers.<Child>hasProperty("id", equalTo(6)),
-				Matchers.<Child>hasProperty("id", equalTo(7))							
+				Matchers.<Child>hasProperty("id", notNullValue())				
 				));	
 		logger.info("Test n. 2 finished");
 	}
 	
 	@Test
 	@Order(3) 
+	@Transactional
 	@DisplayName("should save 14 categories")
 	public void saveAllMainCategories() {
+		assertTrue(categoryDao.findAll().isEmpty());
 		List<Category> all = saveService.saveAllMainCategories();
 		assertThat(all, hasSize(14));
 		assertThat(all, hasItems(
@@ -153,28 +148,17 @@ public class CategorySaveServiceTest {
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112393)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112985)),
-				Matchers.<Category>hasProperty("id", equalTo(1)),
-				Matchers.<Category>hasProperty("id", equalTo(2)),
-				Matchers.<Category>hasProperty("id", equalTo(3)),
-				Matchers.<Category>hasProperty("id", equalTo(4)),
-				Matchers.<Category>hasProperty("id", equalTo(5)),
-				Matchers.<Category>hasProperty("id", equalTo(6)),
-				Matchers.<Category>hasProperty("id", equalTo(7)),
-				Matchers.<Category>hasProperty("id", equalTo(8)),
-				Matchers.<Category>hasProperty("id", equalTo(9)),
-				Matchers.<Category>hasProperty("id", equalTo(10)),
-				Matchers.<Category>hasProperty("id", equalTo(11)),
-				Matchers.<Category>hasProperty("id", equalTo(12)),
-				Matchers.<Category>hasProperty("id", equalTo(13)),
-				Matchers.<Category>hasProperty("id", equalTo(14))				
+				Matchers.<Category>hasProperty("id", notNullValue())				
 				));	
 		all.forEach(category->assertThat(category.getChildren(), hasSize(0)));
 		logger.info("Test n. 3 finished");
 		}
 	@Test
 	@Order(4) 
+	@Transactional
 	@DisplayName("should save 14 categories with children")
 	public void saveAllMainCategoriesWithChildren() {
+		assertTrue(categoryDao.findAll().isEmpty());
 		List<Category> all = saveService.saveAllMainCategoriesWithChildren();
 		Category pekarna = all.stream().filter(category->category.getCategoryId().equals(PEKARNA)).findFirst().orElseGet(Category::new);
 		assertThat(all, hasSize(14));
@@ -193,22 +177,11 @@ public class CategorySaveServiceTest {
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112393)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112985)),
-				Matchers.<Category>hasProperty("id", equalTo(1)),
-				Matchers.<Category>hasProperty("id", equalTo(2)),
-				Matchers.<Category>hasProperty("id", equalTo(3)),
-				Matchers.<Category>hasProperty("id", equalTo(4)),
-				Matchers.<Category>hasProperty("id", equalTo(5)),
-				Matchers.<Category>hasProperty("id", equalTo(6)),
-				Matchers.<Category>hasProperty("id", equalTo(7)),
-				Matchers.<Category>hasProperty("id", equalTo(8)),
-				Matchers.<Category>hasProperty("id", equalTo(9)),
-				Matchers.<Category>hasProperty("id", equalTo(10)),
-				Matchers.<Category>hasProperty("id", equalTo(11)),
-				Matchers.<Category>hasProperty("id", equalTo(12)),
-				Matchers.<Category>hasProperty("id", equalTo(13)),
-				Matchers.<Category>hasProperty("id", equalTo(14))				
-				));	
-		all.forEach(category->assertThat(category.getChildren(), not(IsEmptyCollection.empty())));
+				Matchers.<Category>hasProperty("id", notNullValue())
+				)				
+				);	
+		all.forEach(category->System.out.println(category.getChildren()));
+	//	all.forEach(category->assertThat(category.getChildren(), not(IsEmptyCollection.empty())));
 		assertTrue(pekarna.getChildren().size()==7);
 		assertThat(pekarna.getChildren(), hasItems(
 				Matchers.<Child>hasProperty("categoryId", equalTo(300101024)),
@@ -224,8 +197,10 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(5) 
+	@Transactional
 	@DisplayName("should save category 300106154")
 	public void saveCategory() {
+		assertTrue(categoryDao.findAll().isEmpty());
 		Optional<Category> chipsy = saveService.saveCategory(CHIPSY_A_BRAMBURKY);
 		assertEquals(true, chipsy.isPresent());
 		assertEquals(Optional.ofNullable("Chipsy a brambůrky"), chipsy.map(Category::getCategoryName));
@@ -233,14 +208,16 @@ public class CategorySaveServiceTest {
 		assertEquals(Optional.ofNullable(300106153), chipsy.map(Category::getParentId));
 		assertEquals(Optional.ofNullable(true), chipsy.map(Category::getActive));
 		assertTrue(chipsy.map(Category::getId).isPresent());
-		assertTrue(chipsy.map(Category::getId).get().equals(1));	
+		assertThat(chipsy.orElseGet(Category::new), Matchers.<Category>hasProperty("id", notNullValue()));	
 		logger.info("Test n. 5 finished");
 		}
 	
 	@Test
 	@Order(6)
+	@Transactional
 	@DisplayName("should save category 300106154 with children")
 	public void saveCategoryWithChildren() {
+		assertTrue(categoryDao.findAll().isEmpty());
 		Optional<Category> chipsy = saveService.saveCategoryWithChildren(CHIPSY_A_BRAMBURKY);
 		Set<Child> children = chipsy.orElseGet(Category::new).getChildren();
 		assertEquals(true, chipsy.isPresent());
@@ -249,7 +226,7 @@ public class CategorySaveServiceTest {
 		assertEquals(Optional.ofNullable(300106153), chipsy.map(Category::getParentId));
 		assertEquals(Optional.ofNullable(true), chipsy.map(Category::getActive));
 		assertTrue(chipsy.map(Category::getId).isPresent());
-		assertTrue(chipsy.map(Category::getId).get().equals(1));
+		assertThat(chipsy.orElseGet(Category::new), Matchers.<Category>hasProperty("id", notNullValue()));
 		assertThat(children, hasSize(2));
 		assertThat(children, hasItems(
 				Matchers.<Child>hasProperty("categoryId", equalTo(300114929)),
@@ -261,6 +238,7 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(7) 
+	@Transactional
 	@DisplayName("should save category 300112000")
 	public void saveCompleteTreeOfMainCategoryZvire() {
 		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategory(ZVIRE);
@@ -272,41 +250,35 @@ public class CategorySaveServiceTest {
 		Category zero = levelZero.iterator().next();
 		assertThat(levelZero, hasSize(1));
 		assertThat(levelZero, hasItems(
-				Matchers.<Category>hasProperty("id", equalTo(1)),
+				 Matchers.<Category>hasProperty("id", notNullValue()),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Zvíře")),
 				Matchers.<Category>hasProperty("parentId", equalTo(0))
 				));
 		assertThat(zero.getChildren(), hasSize(4));
 		assertThat(zero.getChildren(), hasItems(
-				Matchers.<Child>hasProperty("id", equalTo(1)),
+				Matchers.<Child>hasProperty("id", notNullValue()),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112001)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Pes")),				
-				Matchers.<Child>hasProperty("id", equalTo(2)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112018)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Malá zvířata")),
-				Matchers.<Child>hasProperty("id", equalTo(3)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112010)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Kočka")),
-				Matchers.<Child>hasProperty("id", equalTo(4)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112021)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Ptactvo"))				
 				));	
 		assertThat(levelOne, hasSize(4));
 		assertThat(levelOne, hasItems(
-				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("id", notNullValue()),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112001)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Pes")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(3)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112018)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Malá zvířata")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(4)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112010)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Kočka")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(5)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112021)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Ptactvo")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000))
@@ -372,6 +344,7 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(8) 
+	@Transactional
 	@DisplayName("should save category 300112000 to level 2")
 	public void saveCompleteTreeOfMainCategoryZvireToLevel2() {
 		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategoryDownToLevel(ZVIRE, 2);
@@ -382,41 +355,35 @@ public class CategorySaveServiceTest {
 		Category zero = levelZero.iterator().next();
 		assertThat(levelZero, hasSize(1));
 		assertThat(levelZero, hasItems(
-				Matchers.<Category>hasProperty("id", equalTo(1)),
+				Matchers.<Category>hasProperty("id", notNullValue()),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112000)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Zvíře")),
 				Matchers.<Category>hasProperty("parentId", equalTo(0))
 				));
 		assertThat(zero.getChildren(), hasSize(4));
 		assertThat(zero.getChildren(), hasItems(
-				Matchers.<Child>hasProperty("id", equalTo(1)),
+				Matchers.<Child>hasProperty("id", notNullValue()),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112001)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Pes")),				
-				Matchers.<Child>hasProperty("id", equalTo(2)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112018)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Malá zvířata")),
-				Matchers.<Child>hasProperty("id", equalTo(3)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112010)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Kočka")),
-				Matchers.<Child>hasProperty("id", equalTo(4)),
 				Matchers.<Child>hasProperty("categoryId", equalTo(300112021)),
 				Matchers.<Child>hasProperty("categoryName", equalTo("Ptactvo"))				
 				));	
 		assertThat(levelOne, hasSize(4));
 		assertThat(levelOne, hasItems(
-				Matchers.<Category>hasProperty("id", equalTo(2)),
+				Matchers.<Category>hasProperty("id", notNullValue()),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112001)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Pes")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(3)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112018)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Malá zvířata")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(4)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112010)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Kočka")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000)),
-				Matchers.<Category>hasProperty("id", equalTo(5)),
 				Matchers.<Category>hasProperty("categoryId", equalTo(300112021)),
 				Matchers.<Category>hasProperty("categoryName", equalTo("Ptactvo")),
 				Matchers.<Category>hasProperty("parentId", equalTo(300112000))
@@ -465,6 +432,7 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(9) 
+	@Transactional
 	@DisplayName("should build category 300112000 from level 2 to level 3")
 	public void saveCompleteTreeOfMainCategoryZvireFromLevel2ToLevel3() {
 		Map<Integer, Set<Category>> zvire = saveService.saveCompleteTreeOfMainCategoryFromLevelToLevel(ZVIRE, 2, 3);
@@ -496,6 +464,7 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(10) 
+	@Transactional
 	@DisplayName("should build level 2 of category 300112000")
 	public void saveLevel2ofCategoryZvire() {
 		 Set<Category> zvire = saveService.saveLevelFromCompleteTreeOfMainCategory(ZVIRE, 2);
@@ -541,6 +510,7 @@ public class CategorySaveServiceTest {
 	
 	@Test
 	@Order(11) 
+	@Transactional
 	@DisplayName("should build lowest levels of category 300112000")
 	public void saveLowestLevelOfEachBranchOfCategoryZvire() {
 		Map<Integer, Set<Category>> zvire = saveService.saveLowestLevelOfEachBranchOfMainCategoryTree(ZVIRE);
@@ -551,38 +521,5 @@ public class CategorySaveServiceTest {
 		logger.info("Test n. 11 finished");
 	}
 	
-	public void clearDatabase() throws SQLException {
-	    Connection c = dataSource.getConnection();
-	    Statement s = c.createStatement();
 
-	    // Disable FK
-	    s.execute("SET REFERENTIAL_INTEGRITY FALSE");
-
-	    // Find all tables and truncate them
-	    Set<String> tables = new HashSet<String>();
-	    ResultSet rs = s.executeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  where TABLE_SCHEMA='PUBLIC'");
-	    while (rs.next()) {
-	        tables.add(rs.getString(1));
-	    }
-	    rs.close();
-	    for (String table : tables) {
-	        s.executeUpdate("TRUNCATE TABLE " + table);
-	    }
-
-	    // Idem for sequences
-	    Set<String> sequences = new HashSet<String>();
-	    rs = s.executeQuery("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA='PUBLIC'");
-	    while (rs.next()) {
-	        sequences.add(rs.getString(1));
-	    }
-	    rs.close();
-	    for (String seq : sequences) {
-	        s.executeUpdate("ALTER SEQUENCE " + seq + " RESTART WITH 1");
-	    }
-
-	    // Enable FK
-	    s.execute("SET REFERENTIAL_INTEGRITY TRUE");
-	    s.close();
-	    c.close();
-	}
 }

@@ -40,7 +40,7 @@ import com.rohlik.data.entities.Child;
 import com.rohlik.data.objects.NavSections;
 
 @SpringJUnitConfig(classes = {AppConfigTestContainer.class, TestContainerConfig.class})
-@DisplayName("Unit CategoryUpdateServiceTest Test")
+@DisplayName("Integration CategoryUpdateServiceTest Test")
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("testContainer")
 @Testcontainers
@@ -56,8 +56,6 @@ public class CategoryUpdateServiceTest {
 	private CategoryDao categoryDao;
 	@Autowired
 	private ChildDao childDao;
-	@Autowired	
-	private NavSections navSections;
 	@Autowired
 	DataSource dataSource;
 	@Autowired
@@ -72,7 +70,6 @@ public class CategoryUpdateServiceTest {
 	@DisplayName("should test deactivation")
 	@Transactional
 	public void testDeactivation() {
-		logger.info("MySQL exposed ports: {}", mysqlContainer.getExposedPorts());
 		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
 		categoryDao.findAll().forEach(System.out::println);
 		Category toDeactivate = new Category(20, "DeactivationTest", 300112000, true);
