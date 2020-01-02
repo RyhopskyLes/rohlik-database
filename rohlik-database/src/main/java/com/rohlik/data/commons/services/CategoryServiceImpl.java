@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.rohlik.data.commons.dao.CategoryDao;
 import com.rohlik.data.commons.dao.ProductDao;
-import com.rohlik.data.commons.utilities.DataRohlik;
 import com.rohlik.data.commons.dao.ChildDao;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
@@ -36,7 +35,6 @@ public class CategoryServiceImpl implements CategoryService {
 	CategoryDao catDao;
 	FullProductInfo fullProductInfo;
 	ProductDao productDao;
-	DataRohlik dataRohlik;
 	NavSections nav;
 	ProductsInCategory productsInCategory;	
 	ChildDao childDao;
@@ -44,13 +42,11 @@ public class CategoryServiceImpl implements CategoryService {
 	private static Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
 	
 	@Autowired
-	public CategoryServiceImpl(CategoryDao catDao, FullProductInfo fullProductInfo, ProductDao productDao, DataRohlik dataRohlik,
-			NavSections nav, ProductsInCategory productsInCategory, ChildDao childDao) {
+	public CategoryServiceImpl(CategoryDao catDao, FullProductInfo fullProductInfo, ProductDao productDao, NavSections nav, ProductsInCategory productsInCategory, ChildDao childDao) {
 		super();
 		this.catDao = catDao;
 		this.fullProductInfo = fullProductInfo;
 		this.productDao = productDao;
-		this.dataRohlik = dataRohlik;
 		this.nav = nav;
 		this.productsInCategory = productsInCategory;
 		this.childDao = childDao;
