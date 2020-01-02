@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         )
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class EmptyDBConfig {
-	private Logger logger = LoggerFactory.getLogger(DataTestConfig.class);
+	private Logger logger = LoggerFactory.getLogger(EmptyDBConfig.class);
 	@Bean
 	public DataSource dataSource() {
 		try {
