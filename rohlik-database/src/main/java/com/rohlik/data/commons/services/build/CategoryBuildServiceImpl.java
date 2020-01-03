@@ -211,18 +211,37 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 	public Map<Integer, Set<Category>> buildLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId) {
 		Map<Integer, Set<Category>> result = new HashMap<>();
 		Map<Integer, Set<Category>> completeTree = buildCompleteTreeOfMainCategoryToLevel(categoryId, -1);
-		completeTree.entrySet().stream()
-				.filter(containsCategoryWithoutChildren::test)
-				.forEach(entry -> {
-					Set<Category> lowest = collectCategoriesWithoutChildren.apply(entry.getValue());
-					if (!lowest.isEmpty())
-						result.put(entry.getKey(), lowest);
-				});
+		completeTree.entrySet().stream().filter(containsCategoryWithoutChildren::test).forEach(entry -> {
+			Set<Category> lowest = collectCategoriesWithoutChildren.apply(entry.getValue());
+			if (!lowest.isEmpty())
+				result.put(entry.getKey(), lowest);
+		});
 		return result;
 	}
 
-	private Predicate<Entry<Integer, Set<Category>>> containsCategoryWithoutChildren = entry -> entry.getValue().stream()
-			.map(Category::getChildren).anyMatch(Set::isEmpty);
+	private Predicate<Entry<Integer, Set<Category>>> containsCategoryWithoutChildren = entry -> entry.getValue()
+			.stream().map(Category::getChildren).anyMatch(Set::isEmpty);
 	private UnaryOperator<Set<Category>> collectCategoriesWithoutChildren = set -> set.stream()
 			.filter(category -> category.getChildren().isEmpty()).collect(Collectors.toCollection(HashSet::new));
+
+	@Override
+	public Map<Integer, Category> buildParentChainOfCategory(Integer categoryId) {
+		Map<Integer, Category> chain = new HashMap<>();
+		Optional<Category> category = buildCategory(categoryId);
+		int counter = 0;
+		if (category.isPresent()) {
+			Integer parentId = category.get().getParentId();
+			while (parentId != null && !parentId.equals(0)) {
+				category = buildCategory(parentId);
+				if (category.isPresent()) {
+					counter++;
+					chain.put(counter, category.get());
+					parentId = category.get().getParentId();
+				} else {
+					parentId = null;
+				}
+			}
+		}
+		return chain;
+	}
 }

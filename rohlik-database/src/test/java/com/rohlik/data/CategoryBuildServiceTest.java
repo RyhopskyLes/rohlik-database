@@ -3,6 +3,7 @@ package com.rohlik.data;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -330,4 +331,25 @@ public void buildLowestLevelOfEachBranchOfCategoryZvire() {
 			Matchers.<Category>hasProperty("categoryId", equalTo(300112017))
 			));		
 }
+@Test
+@Order(17) 
+@DisplayName("should build parent chain of category 300114931")
+public void buildParentChainOfCategoryLUSTENINOVE_A_RYZOVE() { 
+	Category zero = buildService.buildCategory(LUSTENINOVE_A_RYZOVE).orElseGet(Category::new);
+	Map<Integer, Category> parentChain =buildService.buildParentChainOfCategory(LUSTENINOVE_A_RYZOVE);
+assertThat(parentChain.entrySet(), hasSize(3));
+Category one =parentChain.get(1);
+Category two =parentChain.get(2);
+Category three=parentChain.get(3);
+assertThat(one, allOf(Matchers.<Category>hasProperty("categoryId", equalTo(zero.getParentId())),
+		Matchers.<Category>hasProperty("parentId", equalTo(two.getCategoryId()))
+		));
+assertThat(two, allOf(Matchers.<Category>hasProperty("categoryId", equalTo(one.getParentId())),
+		Matchers.<Category>hasProperty("parentId", equalTo(three.getCategoryId()))
+		));
+assertThat(three, allOf(Matchers.<Category>hasProperty("categoryId", equalTo(two.getParentId())),
+		Matchers.<Category>hasProperty("parentId", equalTo(0))
+		));
+}
+
 }
