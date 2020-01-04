@@ -74,8 +74,9 @@ public class NavSections {
 			category.setCategoryName(last.getTitle());
 			category.setParentId(parentId);
 			category.setActive(true);
-		} catch (Exception e) {
+		} catch (Exception e) {			
 			log.info("{}", e);
+			return Optional.empty();
 			
 		}		
 		}	
