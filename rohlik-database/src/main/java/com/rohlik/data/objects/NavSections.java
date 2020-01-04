@@ -66,12 +66,18 @@ public class NavSections {
 		Breadcrumb last = breadcrumbs.getLast();
 		breadcrumbs.removeLast();
 		Breadcrumb nexttolast = breadcrumbs.pollLast();
-		Integer parentId= nexttolast==null ? 0 : nexttolast.getCategoryId();
-		category = new Category();
-		category.setCategoryId(last.getCategoryId());
-		category.setCategoryName(last.getTitle());
-		category.setParentId(parentId);
-		category.setActive(true);
+		Integer parentId;
+		try {
+			parentId = nexttolast==null ? 0 : nexttolast.getCategoryId();
+			category = new Category();
+			category.setCategoryId(last.getCategoryId());
+			category.setCategoryName(last.getTitle());
+			category.setParentId(parentId);
+			category.setActive(true);
+		} catch (Exception e) {
+			log.info("{}", e);
+			
+		}		
 		}	
 		return Optional.ofNullable(category);
 	}
@@ -81,10 +87,14 @@ public class NavSections {
 		Child child = null;
 		if(!breadcrumbs.isEmpty()) {
 			Breadcrumb last = breadcrumbs.getLast();
-			child = new Child();
-			child.setCategoryId(last.getCategoryId());
-			child.setCategoryName(last.getTitle());
-			child.setActive(true);
+			try {
+				child = new Child();
+				child.setCategoryId(last.getCategoryId());
+				child.setCategoryName(last.getTitle());
+				child.setActive(true);
+			} catch (Exception e) {
+				log.info("{}", e);
+			}			
 			}	
 		return Optional.ofNullable(child);		
 	}
