@@ -244,4 +244,9 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 		}
 		return chain;
 	}
+
+	@Override
+	public Set<Category> buildFlattenedLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId) {
+		return buildLowestLevelOfEachBranchOfMainCategoryTree(categoryId).values().stream().flatMap(Set::stream).collect(Collectors.toCollection(HashSet::new));
+	}
 }

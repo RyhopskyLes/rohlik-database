@@ -21,5 +21,6 @@ Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryDownToLevel(Integer c
 Map<Integer, Set<Category>> buildCompleteTreeOfMainCategoryFromLevelToLevel(Integer categoryId, int fromLevel, int toLevel);
 Set<Category> buildLevelFromCompleteTreeOfMainCategory(Integer categoryId, int level);
 Map<Integer, Set<Category>> buildLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId);
+Set<Category> buildFlattenedLowestLevelOfEachBranchOfMainCategoryTree(Integer categoryId);
 Map<Integer, Category> buildParentChainOfCategory(Integer categoryId);
 }
