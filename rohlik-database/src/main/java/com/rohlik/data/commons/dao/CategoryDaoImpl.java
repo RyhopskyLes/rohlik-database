@@ -91,7 +91,8 @@ public class CategoryDaoImpl implements CategoryDao {
 	public Category save(Category category) {
 		Category saved = catRepository.save(category);
 		try {
-			registry.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
+			boolean added = registry.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
+			log.info("{} removed from registry: {}", category, added);
 		} catch (NullIdException | WrongOrMissingClassException e) {
 			log.info("not added to registry: {}", category);
 			log.info("{}", e);
@@ -102,8 +103,8 @@ public class CategoryDaoImpl implements CategoryDao {
 	@Override
 	public void removeById(Integer id) {
 		registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
-				.ifPresent(record ->{ registry.removeCategoryRecord(record);
-				log.info("removed from registry: {}", record);});
+				.ifPresent(record ->{ boolean removed = registry.removeCategoryRecord(record);
+				log.info("{} removed from registry: {}", record, removed);});
 		catRepository.deleteById(id);
 
 	}
@@ -112,8 +113,8 @@ public class CategoryDaoImpl implements CategoryDao {
 	public void remove(Category category) {
 		catRepository.delete(category);
 		try {
-			registry.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
-			log.info("removed from registry: {}", category);
+			boolean removed = registry.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
+			log.info("{} removed from registry: {}", category, removed);
 		} catch (NullIdException | WrongOrMissingClassException e) {
 			log.info("not removed from registry: {}", category);
 			log.info("{}", e);
