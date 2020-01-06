@@ -1,6 +1,7 @@
 package com.rohlik.data.commons.services.build;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -226,7 +228,7 @@ public class CategoryBuildServiceImpl implements CategoryBuildService {
 
 	@Override
 	public Map<Integer, Category> buildParentChainOfCategory(Integer categoryId) {
-		Map<Integer, Category> chain = new HashMap<>();
+		Map<Integer, Category> chain = new TreeMap<>();
 		Optional<Category> category = buildCategory(categoryId);
 		int counter = 0;
 		if (category.isPresent()) {
