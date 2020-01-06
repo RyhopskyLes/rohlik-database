@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("testContainer")
 
 @ComponentScan(basePackages = {"com.rohlik.data"})
-public class AppConfigTestContainer {
+public class AppConfigTestContainer {	
+	
 
 }

@@ -21,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rohlik.data.commons.exceptions.NullIdException;
+import com.rohlik.data.commons.exceptions.WrongOrMissingClassException;
+import com.rohlik.data.commons.objects.Record;
+import com.rohlik.data.commons.objects.Registry;
 import com.rohlik.data.commons.repos.CategoryRepository;
 import com.rohlik.data.dtos.ChildDTO;
 import com.rohlik.data.entities.Category;
@@ -32,11 +36,13 @@ public class CategoryDaoImpl implements CategoryDao {
 	CategoryRepository catRepository;
 	@PersistenceContext
 	private EntityManager em;
+	private Registry registry;
 
 	@Autowired
-	public CategoryDaoImpl(CategoryRepository catRepository) {
+	public CategoryDaoImpl(CategoryRepository catRepository, Registry registry) {
 		super();
 		this.catRepository = catRepository;
+		this.registry = registry;
 	}
 
 	private static Logger log = LoggerFactory.getLogger(CategoryDaoImpl.class);
@@ -83,11 +89,21 @@ public class CategoryDaoImpl implements CategoryDao {
 
 	@Override
 	public Category save(Category category) {
-		return catRepository.save(category);
+		Category saved = catRepository.save(category);
+		try {
+			registry.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
+		} catch (NullIdException | WrongOrMissingClassException e) {
+			log.info("not added to registry: {}", category);
+			log.info("{}", e);
+		}
+		return saved;
 	}
 
 	@Override
 	public void removeById(Integer id) {
+		registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
+				.ifPresent(record ->{ registry.removeCategoryRecord(record);
+				log.info("removed from registry: {}", record);});
 		catRepository.deleteById(id);
 
 	}
@@ -95,6 +111,13 @@ public class CategoryDaoImpl implements CategoryDao {
 	@Override
 	public void remove(Category category) {
 		catRepository.delete(category);
+		try {
+			registry.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
+			log.info("removed from registry: {}", category);
+		} catch (NullIdException | WrongOrMissingClassException e) {
+			log.info("not removed from registry: {}", category);
+			log.info("{}", e);
+		}
 	}
 
 	@Override
@@ -109,7 +132,7 @@ public class CategoryDaoImpl implements CategoryDao {
 
 	@Override
 	public Category findByCategoryIdWithChildrenAndCategoriesKosik(Integer id) {
-		log.info("categoryId: " + id);
+		log.info("categoryId: {}", id);
 		return catRepository.findByCategoryIdWithChildrenAndCategoriesKosik(id);
 	}
 
@@ -142,7 +165,8 @@ public class CategoryDaoImpl implements CategoryDao {
 	@Override
 	public Map<Integer, Set<Category>> findSubcategoriesOfMainCategoryOnAllLevelsGroupedByLevels(Integer categoryId) {
 		List<Category> completeTree = findSubcategoriesOfCategoryOnAllLevels(categoryId);
-		Map<Integer, List<Category>> completeTreeGroupedByCategoryId = completeTree.stream().collect(Collectors.groupingBy(Category::getCategoryId));
+		Map<Integer, List<Category>> completeTreeGroupedByCategoryId = completeTree.stream()
+				.collect(Collectors.groupingBy(Category::getCategoryId));
 		Category root = this.findByCategoryIdWithChildren(categoryId);
 		Set<Category> level = new HashSet<>();
 		Map<Integer, Set<Category>> groupedCompleteTree = new HashMap<>();
@@ -152,9 +176,9 @@ public class CategoryDaoImpl implements CategoryDao {
 			groupedCompleteTree.put(counter, level);
 			Set<Child> childrenOnLevel = root.getChildren();
 			while (!childrenOnLevel.isEmpty()) {
-				level = childrenOnLevel.stream().map(child -> completeTreeGroupedByCategoryId.get(child.getCategoryId())).filter(Objects::nonNull)
-						.filter(list->!list.isEmpty())
-						.map(list->list.iterator().next())
+				level = childrenOnLevel.stream()
+						.map(child -> completeTreeGroupedByCategoryId.get(child.getCategoryId()))
+						.filter(Objects::nonNull).filter(list -> !list.isEmpty()).map(list -> list.iterator().next())
 						.filter(Objects::nonNull).collect(Collectors.toCollection(HashSet::new));
 				counter++;
 				groupedCompleteTree.put(counter, level);
