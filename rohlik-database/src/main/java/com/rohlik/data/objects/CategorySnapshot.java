@@ -1,28 +1,29 @@
 package com.rohlik.data.objects;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.rohlik.data.commons.exceptions.WrongCategoryIdException;
 import com.rohlik.data.commons.services.build.CategoryBuildService;
-import com.rohlik.data.commons.services.build.ProductBuildService;
 import com.rohlik.data.entities.Category;
 
-public class CategorySnapshot {
-	private Category category;
-	private Set<Category> parentChain = new HashSet<>();
-	private List<Integer> productIds = new ArrayList<>();
+public final class CategorySnapshot {
+	private final Category category;
+	private final Map<Integer, Category> parentChain;
+	private final List<Integer> productIds;
 	private ProductsInCategory productsInCategory;
 	private CategoryBuildService buildService;
 	private static Logger log = LoggerFactory.getLogger(CategorySnapshot.class);
@@ -30,22 +31,29 @@ public class CategorySnapshot {
 	
 
 	public CategorySnapshot() {
-		super();		
+		super();
+		category=null;
+		Map<Integer, Category>  holder = new TreeMap<>();
+		this.parentChain = Collections.unmodifiableSortedMap((TreeMap<Integer, Category>) holder);
+		List<Integer> productIdsHolder = new ArrayList<>();
+		this.productIds = Collections.unmodifiableList(productIdsHolder);	
+		
 	}
 
 	public CategorySnapshot(ProductsInCategory productsInCategory, CategoryBuildService buildService, Category category)
 			throws WrongCategoryIdException {
 		super();
-		log.info("category in constructor: {}", category);
 		this.buildService = buildService;
 		this.productsInCategory = productsInCategory;
 		if (category != null) {
 			this.category = category;
-			this.parentChain = buildService.buildParentChainOfCategory(category.getCategoryId()).values().stream()
-					.collect(Collectors.toCollection(HashSet::new));
-			this.productIds = productsInCategory.getProductIdsForCategory(category.getCategoryId(), 10000);
+			Map<Integer, Category>  holder = new TreeMap<>();
+			holder=buildService.buildParentChainOfCategory(category.getCategoryId());
+			this.parentChain = Collections.unmodifiableSortedMap((TreeMap<Integer, Category>) holder);
+			List<Integer> productIdsHolder = new ArrayList<>();
+			productIdsHolder.addAll(productsInCategory.getProductIdsForCategory(category.getCategoryId(), 10000));
+			this.productIds = Collections.unmodifiableList(productIdsHolder);
 		} else {
-			log.info("argument in else: {}", category);
 			throw new WrongCategoryIdException("Category not exists");
 		}
 	}
@@ -54,7 +62,7 @@ public class CategorySnapshot {
 		return category;
 	}
 
-	public Set<Category> getParentChain() {
+	public Map<Integer, Category> getParentChain() {
 		return parentChain;
 	}
 
