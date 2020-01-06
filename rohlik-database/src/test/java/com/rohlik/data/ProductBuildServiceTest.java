@@ -49,7 +49,20 @@ public class ProductBuildServiceTest {
 	@Autowired	
 	private ProductsInCategory inCategory;
 	private final Integer LUSTENINOVE_A_RYZOVE=300114931;
-	
+	private final Integer ZVIRE=300112000;
+	private final Integer PEKARNA=300101000;
+	private final Integer OVOCE=300102000;
+	private final Integer MASO=300103000;
+	private final Integer UZENINY=300104000;
+	private final Integer MLECNE=300105000;
+	private final Integer TRVANLIVE=300106000;
+	private final Integer MRAZENE=300107000;
+	private final Integer NAPOJE=300108000;
+	private final Integer SPECIALNI=300112393;
+	private final Integer DITE=300110000;
+	private final Integer DROGERIE=300109000;
+	private final Integer DOMACNOST=300111000;
+	private final Integer LEKARNA=300112985;
 	@Test
 	@Order(1) 
 	@DisplayName("should build products in category 300114931")
@@ -80,5 +93,37 @@ public class ProductBuildServiceTest {
 				Matchers.<Product>hasProperty("productKosik", nullValue())
 				)));
 			}
-
+	@Test
+	@Order(2) 
+	@DisplayName("should build all products in category 300112000")
+	public void buildAllProductsWithProducersAndCategoriesInCategoryZVIRE() {
+		Integer test =ZVIRE;
+		List<Product> zvire = buildService.buildAllProductsInMainCategoryWithProducers(test);
+		Optional<String> totalHits = inCategory.getTotalHitsForCategory(test);
+		logger.info("size {}, totalHits {}", zvire.size(), totalHits);
+		assertEquals(zvire.size(), NumberUtils.toInt(totalHits.orElseGet(()->"0")));
+		zvire.forEach(item->assertThat(item, allOf(
+				Matchers.<Product>hasProperty("id", nullValue()),
+				Matchers.<Product>hasProperty("productId", notNullValue()),
+				Matchers.<Product>hasProperty("productName", notNullValue()),
+				Matchers.<Product>hasProperty("producer", notNullValue()),
+				Matchers.<Product>hasProperty("originalPrice", is(greaterThanOrEqualTo(0.0))),
+				Matchers.<Product>hasProperty("price", is(greaterThanOrEqualTo(0.0))),
+				Matchers.<Product>hasProperty("textualAmount", is(not(emptyOrNullString()))),
+				Matchers.<Product>hasProperty("unit", notNullValue()),
+				Matchers.<Product>hasProperty("baseLink", is(not(emptyOrNullString()))),
+				Matchers.<Product>hasProperty("imgPath", notNullValue()),
+				Matchers.<Product>hasProperty("inStock", notNullValue()),
+				Matchers.<Product>hasProperty("active", notNullValue()),
+				Matchers.<Product>hasProperty("hasSales", notNullValue()),
+				Matchers.<Product>hasProperty("link", is(not(emptyOrNullString()))),
+				Matchers.<Product>hasProperty("pricePerUnit", is(greaterThanOrEqualTo(0.0))),
+				Matchers.<Product>hasProperty("mainCategoryId", notNullValue()),
+				Matchers.<Product>hasProperty("isFromRohlik", is(true)),
+				Matchers.<Product>hasProperty("sales", Matchers.<Sale> iterableWithSize(greaterThanOrEqualTo(0))),
+				Matchers.<Product>hasProperty("categories", Matchers.<Category> iterableWithSize(greaterThanOrEqualTo(1))),
+				Matchers.<Product>hasProperty("productKosik", nullValue())
+				)));
+		
+			}
 }
