@@ -31,15 +31,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.rohlik.data.commons.dao.CategoryDao;
 import com.rohlik.data.commons.dao.ChildDao;
+import com.rohlik.data.commons.objects.Registry;
 import com.rohlik.data.commons.services.save.CategorySaveService;
 import com.rohlik.data.commons.services.update.CategoryUpdateService;
 import com.rohlik.data.config.AppConfigTestContainer;
 import com.rohlik.data.config.TestContainerConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
-import com.rohlik.data.objects.NavSections;
 
-@SpringJUnitConfig(classes = {AppConfigTestContainer.class, TestContainerConfig.class})
+@SpringJUnitConfig(classes = {AppConfigTestContainer.class, TestContainerConfig.class/*, RegistryRepositoryMySqlImpl.class*/})
 @DisplayName("Integration CategoryUpdateServiceTest Test")
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("testContainer")
@@ -59,6 +59,8 @@ public class CategoryUpdateServiceTest {
 	@Autowired
 	DataSource dataSource;
 	@Autowired
+	Registry registry;
+	@Autowired
 	@Container
     public MySQLContainer mysqlContainer;
 	private final Integer ZVIRE=300112000;
@@ -70,11 +72,14 @@ public class CategoryUpdateServiceTest {
 	@DisplayName("should test deactivation")
 	@Transactional
 	public void testDeactivation() {
+		assertEquals(0, registry.getCategoryRecords().size());
 		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
-		categoryDao.findAll().forEach(System.out::println);
+		registry.getCategoryRecords().forEach(record->logger.info("in registry {}", record));
+		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
 		Category toDeactivate = new Category(20, "DeactivationTest", 300112000, true);
 		Child childToDeactivate = new Child(20, "DeactivationTest", true);
 		categoryDao.save(toDeactivate);
+		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
 		categoryDao.findAll().forEach(System.out::println);
 		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
 		if(zvire!=null){zvire.addChild(childToDeactivate);
