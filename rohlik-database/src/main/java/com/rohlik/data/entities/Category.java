@@ -147,7 +147,7 @@ public class Category implements Serializable, IdMediator {
 		return Objects.equals(categoryId, other.categoryId) && Objects.equals(categoryName, other.categoryName)
 				&& Objects.equals(children, other.children) && Objects.equals(parentId, other.parentId)
 				&& Objects.equals(active, other.active)
-				&& Objects.equals(products, other.products);
+				/*&& Objects.equals(products, other.products)*/;
 	}
 	@Override
 	public String toString() {
