@@ -29,6 +29,8 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.rohlik.data.commons.repos.RegistryRepository;
+import com.rohlik.data.commons.repos.RegistryRepositoryMySqlImpl;
 
 import static java.lang.String.format;
 
@@ -145,7 +147,5 @@ public class TestContainerConfig {
 		.withPassword(password).withExposedPorts(portExposed).withStartupTimeout(Duration.ofSeconds(30));		
 		return mysqlContainer;
 	}
-	
-
 
 }
