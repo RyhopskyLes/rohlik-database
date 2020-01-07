@@ -89,35 +89,51 @@ public class CategoryDaoImpl implements CategoryDao {
 
 	@Override
 	public Category save(Category category) {
-		Category saved = catRepository.save(category);
-		try {
-			boolean added = registry.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
-			log.info("{} removed from registry: {}", category, added);
-		} catch (NullIdException | WrongOrMissingClassException e) {
-			log.info("not added to registry: {}", category);
-			log.info("{}", e);
+		Category saved;
+		boolean persisted = registry.getCategoryRecords().stream()
+				.anyMatch(record -> record.getNativeId().equals(category.getCategoryId()));
+		if (persisted && category.getId() == null) {
+			saved = findByCategoryIdWithChildren(category.getCategoryId());
+			log.info(" previously saved as: {}", saved);
+		} else {
+			saved = catRepository.save(category);
+			try {
+				boolean added = registry
+						.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
+				log.info("{} added to registry: {}", category, added);
+			} catch (NullIdException | WrongOrMissingClassException e) {
+				log.info("not added to registry: {}", category);
+				log.info("{}", e);
+			}
 		}
 		return saved;
 	}
 
 	@Override
 	public void removeById(Integer id) {
-		registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
-				.ifPresent(record ->{ boolean removed = registry.removeCategoryRecord(record);
-				log.info("{} removed from registry: {}", record, removed);});
-		catRepository.deleteById(id);
+		if (id != null) {
+			registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
+					.ifPresent(record -> {
+						boolean removed = registry.removeCategoryRecord(record);
+						log.info("{} removed from registry: {}", record, removed);
+					});
+			catRepository.deleteById(id);
+		}
 
 	}
 
 	@Override
 	public void remove(Category category) {
-		catRepository.delete(category);
-		try {
-			boolean removed = registry.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
-			log.info("{} removed from registry: {}", category, removed);
-		} catch (NullIdException | WrongOrMissingClassException e) {
-			log.info("not removed from registry: {}", category);
-			log.info("{}", e);
+		if (category != null) {
+			catRepository.delete(category);
+			try {
+				boolean removed = registry
+						.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
+				log.info("{} removed from registry: {}", category, removed);
+			} catch (NullIdException | WrongOrMissingClassException e) {
+				log.info("not removed from registry: {}", category);
+				log.info("{}", e);
+			}
 		}
 	}
 
