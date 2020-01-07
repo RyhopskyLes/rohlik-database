@@ -80,7 +80,6 @@ public class CategoryUpdateServiceTest {
 		Child childToDeactivate = new Child(20, "DeactivationTest", true);
 		categoryDao.save(toDeactivate);
 		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
-		categoryDao.findAll().forEach(System.out::println);
 		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
 		if(zvire!=null){zvire.addChild(childToDeactivate);
 	categoryDao.save(zvire);
@@ -103,6 +102,8 @@ public class CategoryUpdateServiceTest {
 	@DisplayName("should test adding new category")
 	@Transactional
 	public void addingNewCategory() {
+		registry.refreshCategoryRegistry();
+		logger.info("adding new category test started");
 		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
 		Category ptactvo = categoryDao.findByCategoryIdWithChildren(300112021);
 		categoryDao.remove(ptactvo);
@@ -132,6 +133,7 @@ public class CategoryUpdateServiceTest {
 		assertThat(restored.get(), hasProperty("categoryName", equalTo("Ptactvo")));
 		assertThat(restored.get(), hasProperty("categoryId", equalTo(300112021)));
 		assertThat(restored.get(), hasProperty("active", equalTo(true)));
+		logger.info("adding new category test finished");
 	}
 	
 }
