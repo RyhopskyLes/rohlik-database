@@ -2,6 +2,7 @@ package com.rohlik.data.commons.objects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class Registry {
 	public Registry(RegistryRepository regRepository) {
 		super();
 		this.regRepository = regRepository;
-		this.categoryRecords = regRepository.findAllCategoryRecords();
+		this.categoryRecords = new CopyOnWriteArrayList<>(regRepository.findAllCategoryRecords());
 	}
 
 	public synchronized boolean removeCategoryRecord(Record record) {
@@ -43,4 +44,7 @@ public class Registry {
 		return new ArrayList<>(categoryRecords);
 	}
 
+	public synchronized void refreshCategoryRegistry() {
+		this.categoryRecords = new CopyOnWriteArrayList<>(regRepository.findAllCategoryRecords());
+	}
 }
