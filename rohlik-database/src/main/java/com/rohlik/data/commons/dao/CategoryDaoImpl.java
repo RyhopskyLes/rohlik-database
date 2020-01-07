@@ -88,10 +88,12 @@ public class CategoryDaoImpl implements CategoryDao {
 	}
 
 	@Override
-	public Category save(Category category) {
+	public synchronized Category save(Category category) {
+		log.info(" trying to save: {}", category);
 		Category saved;
 		boolean persisted = registry.getCategoryRecords().stream()
 				.anyMatch(record -> record.getNativeId().equals(category.getCategoryId()));
+		log.info(" is already persisted?: {}", persisted);
 		if (persisted && category.getId() == null) {
 			saved = findByCategoryIdWithChildren(category.getCategoryId());
 			log.info(" previously saved as: {}", saved);
@@ -110,7 +112,7 @@ public class CategoryDaoImpl implements CategoryDao {
 	}
 
 	@Override
-	public void removeById(Integer id) {
+	public synchronized void removeById(Integer id) {
 		if (id != null) {
 			registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
 					.ifPresent(record -> {
@@ -123,7 +125,7 @@ public class CategoryDaoImpl implements CategoryDao {
 	}
 
 	@Override
-	public void remove(Category category) {
+	public synchronized void remove(Category category) {
 		if (category != null) {
 			catRepository.delete(category);
 			try {
