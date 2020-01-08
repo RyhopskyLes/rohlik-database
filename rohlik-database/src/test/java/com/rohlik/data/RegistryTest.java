@@ -68,19 +68,19 @@ public class RegistryTest {
 		ExecutorService service = null;
 		try {
 			service = Executors.newFixedThreadPool(10);
-			assertThat(registry.getCategoryRecords(), hasSize(0));
+			assertSize(0);
 			for (int i = 0; i < 10; i++) {
 				Future<Category> result = service.submit(() -> {
 					Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
 					return categoryDao.save(zvire.get());
 				});
 				if (result.isDone()) {
-					assertThat(registry.getCategoryRecords(), hasSize(1));
+					assertSize(1);
 				}
 			}
 		} finally {
-			shutDownService(service); 
-		}	
+			shutDownService(service);
+		}
 		finalizeTest(service, 1, 1);
 	}
 
@@ -93,12 +93,13 @@ public class RegistryTest {
 		try {
 			service = Executors.newFixedThreadPool(10);
 			for (int i = 0; i < 10; i++) {
-				CompletableFuture.runAsync(() -> categoryDao.removeById(2713), service).thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);
+				CompletableFuture.runAsync(() -> categoryDao.removeById(2713), service)
+						.thenRunAsync(() -> assertSize(0), service);
 			}
 
 		} finally {
-			shutDownService(service); 
-					}		
+			shutDownService(service);
+		}
 		finalizeTest(service, 2, 0);
 	}
 
@@ -109,17 +110,18 @@ public class RegistryTest {
 	public void concurrentCategoryRemoving() {
 		Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
 		categoryDao.save(zvire.get());
-		Category category = categoryDao.findByCategoryId(ZVIRE).orElseGet(()->null);
+		Category category = categoryDao.findByCategoryId(ZVIRE).orElseGet(() -> null);
 		ExecutorService service = null;
 		try {
 			service = Executors.newFixedThreadPool(10);
 			for (int i = 0; i < 10; i++) {
-				CompletableFuture.runAsync(() -> categoryDao.remove(category), service).thenRunAsync(()->assertThat(registry.getCategoryRecords(), hasSize(0)), service);
+				CompletableFuture.runAsync(() -> categoryDao.remove(category), service)
+						.thenRunAsync(() -> assertSize(0), service);
 			}
 		} finally {
-			shutDownService(service); 			
-		}		
-			finalizeTest(service, 3, 0);
+			shutDownService(service);
+		}
+		finalizeTest(service, 3, 0);
 	}
 
 	public void finalizeTest(ExecutorService service, int number, int size) {
@@ -130,14 +132,18 @@ public class RegistryTest {
 				e.printStackTrace();
 			}
 			if (service.isTerminated()) {
-				logger.info("tests n. "+number+" finished");
-				assertThat(registry.getCategoryRecords(), hasSize(size));
+				logger.info("tests n. " + number + " finished");
+				assertSize(size);
 			}
-		}		
+		}
 	}
-	
+
 	public void shutDownService(ExecutorService service) {
 		if (service != null)
-			service.shutdown();	
+			service.shutdown();
 	}
+
+	public void assertSize(int size) {
+		assertThat(registry.getCategoryRecords(), hasSize(size));
 	}
+}
