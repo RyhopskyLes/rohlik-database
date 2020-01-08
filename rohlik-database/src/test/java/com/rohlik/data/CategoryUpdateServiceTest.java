@@ -39,7 +39,8 @@ import com.rohlik.data.config.TestContainerConfig;
 import com.rohlik.data.entities.Category;
 import com.rohlik.data.entities.Child;
 
-@SpringJUnitConfig(classes = {AppConfigTestContainer.class, TestContainerConfig.class/*, RegistryRepositoryMySqlImpl.class*/})
+@SpringJUnitConfig(classes = { AppConfigTestContainer.class,
+		TestContainerConfig.class/* , RegistryRepositoryMySqlImpl.class */ })
 @DisplayName("Integration CategoryUpdateServiceTest Test")
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("testContainer")
@@ -62,63 +63,51 @@ public class CategoryUpdateServiceTest {
 	Registry registry;
 	@Autowired
 	@Container
-    public MySQLContainer mysqlContainer;
-	private final Integer ZVIRE=300112000;
-	 
-	
-		
+	public MySQLContainer mysqlContainer;
+	private final Integer ZVIRE = 300112000;
+	private final Integer PTACTVO = 300112021;
+	private final Category TO_DEACTIVATE = new Category(20, "DeactivationTest", 300112000, true);
+	private final Child CHILD_TO_DEACTIVATE = new Child(20, "DeactivationTest", true);
+
 	@Test
-	@Order(1) 
+	@Order(1)
 	@DisplayName("should test deactivation")
 	@Transactional
 	public void testDeactivation() {
-		assertEquals(0, registry.getCategoryRecords().size());
-		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
-		registry.getCategoryRecords().forEach(record->logger.info("in registry {}", record));
-		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
-		Category toDeactivate = new Category(20, "DeactivationTest", 300112000, true);
-		Child childToDeactivate = new Child(20, "DeactivationTest", true);
-		categoryDao.save(toDeactivate);
-		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
+		saveCompleteTreeOfCategoryAndTestIfDone(ZVIRE);
+		createCategoryAndChildForDeactivationAndSaveThem(TO_DEACTIVATE, CHILD_TO_DEACTIVATE);
+		testIfCategoryAndChildForDeactivationWereSaved();
 		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
-		if(zvire!=null){zvire.addChild(childToDeactivate);
-	categoryDao.save(zvire);
-	zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
-	Optional<Child> persisted = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(20)).findFirst();	
-	Category toDeactivatePersisted = categoryDao.findByCategoryIdWithChildren(20);
-	assertEquals(true, persisted.isPresent());
-	assertEquals(Optional.of(true), persisted.map(Child::getActive));
-	assertEquals(true, Objects.nonNull(toDeactivatePersisted));
-	updateService.updateCompleteTreeOfMainCategory(ZVIRE);
-	persisted = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(20)).findFirst();	
-	toDeactivatePersisted = categoryDao.findByCategoryIdWithChildren(20);
-	assertEquals(true, persisted.isPresent());
-	assertEquals(Optional.of(false), persisted.map(Child::getActive));
-	assertEquals(false, toDeactivatePersisted.getActive());}
-	
+		updateService.updateCompleteTreeOfMainCategory(ZVIRE);
+		testIfCategoryAndChildForDeactivationWereDeactivated(zvire);
 	}
+
 	@Test
-	@Order(2) 
+	@Order(2)
 	@DisplayName("should test adding new category")
 	@Transactional
 	public void addingNewCategory() {
-		registry.refreshCategoryRegistry();
 		logger.info("adding new category test started");
-		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
-		Category ptactvo = categoryDao.findByCategoryIdWithChildren(300112021);
+		registry.refreshCategoryRegistry();
+		// saveService.saveCompleteTreeOfMainCategory(ZVIRE);
+		saveCompleteTreeOfCategoryAndTestIfDone(ZVIRE);
+		Category ptactvo = categoryDao.findByCategoryIdWithChildren(PTACTVO);
 		categoryDao.remove(ptactvo);
-		assertTrue(categoryDao.findByCategoryIdWithChildren(300112021)==null);
+		assertTrue(categoryDao.findByCategoryIdWithChildren(PTACTVO) == null);
 		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
-		Child toRemove = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst().get();
-		if(zvire!=null)zvire.removeChild(toRemove);
+		Child toRemove = zvire.getChildren().stream().filter(child -> child.getCategoryId().equals(300112021))
+				.findFirst().get();
+		if (zvire != null)
+			zvire.removeChild(toRemove);
 		categoryDao.save(zvire);
 		Category krmiva = categoryDao.findByCategoryIdWithChildren(300112022);
 		logger.info("krmiva {}", krmiva);
 		zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
-		assertEquals(Optional.empty(), zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst());
+		assertEquals(Optional.empty(),
+				zvire.getChildren().stream().filter(child -> child.getCategoryId().equals(300112021)).findFirst());
 		updateService.updateCompleteTreeOfMainCategory(ZVIRE);
 		ptactvo = categoryDao.findByCategoryIdWithChildren(300112021);
-		assertTrue(ptactvo!=null);	
+		assertTrue(ptactvo != null);
 		assertThat(ptactvo, hasProperty("categoryName", equalTo("Ptactvo")));
 		assertThat(ptactvo, hasProperty("categoryId", equalTo(300112021)));
 		assertThat(ptactvo, hasProperty("parentId", equalTo(ZVIRE)));
@@ -128,12 +117,46 @@ public class CategoryUpdateServiceTest {
 		zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
 		krmiva = categoryDao.findByCategoryIdWithChildren(300112022);
 		logger.info("krmiva {}", krmiva);
-		Optional<Child> restored = zvire.getChildren().stream().filter(child->child.getCategoryId().equals(300112021)).findFirst();
+		Optional<Child> restored = zvire.getChildren().stream().filter(child -> child.getCategoryId().equals(300112021))
+				.findFirst();
 		assertTrue(restored.isPresent());
 		assertThat(restored.get(), hasProperty("categoryName", equalTo("Ptactvo")));
 		assertThat(restored.get(), hasProperty("categoryId", equalTo(300112021)));
 		assertThat(restored.get(), hasProperty("active", equalTo(true)));
 		logger.info("adding new category test finished");
 	}
-	
+
+	public void saveCompleteTreeOfCategoryAndTestIfDone(Integer categoryId) {
+		assertEquals(0, registry.getCategoryRecords().size());
+		saveService.saveCompleteTreeOfMainCategory(ZVIRE);
+		assertEquals(categoryDao.findAll().size(), registry.getCategoryRecords().size());
+	}
+
+	public void createCategoryAndChildForDeactivationAndSaveThem(Category category, Child child) {
+		categoryDao.save(category);
+		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
+		if (zvire != null) {
+			zvire.addChild(child);
+			categoryDao.save(zvire);
+		}
+	}
+
+	public void testIfCategoryAndChildForDeactivationWereSaved() {
+		Category zvire = categoryDao.findByCategoryIdWithChildren(ZVIRE);
+		Optional<Child> persisted = zvire.getChildren().stream().filter(child -> child.getCategoryId().equals(20))
+				.findFirst();
+		Category toDeactivatePersisted = categoryDao.findByCategoryIdWithChildren(20);
+		assertEquals(true, persisted.isPresent());
+		assertEquals(Optional.of(true), persisted.map(Child::getActive));
+		assertEquals(true, Objects.nonNull(toDeactivatePersisted));
+	}
+
+	public void testIfCategoryAndChildForDeactivationWereDeactivated(Category zvire) {
+		Optional<Child> persisted = zvire.getChildren().stream().filter(child -> child.getCategoryId().equals(20))
+				.findFirst();
+		Category toDeactivatePersisted = categoryDao.findByCategoryIdWithChildren(20);
+		assertEquals(true, persisted.isPresent());
+		assertEquals(Optional.of(false), persisted.map(Child::getActive));
+		assertEquals(false, toDeactivatePersisted.getActive());
+	}
 }
