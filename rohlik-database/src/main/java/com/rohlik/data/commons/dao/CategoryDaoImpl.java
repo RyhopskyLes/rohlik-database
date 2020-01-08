@@ -114,7 +114,8 @@ public class CategoryDaoImpl implements CategoryDao {
 	@Override
 	public synchronized void removeById(Integer id) {
 		if (id != null) {
-			registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id)).findFirst()
+			registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id))			
+			.findFirst()
 					.ifPresent(record -> {
 						boolean removed = registry.removeCategoryRecord(record);
 						log.info("{} removed from registry: {}", record, removed);

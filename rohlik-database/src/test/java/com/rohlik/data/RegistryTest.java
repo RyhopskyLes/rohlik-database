@@ -1,11 +1,13 @@
 package com.rohlik.data;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -53,7 +55,7 @@ public class RegistryTest {
 	@Container
 	public MySQLContainer mysqlContainer;
 	private final Integer ZVIRE = 300112000;
-
+	private final Integer PEKARNA = 300101000;
 	@Test
 	@Order(1)
 	@DisplayName("should test concurrent adding")
@@ -82,9 +84,29 @@ public class RegistryTest {
 				e.printStackTrace();
 			}
 			    if(service.isTerminated())
-			    { logger.info("tests finished");
+			    { logger.info("tests n. 1 finished");
 			    	assertThat(registry.getCategoryRecords(), hasSize(1));		
 			    }
 			}
+	}
+	@Test
+	@Order(2)
+	@DisplayName("should test concurrent removing")
+	@Transactional
+	public void concurrentCategoryRemovingCompletableFuture() {
+		ExecutorService service = null;		
+		try {			
+			service = Executors.newFixedThreadPool(10);
+			for(int i=0; i<10; i++)
+			{
+			CompletableFuture.runAsync(()->
+			{categoryDao.removeById(2713);}, service)
+			.thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);}
+			
+			
+		}  finally {
+			if (service != null)
+				service.shutdown();
+		}		
 	}
 }
