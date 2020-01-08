@@ -79,20 +79,9 @@ public class RegistryTest {
 				}
 			}
 		} finally {
-			if (service != null)
-				service.shutdown();
-		}
-		if (service != null) {
-			try {
-				service.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (service.isTerminated()) {
-				logger.info("tests n. 1 finished");
-				assertThat(registry.getCategoryRecords(), hasSize(1));
-			}
-		}
+			shutDownService(service); 
+		}	
+		finalizeTest(service, 1, 1);
 	}
 
 	@Test
@@ -108,21 +97,9 @@ public class RegistryTest {
 			}
 
 		} finally {
-			if (service != null)
-				service.shutdown();
-					}
-		
-		if (service != null) {
-			try {
-				service.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (service.isTerminated()) {
-				logger.info("tests n. 2 finished");
-				assertThat(registry.getCategoryRecords(), hasSize(0));
-			}
-		}
+			shutDownService(service); 
+					}		
+		finalizeTest(service, 2, 0);
 	}
 
 	@Test
@@ -140,10 +117,12 @@ public class RegistryTest {
 				CompletableFuture.runAsync(() -> categoryDao.remove(category), service).thenRunAsync(()->assertThat(registry.getCategoryRecords(), hasSize(0)), service);
 			}
 		} finally {
-			if (service != null)
-				service.shutdown();			
-		}
-		
+			shutDownService(service); 			
+		}		
+			finalizeTest(service, 3, 0);
+	}
+
+	public void finalizeTest(ExecutorService service, int number, int size) {
 		if (service != null) {
 			try {
 				service.awaitTermination(1, TimeUnit.MINUTES);
@@ -151,10 +130,14 @@ public class RegistryTest {
 				e.printStackTrace();
 			}
 			if (service.isTerminated()) {
-				logger.info("tests n. 3 finished");
-				assertThat(registry.getCategoryRecords(), hasSize(0));
+				logger.info("tests n. "+number+" finished");
+				assertThat(registry.getCategoryRecords(), hasSize(size));
 			}
-		}
+		}		
 	}
-
+	
+	public void shutDownService(ExecutorService service) {
+		if (service != null)
+			service.shutdown();	
+	}
 	}
