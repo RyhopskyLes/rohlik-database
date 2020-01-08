@@ -1,8 +1,10 @@
 package com.rohlik.data;
 
 import java.util.Optional;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -56,6 +58,7 @@ public class RegistryTest {
 	public MySQLContainer mysqlContainer;
 	private final Integer ZVIRE = 300112000;
 	private final Integer PEKARNA = 300101000;
+
 	@Test
 	@Order(1)
 	@DisplayName("should test concurrent adding")
@@ -66,47 +69,98 @@ public class RegistryTest {
 		try {
 			service = Executors.newFixedThreadPool(10);
 			assertThat(registry.getCategoryRecords(), hasSize(0));
-			for (int i = 0; i < 10; i++) {				
+			for (int i = 0; i < 10; i++) {
 				Future<Category> result = service.submit(() -> {
 					Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
 					return categoryDao.save(zvire.get());
-				});		
-				if(result.isDone()) {assertThat(registry.getCategoryRecords(), hasSize(1));}
+				});
+				if (result.isDone()) {
+					assertThat(registry.getCategoryRecords(), hasSize(1));
+				}
 			}
 		} finally {
 			if (service != null)
 				service.shutdown();
 		}
-		if(service != null) {
-			   try {
+		if (service != null) {
+			try {
 				service.awaitTermination(1, TimeUnit.MINUTES);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			    if(service.isTerminated())
-			    { logger.info("tests n. 1 finished");
-			    	assertThat(registry.getCategoryRecords(), hasSize(1));		
-			    }
+			if (service.isTerminated()) {
+				logger.info("tests n. 1 finished");
+				assertThat(registry.getCategoryRecords(), hasSize(1));
 			}
+		}
 	}
+
 	@Test
 	@Order(2)
 	@DisplayName("should test concurrent removing")
 	@Transactional
-	public void concurrentCategoryRemovingCompletableFuture() {
-		ExecutorService service = null;		
-		try {			
+	public void concurrentCategoryRemovingById() {
+		Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
+		categoryDao.save(zvire.get());
+		ExecutorService service = null;
+		try {
 			service = Executors.newFixedThreadPool(10);
-			for(int i=0; i<10; i++)
-			{
-			CompletableFuture.runAsync(()->
-			{categoryDao.removeById(2713);}, service)
-			.thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);}
-			
-			
-		}  finally {
+			for (int i = 0; i < 10; i++) {
+				CompletableFuture.runAsync(() -> {
+					categoryDao.removeById(2713);
+				}, service).thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);
+			}
+
+		} finally {
 			if (service != null)
 				service.shutdown();
-		}		
+					}
+		
+		if (service != null) {
+			try {
+				service.awaitTermination(1, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (service.isTerminated()) {
+				logger.info("tests n. 2 finished");
+				assertThat(registry.getCategoryRecords(), hasSize(0));
+			}
+		}
 	}
-}
+
+	@Test
+	@Order(3)
+	@DisplayName("should test concurrent removing")
+	@Transactional
+	public void concurrentCategoryRemoving() {
+		Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
+		categoryDao.save(zvire.get());
+		Category category = categoryDao.findByCategoryId(ZVIRE).orElseGet(()->null);
+		ExecutorService service = null;
+		try {
+			service = Executors.newFixedThreadPool(10);
+			for (int i = 0; i < 10; i++) {
+				CompletableFuture.runAsync(() -> {
+				categoryDao.remove(category);
+				assertThat(registry.getCategoryRecords(), hasSize(0));}, service);
+			}
+		} finally {
+			if (service != null)
+				service.shutdown();			
+		}
+		
+		if (service != null) {
+			try {
+				service.awaitTermination(1, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (service.isTerminated()) {
+				logger.info("tests n. 3 finished");
+				assertThat(registry.getCategoryRecords(), hasSize(0));
+			}
+		}
+	}
+
+	}

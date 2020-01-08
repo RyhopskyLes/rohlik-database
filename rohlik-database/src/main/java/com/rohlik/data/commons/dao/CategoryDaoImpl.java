@@ -102,7 +102,7 @@ public class CategoryDaoImpl implements CategoryDao {
 			try {
 				boolean added = registry
 						.addCategoryRecord(new Record(saved.getId(), saved.getCategoryId(), Category.class));
-				log.info("{} added to registry: {}", category, added);
+				log.info("added to registry: {}  {}", added, category);
 			} catch (NullIdException | WrongOrMissingClassException e) {
 				log.info("not added to registry: {}", category);
 				log.info("{}", e);
@@ -118,7 +118,7 @@ public class CategoryDaoImpl implements CategoryDao {
 			.findFirst()
 					.ifPresent(record -> {
 						boolean removed = registry.removeCategoryRecord(record);
-						log.info("{} removed from registry: {}", record, removed);
+						log.info("removed from registry: {}, {} ", removed, record);
 					});
 			catRepository.deleteById(id);
 		}
@@ -127,17 +127,19 @@ public class CategoryDaoImpl implements CategoryDao {
 
 	@Override
 	public synchronized void remove(Category category) {
-		if (category != null) {
+		boolean persisted = registry.getCategoryRecords().stream()
+				.anyMatch(record -> record.getNativeId().equals(category.getCategoryId()));
+		if (category != null && persisted) {
 			catRepository.delete(category);
 			try {
 				boolean removed = registry
 						.removeCategoryRecord(new Record(category.getId(), category.getCategoryId(), Category.class));
-				log.info("{} removed from registry: {}", category, removed);
+				log.info("removed from registry: {}, {} ", removed, category);
 			} catch (NullIdException | WrongOrMissingClassException e) {
 				log.info("not removed from registry: {}", category);
 				log.info("{}", e);
 			}
-		}
+		} else {log.info("not found in database: {} ", category);}
 	}
 
 	@Override
