@@ -100,15 +100,11 @@ public class RegistryTest {
 	@DisplayName("should test concurrent removing")
 	@Transactional
 	public void concurrentCategoryRemovingById() {
-		Optional<Category> zvire = buildService.buildMainCategory(ZVIRE);
-		categoryDao.save(zvire.get());
 		ExecutorService service = null;
 		try {
 			service = Executors.newFixedThreadPool(10);
 			for (int i = 0; i < 10; i++) {
-				CompletableFuture.runAsync(() -> {
-					categoryDao.removeById(2713);
-				}, service).thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);
+				CompletableFuture.runAsync(() -> categoryDao.removeById(2713), service).thenRunAsync(() -> assertThat(registry.getCategoryRecords(), hasSize(0)), service);
 			}
 
 		} finally {
@@ -141,9 +137,7 @@ public class RegistryTest {
 		try {
 			service = Executors.newFixedThreadPool(10);
 			for (int i = 0; i < 10; i++) {
-				CompletableFuture.runAsync(() -> {
-				categoryDao.remove(category);
-				assertThat(registry.getCategoryRecords(), hasSize(0));}, service);
+				CompletableFuture.runAsync(() -> categoryDao.remove(category), service).thenRunAsync(()->assertThat(registry.getCategoryRecords(), hasSize(0)), service);
 			}
 		} finally {
 			if (service != null)

@@ -113,7 +113,9 @@ public class CategoryDaoImpl implements CategoryDao {
 
 	@Override
 	public synchronized void removeById(Integer id) {
-		if (id != null) {
+		boolean persisted = registry.getCategoryRecords().stream()
+				.anyMatch(record -> Objects.equals(record.getPersistedId(), id));
+		if (id != null && persisted) {
 			registry.getCategoryRecords().stream().filter(record -> record.getPersistedId().equals(id))			
 			.findFirst()
 					.ifPresent(record -> {
@@ -121,7 +123,7 @@ public class CategoryDaoImpl implements CategoryDao {
 						log.info("removed from registry: {}, {} ", removed, record);
 					});
 			catRepository.deleteById(id);
-		}
+		} else log.info("category with id: {} not found in database.", id); 
 
 	}
 
