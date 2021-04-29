@@ -16,7 +16,7 @@
 		<hibernatejpa.version>1.0.2.Final</hibernatejpa.version>
 		<javaxpersistence.version>2.2</javaxpersistence.version>
 		<junitjupiter.version>5.5.2</junitjupiter.version>
-		<fasterxmljacksoncore.version>2.10.1</fasterxmljacksoncore.version>
+		<fasterxmljacksoncore.version>2.12.1</fasterxmljacksoncore.version>
 	</properties>
 	<dependencies>
 	<dependency>
